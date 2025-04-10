@@ -1,0 +1,30 @@
+# Use mod_rewrite
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Serve existing files and directories directly
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # If not a real file or folder, redirect to React's index.html
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# Set correct content type for React build files
+AddType application/javascript .js
+AddType text/css .css
+
+# Optional: Gzip compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript
+</IfModule>
+
+# Optional: Cache control for static assets
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html "access plus 1 hour"
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+  ExpiresByType image/* "access plus 1 month"
+</IfModule>
