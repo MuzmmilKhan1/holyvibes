@@ -15,7 +15,7 @@ const Welcome = () => {
             <div className='flex items-center justify-center min-h-screen ' >
                 <div className="bg-white p-10 rounded-xl border max-w-md w-full text-start">
                     <h1 className="text-3xl font-bold  mb-3">Welcome!</h1>
-                    <p className="text-lg text-gray-600 mb-4">Hello</p>
+                    <p className="text-lg text-gray-600 mb-4">What would you like to do today?</p>
                     <div className="space-y-3">
                         <Button
                             onClick={() => handleOptionClick('/create-teacher-account')}
