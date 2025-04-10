@@ -21,7 +21,6 @@ interface User {
   password: string;
 }
 
-
 export function LoginForm({
   className,
   ...props

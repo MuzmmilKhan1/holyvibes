@@ -104,7 +104,7 @@ export function SignupForm({
                 <Label htmlFor="userType">User Type</Label>
                 <Select
                   required
-                  onValueChange={(value:string) =>
+                  onValueChange={(value: string) =>
                     setUserData((prev) => ({ ...prev, userType: value }))
                   }
                 >

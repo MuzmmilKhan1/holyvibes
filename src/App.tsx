@@ -5,7 +5,7 @@ import { Routes, Route } from 'react-router-dom';
 import Course from './pages/admin/Course';
 import CreateTeacherAccount from './pages/auth/CreateTeacherAccount';
 import CreateStudentAccount from './pages/auth/CreateStudentAccount';
-import Teacher  from './pages/teacher/Teacher';
+import Teacher from './pages/teacher/Teacher';
 
 function App() {
   return (

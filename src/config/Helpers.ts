@@ -5,7 +5,7 @@ class Helpers {
     static server: string = 'api.holyvibes.org';
     static basePath: string = `http://${this.server}`;
     static apiUrl: string = `${this.basePath}/api/`;
-    static imageUrl: string = `${this.basePath}/storage/`;
+    static imageUrl: string = `${this.basePath}/`;
     static serverImage = (name: string): string => {
         return `${this.basePath}/uploads/${name}`;
     };
