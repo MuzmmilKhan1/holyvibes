@@ -1,0 +1,32 @@
+name: 🔨 Build React App on Push
+
+on:
+  push:
+    branches:
+      - main  # change this if your main branch is named something else
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v3
+
+    - name: 🛠 Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: 📦 Install Dependencies
+      run: npm install
+
+    - name: 🧱 Build Project
+      run: npm run build
+
+    # Optional: Upload build folder as artifact for download/debugging
+    - name: 📤 Upload Build Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: react-build
+        path: build/
