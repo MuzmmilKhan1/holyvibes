@@ -10,49 +10,50 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 📥 Checkout repo
-      uses: actions/checkout@v3
+      - name: 📥 Checkout repo
+        uses: actions/checkout@v3
 
-    - name: 🛠 Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
+      - name: 🛠 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
 
-    - name: 📦 Install dependencies
-      run: npm install
+      - name: 📦 Install dependencies
+        run: npm install
 
-    - name: 🧱 Build the app
-      run: npm run build
+      - name: 🧱 Build the app
+        run: npm run build
 
-    - name: 📄 Add .htaccess to build output
-      run: |
-        echo "<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteCond %{REQUEST_FILENAME} -f [OR]
-  RewriteCond %{REQUEST_FILENAME} -d
-  RewriteRule ^ - [L]
-  RewriteRule ^ index.html [L]
-</IfModule>
+      - name: 📄 Add .htaccess to build output
+        run: |
+          cat <<EOF > dist/.htaccess
+          <IfModule mod_rewrite.c>
+            RewriteEngine On
+            RewriteCond %{REQUEST_FILENAME} -f [OR]
+            RewriteCond %{REQUEST_FILENAME} -d
+            RewriteRule ^ - [L]
+            RewriteRule ^ index.html [L]
+          </IfModule>
 
-AddType application/javascript .js
-AddType text/css .css
+          AddType application/javascript .js
+          AddType text/css .css
 
-<IfModule mod_deflate.c>
-  AddOutputFilterByType DEFLATE text/html text/css application/javascript
-</IfModule>
+          <IfModule mod_deflate.c>
+            AddOutputFilterByType DEFLATE text/html text/css application/javascript
+          </IfModule>
 
-<IfModule mod_expires.c>
-  ExpiresActive On
-  ExpiresByType text/html \"access plus 1 hour\"
-  ExpiresByType text/css \"access plus 1 month\"
-  ExpiresByType application/javascript \"access plus 1 month\"
-  ExpiresByType image/* \"access plus 1 month\"
-</IfModule>" > dist/.htaccess
+          <IfModule mod_expires.c>
+            ExpiresActive On
+            ExpiresByType text/html "access plus 1 hour"
+            ExpiresByType text/css "access plus 1 month"
+            ExpiresByType application/javascript "access plus 1 month"
+            ExpiresByType image/* "access plus 1 month"
+          </IfModule>
+          EOF
 
-    - name: 🚀 Push `dist/` to `build` branch
-      uses: JamesIves/github-pages-deploy-action@v4
-      with:
-        branch: build
-        folder: dist
-        clean: true
-        
+      - name: 🚀 Push `dist/` to `build` branch
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: build
+          folder: dist
+          clean: true
