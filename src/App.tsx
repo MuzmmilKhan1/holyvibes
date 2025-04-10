@@ -6,12 +6,14 @@ import Course from './pages/admin/Course';
 import CreateTeacherAccount from './pages/auth/CreateTeacherAccount';
 import CreateStudentAccount from './pages/auth/CreateStudentAccount';
 import Teacher from './pages/teacher/Teacher';
+import RestrictionMessage from './pages/RestrictionMessage';
 
 function App() {
   return (
     <>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/restriction-message" element={<RestrictionMessage />} />
         <Route path="/create-teacher-account" element={<CreateTeacherAccount />} />
         <Route path="/create-student-account" element={<CreateStudentAccount />} />
         <Route path="/admin" element={<Layout userType="admin" />}>

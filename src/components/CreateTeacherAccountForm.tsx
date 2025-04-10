@@ -105,7 +105,7 @@ const CreateTeacherAccountForm = ({
 
     return (
         <div className={cn("flex items-center justify-center w-full p-6", className)} {...props}>
-            <Card className="w-full max-w-7xl">
+            <Card className="w-full max-w-7xl shadow-none">
                 <CardHeader>
                     <CardTitle>Create Teacher Account</CardTitle>
                     <CardDescription>

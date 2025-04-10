@@ -44,10 +44,17 @@ export function LoginForm({
     e.preventDefault();
     console.log(userData);
     const res = await post.callApi("auth/login", userData, true, false, true);
+    console.log(res.data)
     if (res.status == 200) {
       localStorage.setItem("token", res.data.token)
       if (res.data.user.role === "admin") {
         navigate(res.data.user.role + "/course")
+      }
+      if (res.data.user.role === "teacher" && res.data.status === "allowed") {
+        navigate(res.data.user.role)
+      }
+      else if (res.data.user.role === "teacher" && res.data.status === "blocked") {
+        navigate('/restriction-message')
       }
 
     }
@@ -55,7 +62,7 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
+      <Card className="shadow-none" >
         <CardHeader>
           <CardTitle   >Login to your account</CardTitle>
           <CardDescription>

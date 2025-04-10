@@ -74,14 +74,16 @@ const Teacher = () => {
         }
     }
 
-    const blockUser = async () => {
+    const blockUser = async (status: string, id: string) => {
         const response = await postTeacherData.callApi('teacher/block', {
-            teacherID: selectedTeacher.id
+            teacherID: id,
+            status: status
         },
             true,
             false,
             true
         )
+        console.log(response)
         if (response.status == 200) {
             setShowTeacherDetails(!showTeacherDetails)
             getRequestedTeacher();
@@ -137,7 +139,7 @@ const Teacher = () => {
                 <div className="w-full">
                     <Button
                         onClick={() => setShowTeacherDetails(!showTeacherDetails)}
-                        className="bg-transparent text-black hover:bg-transparent"
+                        className="bg-transparent shadow-none text-black hover:bg-transparent"
                     >
                         <ArrowLeft size={40} />
                     </Button>
@@ -175,10 +177,10 @@ const Teacher = () => {
                                         {selectedTeacher.class_timings?.map((ct: any, index: number) => (
                                             <div key={index} className="w-auto p-2 bg-gray-200 rounded-md">
                                                 <span className="block ">
-                                                   <strong>Course:</strong>  {ct.course?.name ?? "No Course Assigned"}
+                                                    <strong>Course:</strong>  {ct.course?.name ?? "No Course Assigned"}
                                                 </span>
-                                                 <span>
-                                                 <strong>Timings: </strong> 
+                                                <span>
+                                                    <strong>Timings: </strong>
                                                     {ct.preferred_time_from} - {ct.preferred_time_to}</span>
                                             </div>
                                         ))}
@@ -195,21 +197,23 @@ const Teacher = () => {
                                                     Edit
                                                 </Button>
                                             </div>
-                                            <div className="flex gap-2" >
-                                                <Button
-                                                    onClick={blockUser}
-                                                    variant="destructive" >
-                                                    Block
-                                                </Button>
-                                            </div>
+                                            {
+                                                selectedTeacher.status !== "pending" &&
+                                                <div className="flex gap-2" >
+                                                    <Button
+                                                        onClick={() => blockUser(selectedTeacher.status, selectedTeacher.id)}
+                                                        variant="destructive" >
+                                                        {selectedTeacher.status === "blocked" && "Unblock"}
+                                                        {selectedTeacher.status === "allowed" && "block"}
+                                                    </Button>
+                                                </div>
+                                            }
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
-
-
                     {
                         selectedTeacher.status === "pending" &&
                         (
