@@ -103,10 +103,6 @@ const data = {
       icon: Notebook,
       isActive: true,
       items: [
-        {
-          title: "Create Class",
-          url: "#",
-        },
         // {
         //   title: "Cohort",
         //   url: "#",

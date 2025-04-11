@@ -29,7 +29,7 @@ const Teacher = () => {
 
     const getRequestedTeacher = async () => {
         const response = await getTeacher.callApi("teacher/get", false, false);
-        console.log(response.data)
+        console.log(response.teachers)
     };
 
     useEffect(() => {
@@ -37,6 +37,7 @@ const Teacher = () => {
     }, []);
 
     const handleTeacherDetails = (teacher: any) => {
+        console.log(JSON.parse(teacher.class_course_schedule))
         setSelectedTeacher(teacher);
         setTeacherName(teacher.name);
         setTeacherEmail(teacher.email);
@@ -49,6 +50,7 @@ const Teacher = () => {
             email: teacherEmail,
             password: teacherPassword,
             teacherID: selectedTeacher.id,
+            courseIds: selectedTeacher.class_course_schedule
         },
             true,
             false,
@@ -174,14 +176,22 @@ const Teacher = () => {
                                 <div>
                                     <h4 className="text-lg font-bold underline flex items-start">Class Timings</h4>
                                     <div className="space-y-2 w-full flex items-start flex-col">
-                                        {selectedTeacher.class_timings?.map((ct: any, index: number) => (
+                                        {selectedTeacher?.class_course_schedule && JSON.parse(selectedTeacher.class_course_schedule)?.map((ct: any, index: number) => (
                                             <div key={index} className="w-auto p-2 bg-gray-200 rounded-md">
                                                 <span className="block ">
-                                                    <strong>Course:</strong>  {ct.course?.name ?? "No Course Assigned"}
+                                                    <strong>Course:</strong>  {ct.name ?? "No Course Assigned"}
                                                 </span>
-                                                <span>
-                                                    <strong>Timings: </strong>
-                                                    {ct.preferred_time_from} - {ct.preferred_time_to}</span>
+                                                <strong>Timings: </strong><br />
+                                                {
+                                                    ct.timings.map((time: { from: string; to: string }) => (
+                                                        <span>
+                                                            <span key={`${time.from}-${time.to}`}>
+                                                                {time.from} - {time.to}
+                                                            </span>
+                                                            <br />
+                                                        </span>
+                                                    ))
+                                                }
                                             </div>
                                         ))}
                                     </div>

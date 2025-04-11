@@ -51,7 +51,7 @@ export function LoginForm({
         navigate(res.data.user.role + "/course")
       }
       if (res.data.user.role === "teacher" && res.data.status === "allowed") {
-        navigate(res.data.user.role)
+        navigate(res.data.user.role + "/classes")
       }
       else if (res.data.user.role === "teacher" && res.data.status === "blocked") {
         navigate('/restriction-message')

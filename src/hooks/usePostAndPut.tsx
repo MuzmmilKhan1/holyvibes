@@ -20,7 +20,7 @@ const usePostAndPut = (method: ApiMethod) => {
 
         console.log(data)
 
-        const url = `https://api.holyvibes.org/api/${path}`;
+        const url = `http://localhost:8000/api/${path}`;
         let headers;
 
         if (auth) {
@@ -31,11 +31,11 @@ const usePostAndPut = (method: ApiMethod) => {
             headers = fileHeaders
                 ? {
                     "Content-Type": "multipart/form-data",
-                    token: `${localStorage.getItem("token")}`,
+                    "token": `${localStorage.getItem("token")}`,
                 }
                 : {
                     "Content-Type": "application/json",
-                    token: `${localStorage.getItem("token")}`,
+                    "token": `${localStorage.getItem("token")}`,
                 };
         }
 
