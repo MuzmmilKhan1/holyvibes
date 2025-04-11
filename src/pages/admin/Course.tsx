@@ -6,7 +6,6 @@ import { Textarea } from "@/components/ui/textarea";
 import usePostAndPut from "@/hooks/usePostAndPut";
 import axios from "axios";
 import useGetAndDelete from "@/hooks/useGetAndDelete";
-import Helpers from "@/config/Helpers";
 import SpinnerLoader from "@/components/SpinLoader";
 
 
@@ -144,7 +143,7 @@ const Course: React.FC = () => {
                             {getCourse?.response?.course?.map((course: Course) => (
                                 <div key={course.id} className="border border-gery-100 rounded-lg p-4  lg:w-[23%]">
                                     <img
-                                        src={Helpers.imageUrl + course.image}
+                                        src={course.image}
                                         className="w-full h-40 object-cover rounded-md mb-4 border"
                                     />
                                     <h3 className="text-lg font-semibold mt-1">{course.name}</h3>

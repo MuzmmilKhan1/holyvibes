@@ -97,7 +97,7 @@ const Teacher = () => {
             ) : !showTeacherDetails ? (
                 <Card className="shadow-none">
                     <CardHeader>
-                        <CardTitle>Requested Teacher</CardTitle>
+                        <CardTitle>Teachers</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <Table>
@@ -136,14 +136,14 @@ const Teacher = () => {
                     </CardContent>
                 </Card>
             ) : (
-                <div className="w-full">
+                <div className="w-full -mt-5">
                     <Button
                         onClick={() => setShowTeacherDetails(!showTeacherDetails)}
-                        className="bg-transparent shadow-none text-black hover:bg-transparent"
+                        className="bg-transparent shadow-none  text-black hover:bg-transparent"
                     >
                         <ArrowLeft size={40} />
                     </Button>
-                    <Card className="shadow-none w-full">
+                    <Card className="shadow-none w-full  ">
                         <CardHeader>
                             <CardTitle className="text-xl font-bold underline -mb-3">Teacher Details</CardTitle>
                         </CardHeader>
@@ -193,9 +193,12 @@ const Teacher = () => {
                                                 <Button onClick={deleteUser} >
                                                     Delete
                                                 </Button>
-                                                <Button variant="outline" >
-                                                    Edit
-                                                </Button>
+                                                {
+                                                    selectedTeacher.status !== "pending" &&
+                                                    <Button variant="outline" >
+                                                        Edit
+                                                    </Button>
+                                                }
                                             </div>
                                             {
                                                 selectedTeacher.status !== "pending" &&

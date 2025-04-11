@@ -10,7 +10,7 @@ const useGetAndDelete = (method: ApiMethod) => {
   const callApi = async (path: string, auth: boolean, fileHeaders: boolean) => {
     setLoading(true);
     setError(null);
-    const url = `http://localhost:8000/api/${path}`;
+    const url = `https://api.holyvibes.org/api/${path}`;
     let headers;
 
     if (auth) {
@@ -21,11 +21,11 @@ const useGetAndDelete = (method: ApiMethod) => {
       headers = fileHeaders
         ? {
           "Content-Type": "multipart/form-data",
-          token: `${localStorage.getItem("token")}`,
+          "token": `${localStorage.getItem("token")}`,
         }
         : {
           "Content-Type": "application/json",
-          token: `${localStorage.getItem("token")}`,
+          "token": `${localStorage.getItem("token")}`,
         };
     }
     try {

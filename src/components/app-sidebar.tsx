@@ -98,27 +98,27 @@ const data = {
   // teacher routers
   teacherRoutes: [
     {
-      title: "Courses",
-      url: "#",
+      title: "Class",
+      url: "/teacher/classes",
       icon: Notebook,
       isActive: true,
       items: [
         {
-          title: "Create Course",
+          title: "Create Class",
           url: "#",
         },
-        {
-          title: "Cohort",
-          url: "#",
-        },
+        // {
+        //   title: "Cohort",
+        //   url: "#",
+        // },
         {
           title: "Live Session",
           url: "#",
         },
-        {
-          title: "Student",
-          url: "#",
-        },
+        // {
+        //   title: "Student",
+        //   url: "#",
+        // },
       ],
     },
 

@@ -5,8 +5,9 @@ import { Routes, Route } from 'react-router-dom';
 import Course from './pages/admin/Course';
 import CreateTeacherAccount from './pages/auth/CreateTeacherAccount';
 import CreateStudentAccount from './pages/auth/CreateStudentAccount';
-import Teacher from './pages/teacher/Teacher';
+import Teacher from './pages/admin/Teacher';
 import RestrictionMessage from './pages/RestrictionMessage';
+import Classes from './pages/teacher/Classes';
 
 function App() {
   return (
@@ -20,8 +21,12 @@ function App() {
           <Route path="course" element={<Course />} />
           <Route path="teacher" element={<Teacher />} />
         </Route>
-        <Route path="/student" element={<Layout userType="student" />} />
-        <Route path="/teacher" element={<Layout userType="teacher" />} />
+        <Route path="/student" element={<Layout userType="student" />} >
+          <Route path="classes" element={<Teacher />} />
+        </Route>
+        <Route path="/teacher" element={<Layout userType="teacher" />} >
+          <Route path="classes" element={<Classes />} />
+        </Route>
       </Routes>
     </>
   );
