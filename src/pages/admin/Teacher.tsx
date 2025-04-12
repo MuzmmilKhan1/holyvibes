@@ -13,7 +13,6 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import SpinnerLoader from "@/components/SpinLoader";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import { Input } from "@/components/ui/input";
 import usePostAndPut from "@/hooks/usePostAndPut";
@@ -138,13 +137,7 @@ const Teacher = () => {
                     </CardContent>
                 </Card>
             ) : (
-                <div className="w-full -mt-5">
-                    <Button
-                        onClick={() => setShowTeacherDetails(!showTeacherDetails)}
-                        className="bg-transparent shadow-none  text-black hover:bg-transparent"
-                    >
-                        <ArrowLeft size={40} />
-                    </Button>
+                <div className="w-full ">
                     <Card className="shadow-none w-full  ">
                         <CardHeader>
                             <CardTitle className="text-xl font-bold underline -mb-3">Teacher Details</CardTitle>
@@ -218,6 +211,12 @@ const Teacher = () => {
                                                         variant="destructive" >
                                                         {selectedTeacher.status === "blocked" && "Unblock"}
                                                         {selectedTeacher.status === "allowed" && "block"}
+                                                    </Button>
+                                                    <Button
+                                                        onClick={() => setShowTeacherDetails(!showTeacherDetails)}
+                                                        variant="secondary"
+                                                    >
+                                                        Close
                                                     </Button>
                                                 </div>
                                             }

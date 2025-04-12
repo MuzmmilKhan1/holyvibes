@@ -1,14 +1,16 @@
 import * as React from "react"
 import {
-  BookOpen,
-  Bot,
   Notebook,
+  School,
   Settings2,
   User,
 } from "lucide-react"
-
+import { PiStudentFill } from "react-icons/pi";
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
+import { SiCoursera } from "react-icons/si";
+import { MdUpcoming } from "react-icons/md";
+import { MdPolicy } from "react-icons/md";
 import {
   Sidebar,
   SidebarContent,
@@ -29,7 +31,7 @@ const data = {
     {
       title: "Courses",
       url: "/admin/course",
-      icon: Notebook,
+      icon: SiCoursera,
       isActive: true,
       items: [
 
@@ -45,19 +47,34 @@ const data = {
       ],
     },
     {
-      title: "Student",
-      url: "#",
-      icon: Bot,
+      title: "Classes",
+      url: "/admin/classes",
+      icon: School,
+      isActive: true,
       items: [
 
       ],
     },
     {
-      title: "Upcomming Classes",
+      title: "Student",
       url: "#",
-      icon: BookOpen,
+      icon: PiStudentFill,
       items: [
 
+      ],
+    },
+    {
+      title: "Upcomming Events",
+      url: "/admin/event",
+      icon: MdUpcoming,
+      items: [
+      ],
+    },
+    {
+      title: "Policy",
+      url: "/admin/policy",
+      icon: MdPolicy,
+      items: [
       ],
     },
     {
@@ -99,22 +116,18 @@ const data = {
   teacherRoutes: [
     {
       title: "Class",
-      url: "/teacher/classes",
+      url: "#",
       icon: Notebook,
       isActive: true,
       items: [
-        // {
-        //   title: "Cohort",
-        //   url: "#",
-        // },
+        {
+          title: "Create Class",
+          url: "/teacher/classes",
+        },
         {
           title: "Live Session",
           url: "#",
         },
-        // {
-        //   title: "Student",
-        //   url: "#",
-        // },
       ],
     },
 

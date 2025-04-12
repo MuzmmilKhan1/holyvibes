@@ -7,7 +7,11 @@ import CreateTeacherAccount from './pages/auth/CreateTeacherAccount';
 import CreateStudentAccount from './pages/auth/CreateStudentAccount';
 import Teacher from './pages/admin/Teacher';
 import RestrictionMessage from './pages/RestrictionMessage';
+// import Classes from './pages/admin/Classes';
+import StudentPolicy from './pages/admin/StudentPolicy';
+import Event from './pages/admin/Event';
 import Classes from './pages/teacher/Classes';
+
 
 function App() {
   return (
@@ -20,6 +24,10 @@ function App() {
         <Route path="/admin" element={<Layout userType="admin" />}>
           <Route path="course" element={<Course />} />
           <Route path="teacher" element={<Teacher />} />
+          <Route path="classes" element={<Classes />} />
+          <Route path="policy" element={<StudentPolicy />} />
+          <Route path="event" element={<Event />} />
+
         </Route>
         <Route path="/student" element={<Layout userType="student" />} >
           <Route path="classes" element={<Teacher />} />

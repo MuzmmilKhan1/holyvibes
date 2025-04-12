@@ -1,4 +1,5 @@
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 type ApiMethod = (url: string, config: { headers: any }) => Promise<any>;
 
@@ -10,7 +11,7 @@ const useGetAndDelete = (method: ApiMethod) => {
   const callApi = async (path: string, auth: boolean, fileHeaders: boolean) => {
     setLoading(true);
     setError(null);
-    const url = `http://api.holyvibes.org/api/${path}`;
+    const url = `https://api.holyvibes.org/api/${path}`;
     let headers;
 
     if (auth) {
@@ -34,7 +35,8 @@ const useGetAndDelete = (method: ApiMethod) => {
       setResponse(data);
       setError(null);
       return data;
-    } catch (err) {
+    } catch (err: any) {
+      toast.error(err.response.data.message)
       setResponse(null);
       setError(err);
       return err;

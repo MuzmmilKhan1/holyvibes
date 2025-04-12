@@ -43,8 +43,7 @@ export function LoginForm({
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log(userData);
-    const res = await post.callApi("auth/login", userData, true, false, true);
-    console.log(res.data)
+    const res = await post.callApi("auth/login", userData, true, false, false);
     if (res.status == 200) {
       localStorage.setItem("token", res.data.token)
       if (res.data.user.role === "admin") {

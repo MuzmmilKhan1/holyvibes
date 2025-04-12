@@ -10,9 +10,6 @@ const CreateStudentAccount = () => {
                     <CreateStudentAccountForm />
                 </div>
             </div>
-
-
-
         </div>
     );
 };
