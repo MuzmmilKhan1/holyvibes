@@ -25,7 +25,7 @@ jobs:
         run: npm install
 
       - name: 🧱 Build the app
-        run: npm run build
+        run: npm run build --force
 
       - name: 📄 Add .htaccess to build output
         run: |
