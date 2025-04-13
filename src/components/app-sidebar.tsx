@@ -17,12 +17,14 @@ import {
   SidebarFooter,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import useGetAndDelete from "@/hooks/useGetAndDelete";
+import axios from "axios";
 
 
-const data = {
+let data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
+    name: "",
+    email: "",
     avatar: "/avatars/shadcn.jpg",
   },
 
@@ -124,10 +126,23 @@ const data = {
           title: "Create Class",
           url: "/teacher/classes",
         },
-        {
-          title: "Live Session",
-          url: "#",
-        },
+        // {
+        //   title: "Live Session",
+        //   url: "#",
+        // },
+      ],
+    },
+
+    {
+      title: "Course",
+      url: "/teacher/course",
+      icon: SiCoursera,
+      isActive: false,
+      items: [
+        // {
+        //   title: "Live Session",
+        //   url: "#",
+        // },
       ],
     },
 
@@ -137,6 +152,19 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<any>) {
+  const getUser = useGetAndDelete(axios.get);
+  const getUserData = async () => {
+    const response = await getUser.callApi('auth/get', false, false);
+    data.user = {
+      name: response.user.name,
+      email: response.user.email,
+      avatar: "",
+    };
+  }
+
+  React.useEffect(() => {
+    getUserData()
+  }, [])
 
 
   return (
@@ -155,7 +183,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<any>) {
           <NavMain items={data.teacherRoutes} />
         }
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter  >
         <NavUser user={data.user} />
       </SidebarFooter>
       <SidebarRail />

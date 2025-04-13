@@ -12,6 +12,7 @@ import StudentPolicy from './pages/admin/StudentPolicy';
 import Event from './pages/admin/Event';
 import Classes from './pages/teacher/Classes';
 import Students from './pages/admin/Students';
+import TeacherCourse from './pages/teacher/TeacherCourse';
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
 
         <Route path="/teacher" element={<Layout userType="teacher" />} >
           <Route path="classes" element={<Classes />} />
+          <Route path="course" element={<TeacherCourse />} />
         </Route>
 
       </Routes>

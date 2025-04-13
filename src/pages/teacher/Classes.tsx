@@ -30,10 +30,25 @@ const Classes = () => {
     const [availableTimings, setAvailableTimings] = useState<any[]>([]);
     const [selectedTimingID, setSelectedTimingID] = useState<string>("");
     const [allClasses, setAllClasses] = useState<any[]>([]);
+    const [showClassData, setShowClassData] = useState<boolean>(false);
+    const [singleClass, setSingleClass] = useState<any>(null);
 
     const getCourse = useGetAndDelete(axios.get);
     const postClass = usePostAndPut(axios.post);
     const getClass = useGetAndDelete(axios.get);
+    const getSingleClass = useGetAndDelete(axios.get);
+
+
+
+
+    const getSingleClassData = async (classID: number) => {
+        const response = await getSingleClass.callApi(`class/get/single-class-data/${classID}`, true, false);
+        console.log(response.class)
+        if (response?.class) {
+            setSingleClass(response.class);
+            setShowClassData(true); 
+        }
+    }
 
     const createClass = async () => {
         const response = await postClass.callApi(
@@ -61,6 +76,7 @@ const Classes = () => {
 
     const fetchClasses = async () => {
         const response = await getClass.callApi("class/get", false, false);
+        console.log(response)
         if (response?.data) {
             setAllClasses(Array.isArray(response.data) ? response.data : [response.data]);
         }
@@ -80,6 +96,14 @@ const Classes = () => {
         getCourses();
     }, []);
 
+    function shortenSentence(sentence: string, wordLimit = 15) {
+        const words = sentence.trim().split(/\s+/);
+        if (words.length <= wordLimit) {
+            return sentence;
+        }
+        return words.slice(0, wordLimit).join(' ') + '...';
+    }
+
     useEffect(() => {
         const selected = courses.find(course => course.id === Number(selectedCourseId));
         if (selected) {
@@ -92,129 +116,203 @@ const Classes = () => {
 
     return (
         <div className="w-full p-6 space-y-10">
-            <Card className="shadow-none">
-                <CardHeader>
-                    <CardTitle className="text-xl font-bold underline">Create Class</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <Label>Course</Label>
-                            <Select
-                                onValueChange={(val) => setSelectedCourseId(val)}
-                                value={selectedCourseId}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select course" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {getCourse?.loading ? (
-                                        <div className="p-2 text-center">Loading...</div>
-                                    ) : (
-                                        courses.map((course) => (
-                                            <SelectItem key={course.id} value={course.id.toString()}>
-                                                {course.name}
-                                            </SelectItem>
-                                        ))
-                                    )}
-                                </SelectContent>
-                            </Select>
-                        </div>
+            {
+                !showClassData && (
+                    <>
+                        <Card className="shadow-none">
+                            <CardHeader>
+                                <CardTitle className="text-xl font-bold underline">Create Class</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label>Course</Label>
+                                        <Select
+                                            onValueChange={(val) => setSelectedCourseId(val)}
+                                            value={selectedCourseId}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select course" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {getCourse?.loading ? (
+                                                    <div className="p-2 text-center">Loading...</div>
+                                                ) : (
+                                                    courses.map((course) => (
+                                                        <SelectItem key={course.id} value={course.id.toString()}>
+                                                            {course.name}
+                                                        </SelectItem>
+                                                    ))
+                                                )}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
 
-                        <div className="space-y-2">
-                            <Label>Class Timing</Label>
-                            <Select
-                                onValueChange={(val) => setSelectedTimingID(val)}
-                                value={selectedTimingID}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select timing" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {availableTimings?.length > 0 ? (
-                                        availableTimings.map((timing, index) => (
-                                            <SelectItem
-                                                key={index}
-                                                value={timing.id.toString()}
-                                            >
-                                                {timing.preferred_time_from} - {timing.preferred_time_to}
-                                            </SelectItem>
-                                        ))
-                                    ) : (
-                                        <div className="p-2 text-center text-sm text-gray-500">
-                                            No timings available
-                                        </div>
-                                    )}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                                    <div className="space-y-2">
+                                        <Label>Class Timing</Label>
+                                        <Select
+                                            onValueChange={(val) => setSelectedTimingID(val)}
+                                            value={selectedTimingID}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select timing" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {availableTimings?.length > 0 ? (
+                                                    availableTimings.map((timing, index) => (
+                                                        <SelectItem
+                                                            key={index}
+                                                            value={timing.id.toString()}
+                                                        >
+                                                            {timing.preferred_time_from} - {timing.preferred_time_to}
+                                                        </SelectItem>
+                                                    ))
+                                                ) : (
+                                                    <div className="p-2 text-center text-sm text-gray-500">
+                                                        No timings available
+                                                    </div>
+                                                )}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
 
-                        <div>
-                            <Label className="block text-sm font-medium">Title</Label>
-                            <Input
-                                id="title"
-                                type="text"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                                className="w-full mt-2"
-                                placeholder="Enter class name"
-                            />
-                        </div>
+                                    <div>
+                                        <Label className="block text-sm font-medium">Title</Label>
+                                        <Input
+                                            id="title"
+                                            type="text"
+                                            value={title}
+                                            onChange={(e) => setTitle(e.target.value)}
+                                            className="w-full mt-2"
+                                            placeholder="Enter class name"
+                                        />
+                                    </div>
 
-                        <div>
-                            <Label className="block text-sm font-medium">Description</Label>
-                            <Input
-                                id="description"
-                                type="text"
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                className="w-full mt-2"
-                                placeholder="Enter description of class"
-                            />
-                        </div>
+                                    <div>
+                                        <Label className="block text-sm font-medium">Description</Label>
+                                        <Input
+                                            id="description"
+                                            type="text"
+                                            value={description}
+                                            onChange={(e) => setDescription(e.target.value)}
+                                            className="w-full mt-2"
+                                            placeholder="Enter description of class"
+                                        />
+                                    </div>
 
-                        <div className="mt-4">
-                            <Button onClick={createClass}>
-                                Create
+                                    <div className="mt-4">
+                                        <Button onClick={createClass}>
+                                            Create
+                                        </Button>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="shadow-none" >
+                            <CardHeader>
+                                <CardTitle className="text-xl font-bold underline">Your Classes</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Title</TableHead>
+                                            <TableHead>Description</TableHead>
+                                            <TableHead>Course</TableHead>
+                                            <TableHead>Total Seats</TableHead>
+                                            <TableHead>Filled Seats</TableHead>
+                                            <TableHead>Link</TableHead>
+                                            <TableHead>Action</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {allClasses.map((cls) => (
+                                            <TableRow key={cls.id}>
+                                                <TableCell>{cls.title}</TableCell>
+                                                <TableCell>{shortenSentence(cls.description)}</TableCell>
+                                                <TableCell>{cls.course.name}</TableCell>
+                                                <TableCell>{cls.total_seats ?? "N/A"}</TableCell>
+                                                <TableCell>{cls.filled_seats ?? "0"}</TableCell>
+                                                <TableCell className="text-blue-600 underline">
+                                                    {cls.classLink ?? "N/A"}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Button onClick={() => getSingleClassData(cls.id)} >
+                                                        See more
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                    </>
+                )
+            }
+
+            {
+                showClassData && singleClass && (
+                    <Card className="shadow-none">
+                        <CardHeader className=" ">
+                            <CardTitle className="text-2xl">{singleClass.title}</CardTitle>
+                            <p className="text-sm ">Course: {singleClass.course?.name ?? "N/A"}</p>
+                        </CardHeader>
+
+                        <CardContent className=" space-y-4">
+                            <div>
+                                <h4 className="font-semibold">Description</h4>
+                                <p className="text-sm text-gray-700">{singleClass.description}</p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <h4 className="font-semibold">Timings</h4>
+                                    {
+                                        singleClass.class_timings?.length > 0 ? (
+                                            <p className="text-sm">
+                                                {singleClass.class_timings[0].preferred_time_from} - {singleClass.class_timings[0].preferred_time_to}
+                                            </p>
+                                        ) : (
+                                            <p className="text-sm text-gray-500">No timing available</p>
+                                        )
+                                    }
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold">Teacher</h4>
+                                    <p className="text-sm">{singleClass.teacher?.name}</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold">Total Seats</h4>
+                                    <p className="text-sm">{singleClass.total_seats ?? "N/A"}</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold">Link</h4>
+                                    <p className="text-sm">{singleClass.classLink ?? "N/A"}</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold">Filled Seats</h4>
+                                    <p className="text-sm">{singleClass.filled_seats ?? "0"}</p>
+                                </div>
+                            </div>
+                        </CardContent>
+
+                        <div className="flex items-center justify-end gap-2 px-4 ">
+                            <Button variant="outline" onClick={() => setShowClassData(false)}>
+                                Back
+                            </Button>
+                            <Button >
+                                Edit
+                            </Button>
+                            <Button variant="destructive">
+                                Delete
                             </Button>
                         </div>
-                    </div>
-                </CardContent>
-            </Card>
+                    </Card>
+                )
+            }
 
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-xl font-bold underline">Your Classes</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Title</TableHead>
-                                <TableHead>Description</TableHead>
-                                <TableHead>Course ID</TableHead>
-                                <TableHead>Total Seats</TableHead>
-                                <TableHead>Filled Seats</TableHead>
-                                <TableHead>Link</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {allClasses.map((cls) => (
-                                <TableRow key={cls.id}>
-                                    <TableCell>{cls.title}</TableCell>
-                                    <TableCell>{cls.description}</TableCell>
-                                    <TableCell>{cls.courseID}</TableCell>
-                                    <TableCell>{cls.total_seats ?? "N/A"}</TableCell>
-                                    <TableCell>{cls.filled_seats ?? "0"}</TableCell>
-                                    <TableCell className="text-blue-600 underline">
-                                        {cls.classLink ?? "N/A"}
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
         </div>
     );
 };

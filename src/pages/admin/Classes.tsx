@@ -61,6 +61,14 @@ const Classes = () => {
         }
     }
 
+    function shortenSentence(sentence:string, wordLimit = 15) {
+        const words = sentence.trim().split(/\s+/); 
+        if (words.length <= wordLimit) {
+          return sentence;
+        }
+        return words.slice(0, wordLimit).join(' ') + '...';
+      }
+
     useEffect(() => {
         getAllClasses();
     }, []);
@@ -92,7 +100,7 @@ const Classes = () => {
                                     {getClass?.response?.data?.map((c: any) => (
                                         <TableRow key={c.id}>
                                             <TableCell>{c.title}</TableCell>
-                                            <TableCell>{c.description}</TableCell>
+                                            <TableCell >{shortenSentence(c.description)}</TableCell>
                                             <TableCell>{c.total_seats || 0}</TableCell>
                                             <TableCell>{c.filled_seats || 0}</TableCell>
                                             <TableCell>{c.class_link || "N/A"}</TableCell>

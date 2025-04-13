@@ -1,3 +1,4 @@
+import Helpers from "@/config/Helpers";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -20,7 +21,7 @@ const usePostAndPut = (method: ApiMethod) => {
 
         console.log(data)
 
-        const url = `https://api.holyvibes.org/api/${path}`;
+        const url = `${Helpers.apiUrl}${path}`;
         let headers;
 
         if (auth) {
