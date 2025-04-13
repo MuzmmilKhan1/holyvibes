@@ -5,7 +5,7 @@ const CreateTeacherAccount = () => {
   return (
     <div>
       <NavBar />
-      <div className="flex min-h-svh w-full items-center justify-center ">
+      <div className="flex min-h-auto w-full items-center justify-center ">
         <div className="w-full  ">
           <CreateTeacherAccountForm />
         </div>

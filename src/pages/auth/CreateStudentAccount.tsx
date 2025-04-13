@@ -5,7 +5,7 @@ const CreateStudentAccount = () => {
     return (
         <div>
             <NavBar />
-            <div className="flex min-h-svh w-full items-center justify-center ">
+            <div className="flex min-h-[93vh]  w-full items-center justify-center ">
                 <div className="w-full  ">
                     <CreateStudentAccountForm />
                 </div>

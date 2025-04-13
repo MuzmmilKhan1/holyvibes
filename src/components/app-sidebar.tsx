@@ -57,7 +57,7 @@ const data = {
     },
     {
       title: "Student",
-      url: "#",
+      url: "/admin/students",
       icon: PiStudentFill,
       items: [
 
