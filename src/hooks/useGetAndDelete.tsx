@@ -11,7 +11,7 @@ const useGetAndDelete = (method: ApiMethod) => {
   const callApi = async (path: string, auth: boolean, fileHeaders: boolean) => {
     setLoading(true);
     setError(null);
-    const url = `http://localhost:8000/api/${path}`;
+    const url = `https://api.holyvibes.org/api/${path}`;
     let headers;
 
     if (auth) {

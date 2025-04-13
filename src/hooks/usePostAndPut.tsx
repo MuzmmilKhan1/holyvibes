@@ -20,7 +20,7 @@ const usePostAndPut = (method: ApiMethod) => {
 
         console.log(data)
 
-        const url = `http://localhost:8000/api/${path}`;
+        const url = `https://api.holyvibes.org/api/${path}`;
         let headers;
 
         if (auth) {
