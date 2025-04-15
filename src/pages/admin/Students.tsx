@@ -39,7 +39,8 @@ interface Student {
 }
 
 interface FormData {
-    id: number
+    id: number;
+    studentID: number;
     name: string;
     email: string;
     password: string;
@@ -60,15 +61,14 @@ interface BillingDetail {
 const Students = () => {
     const getStd = useGetAndDelete(axios.get);
     const getBilling = useGetAndDelete(axios.get);
-    const getClassCourseData = usePostAndPut(axios.post);
     const postLoginCredentials = usePostAndPut(axios.post);
-    const getAllocatedCourseClass = useGetAndDelete(axios.get);
 
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const [showBillingDetails, setShowBillingDetails] = useState<boolean>(false);
-    const [showStdEnrollment, setShowStdEnrollment] = useState<boolean>(false);
+    const [showStdClassTimings, setShowStdClassTimings] = useState<boolean>(false);
     const [formData, setFormData] = useState<FormData>({
         id: 0,
+        studentID: 0,
         name: "",
         email: "",
         password: "",
@@ -84,24 +84,24 @@ const Students = () => {
 
     useEffect(() => {
         if (selectedStudent) {
+            console.log(selectedStudent.class_course_data);
             setFormData({
                 id: selectedStudent.id,
+                studentID:0,
                 name: selectedStudent.name,
                 email: selectedStudent.email,
                 password: "",
             });
-            if (selectedStudent.class_course_data) {
-                getStudentRequestedClassCourseData();
-            }
         } else {
             setFormData({
                 id: 0,
+                studentID:0,
                 name: "",
                 email: "",
                 password: "",
             });
             setShowBillingDetails(false);
-            setShowStdEnrollment(false);
+            setShowStdClassTimings(false);
         }
     }, [selectedStudent]);
 
@@ -118,6 +118,7 @@ const Students = () => {
             await postLoginCredentials.callApi('student/assign_login_credentials', formData, true, false, true);
             setFormData({
                 id: 0,
+                studentID:0,
                 name: "",
                 email: "",
                 password: "",
@@ -141,16 +142,6 @@ const Students = () => {
         }
     };
 
-    const getStudentRequestedClassCourseData = async () => {
-        if (selectedStudent?.class_course_data) {
-            try {
-                const jsonObj = JSON.parse(selectedStudent.class_course_data);
-                await getClassCourseData.callApi('student/get/requested-class-course', jsonObj, true, false, false);
-            } catch (error) {
-                console.error("Error fetching class course data:", error);
-            }
-        }
-    };
 
     const getBillingDetails = async () => {
         if (selectedStudent?.id) {
@@ -159,13 +150,6 @@ const Students = () => {
         }
     };
 
-    const getAllocatedClass = async () => {
-        if (selectedStudent?.id) {
-            const response = await getAllocatedCourseClass.callApi(`student/get/allocated-class-course/${selectedStudent.id}`, true, false);
-            console.log("response", response)
-            setShowStdEnrollment(!showStdEnrollment);
-        }
-    };
 
     return (
         <div className="p-6">
@@ -241,24 +225,18 @@ const Students = () => {
                                     <p><strong>Signature:</strong> {selectedStudent.signature}</p>
                                     <p><strong>Registered On:</strong> {selectedStudent.registration_date}</p>
                                 </div>
-                                <div className="w-full lg:w-1/4 space-y-2  flex flex-col items-start">
-                                    <p className="underline"><strong>Requested Course and Class</strong></p>
-                                    {
-                                        getClassCourseData.response?.data?.map((items: any) => (
-                                            <div className="bg-gray-200 p-2 rounded-lg" key={items.course?.id}>
-                                                <p><strong>Course: </strong> {items.course?.name}</p>
-                                                <p><strong>Class: </strong> {items.class?.title}</p>
-                                                <p><strong>Class Time: </strong> {items.classTime?.preferred_time_from} - {items.classTime?.preferred_time_to}</p>
-                                            </div>
-                                        ))
-                                    }
-                                </div>
                                 <div className="w-full lg:w-1/4 space-y-2 flex flex-col items-start">
                                     <p className="underline"><strong>Action</strong></p>
                                     <div className="flex flex-col flex-wrap gap-3">
                                         <div className="flex gap-2">
                                             <Button onClick={getBillingDetails}>Billing Details</Button>
-                                            <Button onClick={getAllocatedClass}>Allocated Class & Course</Button>
+                                            <Button onClick={() => setShowStdClassTimings(!showStdClassTimings)}>
+                                                {
+                                                    showStdClassTimings ?
+                                                        "Cancel" :
+                                                        "Class time"
+                                                }
+                                            </Button>
                                         </div>
                                         <div className="flex gap-2">
                                             <Button variant="outline" onClick={() => setSelectedStudent(null)}>
@@ -276,13 +254,23 @@ const Students = () => {
                             </div>
                         </CardContent>
                     </Card>
-                    {selectedStudent?.status === 'pending' && !showStdEnrollment && (
+                    {selectedStudent?.status === 'pending' && !showStdClassTimings && (
                         <Card className="shadow-none mt-6">
                             <CardHeader>
                                 <CardTitle className="text-xl font-bold underline">Assign Login Credentials</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
+                                    <div>
+                                        <Label className="block text-sm font-medium">Student ID</Label>
+                                        <Input
+                                            id="studentID"
+                                            type="text"
+                                            value={formData.studentID}
+                                            onChange={handleInputChange}
+                                            className="w-full mt-2"
+                                        />
+                                    </div>
                                     <div>
                                         <Label className="block text-sm font-medium">Name</Label>
                                         <Input
@@ -321,48 +309,44 @@ const Students = () => {
                         </Card>
                     )}
 
-                    {showStdEnrollment && (
+                    {showStdClassTimings && selectedStudent?.class_course_data?.length > 0 ? (
                         <Card className="shadow-none mt-6">
                             <CardHeader>
                                 <CardTitle className="text-xl underline">
-                                    Student Enrollment
+                                    Class Time
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
-                                            <TableHead>Class</TableHead>
                                             <TableHead>Course</TableHead>
-                                            <TableHead>Class Time</TableHead>
-                                            <TableHead>Total Seats</TableHead>
-                                            <TableHead>Occupied Seats</TableHead>
+                                            <TableHead>Preference Time From</TableHead>
+                                            <TableHead>Preference Time To</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {getAllocatedCourseClass?.response?.map((items: any) => (
-                                            <TableRow key={items.id}>
-                                                <TableCell>{items.class?.title}</TableCell>
-                                                <TableCell>{items.course?.name}</TableCell>
-                                                <TableCell>
-                                                    {items.class.class_timings?.[0]?.preferred_time_from} - {items.class.class_timings?.[0]?.preferred_time_to}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {items.class.total_seats || 0}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {items.class.filled_seats || 0}
-                                                </TableCell>
-                                            </TableRow>
+                                        {JSON.parse(selectedStudent?.class_course_data)?.map((item: any, index: number) => (
+                                            item.timings.map((time: any, idx: number) => (
+                                                <TableRow key={`${index}-${idx}`}>
+                                                    <TableCell>{item.course_name}</TableCell>
+                                                    <TableCell>{time.from}</TableCell>
+                                                    <TableCell>{time.to}</TableCell>
+                                                </TableRow>
+                                            ))
                                         ))}
                                     </TableBody>
                                 </Table>
                             </CardContent>
                         </Card>
+                    ) : showStdClassTimings && (
+                        <div className="mt-6">
+                            No enrollment details available.
+                        </div>
                     )}
-
                 </div>
             )}
+
             {showBillingDetails && getBilling.response?.billingDetails && getBilling.response?.billingDetails?.length > 0 && (
                 <div>
                     <div className="underline text-xl font-bold mb-5">

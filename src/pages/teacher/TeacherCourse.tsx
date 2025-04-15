@@ -6,7 +6,7 @@ import {
     CardFooter,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card"; 
+} from "@/components/ui/card";
 import useGetAndDelete from "@/hooks/useGetAndDelete";
 import axios from "axios";
 import { useEffect } from "react";
@@ -33,7 +33,6 @@ const TeacherCourse = () => {
 
     return (
         <div className="p-6">
-            <div className="underline font-bold text-xl">Your courses</div>
             <div className="mt-3 w-full">
                 {getCourses.loading ? (
                     <SpinnerLoader color="black" />
@@ -42,7 +41,7 @@ const TeacherCourse = () => {
                         {getCourses?.response?.course?.map((course: Course) => (
                             <Card
                                 key={course.id}
-                                className="lg:w-[23%]"
+                                className="lg:w-[23%] shadow-none"
                             >
                                 <CardHeader>
                                     <img

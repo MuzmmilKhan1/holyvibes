@@ -25,21 +25,15 @@ import axios from "axios";
 import useGetAndDelete from "@/hooks/useGetAndDelete";
 import usePostAndPut from "@/hooks/usePostAndPut";
 
-// Define TypeScript interfaces for clarity and type safety
+// Define TypeScript interfaces
 interface Course {
     id: string;
     name: string;
 }
 
-interface Class {
-    id: string;
-    title: string;
-}
-
-interface ClassTime {
-    id: string;
-    preferred_time_from: string;
-    preferred_time_to: string;
+interface Timing {
+    from: string;
+    to: string;
 }
 
 interface Billing {
@@ -47,10 +41,10 @@ interface Billing {
     payment_method: string;
 }
 
-interface CourseFormData {
-    courseID: string;
-    classID: string;
-    classTimeID: string;
+interface CourseSelection {
+    course_id: string;
+    course_name: string | undefined;
+    timings: Timing[];
     billing: Billing;
 }
 
@@ -62,7 +56,7 @@ interface FormData {
     alternate_contact_number: string;
     preferred_language: string;
     signature: string;
-    courses: CourseFormData[];
+    courses: CourseSelection[];
 }
 
 const CreateStudentAccountForm = () => {
@@ -76,9 +70,9 @@ const CreateStudentAccountForm = () => {
         signature: "",
         courses: [
             {
-                courseID: "",
-                classID: "",
-                classTimeID: "",
+                course_id: "",
+                course_name: "",
+                timings: [{ from: "", to: "" }],
                 billing: { receipt_image: null, payment_method: "" },
             },
         ],
@@ -87,51 +81,22 @@ const CreateStudentAccountForm = () => {
     const [dob, setDob] = useState<Date | undefined>();
     const [registrationDate, setRegistrationDate] = useState<Date | undefined>();
     const [courseList, setCourseList] = useState<Course[]>([]);
-    const [classesMap, setClassesMap] = useState<Record<string, Class[]>>({});
-    const [classTimesMap, setClassTimesMap] = useState<Record<string, ClassTime[]>>({});
     const [previewUrls, setPreviewUrls] = useState<(string | null)[]>([null]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const getCourse = useGetAndDelete(axios.get);
-    const getClasses = useGetAndDelete(axios.get);
-    const getClassesTime = useGetAndDelete(axios.get);
     const postStudent = usePostAndPut(axios.post);
 
     const fetchCourses = async () => {
         try {
             const response = await getCourse.callApi("course/get", false, false);
             if (response?.course) {
+                console.log(response?.course)
                 setCourseList(response.course);
             }
         } catch (err) {
             setError("Failed to fetch courses");
-        }
-    };
-
-    const fetchClassesForCourse = async (courseID: string) => {
-        try {
-            const res = await getClasses.callApi(`class/get/${courseID}`, true, false);
-            if (res?.class) {
-                setClassesMap((prev) => ({ ...prev, [courseID]: res.class }));
-            }
-        } catch (err) {
-            setError("Failed to fetch classes");
-        }
-    };
-
-    const fetchClassesTime = async (classID: string) => {
-        try {
-            const response = await getClassesTime.callApi(
-                `class/get/class-time/${classID}`,
-                true,
-                false
-            );
-            if (response?.classTime) {
-                setClassTimesMap((prev) => ({ ...prev, [classID]: response.classTime }));
-            }
-        } catch (err) {
-            setError("Failed to fetch class times");
         }
     };
 
@@ -144,55 +109,68 @@ const CreateStudentAccountForm = () => {
         setFormData((prev) => ({ ...prev, preferred_language: value }));
     };
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const handleImageChange = (
+        e: React.ChangeEvent<HTMLInputElement>,
+        courseIndex: number
+    ) => {
         const file = e.target.files?.[0];
         if (file) {
             const updatedCourses = [...formData.courses];
-            updatedCourses[index].billing.receipt_image = file;
+            updatedCourses[courseIndex].billing.receipt_image = file;
             setFormData((prev) => ({ ...prev, courses: updatedCourses }));
 
             const newPreviewUrls = [...previewUrls];
-            newPreviewUrls[index] = URL.createObjectURL(file);
+            if (newPreviewUrls[courseIndex]) {
+                URL.revokeObjectURL(newPreviewUrls[courseIndex]!);
+            }
+            newPreviewUrls[courseIndex] = URL.createObjectURL(file);
             setPreviewUrls(newPreviewUrls);
         }
     };
 
-    const handlePaymentMethodChange = (value: string, index: number) => {
+    const handlePaymentMethodChange = (value: string, courseIndex: number) => {
         const updatedCourses = [...formData.courses];
-        updatedCourses[index].billing.payment_method = value;
+        updatedCourses[courseIndex].billing.payment_method = value;
         setFormData((prev) => ({ ...prev, courses: updatedCourses }));
     };
 
-    const handleCourseChange = async (index: number, courseID: string) => {
+    const handleCourseChange = (index: number, courseId: string) => {
         const updatedCourses = [...formData.courses];
+        console.log(courseList.find((c) => c.id == courseId)?.name || "")
         updatedCourses[index] = {
-            ...updatedCourses[index],
-            courseID,
-            classID: "",
-            classTimeID: "",
+            course_id: courseId,
+            course_name: courseList.find((c) => c.id == courseId)?.name ?? undefined,
+            timings: updatedCourses[index].timings || [{ from: "", to: "" }],
+            billing: updatedCourses[index].billing,
         };
         setFormData((prev) => ({ ...prev, courses: updatedCourses }));
-        if (courseID) {
-            await fetchClassesForCourse(courseID);
-        }
     };
 
-    const handleClassChange = async (index: number, classID: string) => {
+    const handleTimingChange = (
+        courseIndex: number,
+        timingIndex: number,
+        field: "from" | "to",
+        value: string
+    ) => {
         const updatedCourses = [...formData.courses];
-        updatedCourses[index] = {
-            ...updatedCourses[index],
-            classID,
-            classTimeID: "",
-        };
+        updatedCourses[courseIndex].timings[timingIndex][field] = value;
         setFormData((prev) => ({ ...prev, courses: updatedCourses }));
-        if (classID) {
-            await fetchClassesTime(classID);
-        }
     };
 
-    const handleClassTimeChange = (index: number, classTimeID: string) => {
+    const handleAddTiming = (courseIndex: number) => {
         const updatedCourses = [...formData.courses];
-        updatedCourses[index].classTimeID = classTimeID;
+        updatedCourses[courseIndex].timings.push({ from: "", to: "" });
+        setFormData((prev) => ({ ...prev, courses: updatedCourses }));
+    };
+
+    const handleRemoveTiming = (courseIndex: number, timingIndex: number) => {
+        const updatedCourses = [...formData.courses];
+        updatedCourses[courseIndex].timings = updatedCourses[
+            courseIndex
+        ].timings.filter((_, i) => i !== timingIndex);
+        if (updatedCourses[courseIndex].timings.length === 0) {
+            updatedCourses[courseIndex].timings = [{ from: "", to: "" }];
+        }
         setFormData((prev) => ({ ...prev, courses: updatedCourses }));
     };
 
@@ -201,7 +179,12 @@ const CreateStudentAccountForm = () => {
             ...prev,
             courses: [
                 ...prev.courses,
-                { courseID: "", classID: "", classTimeID: "", billing: { receipt_image: null, payment_method: "" } },
+                {
+                    course_id: "",
+                    course_name: "",
+                    timings: [{ from: "", to: "" }],
+                    billing: { receipt_image: null, payment_method: "" },
+                },
             ],
         }));
         setPreviewUrls((prev) => [...prev, null]);
@@ -212,21 +195,60 @@ const CreateStudentAccountForm = () => {
             ...prev,
             courses: prev.courses.filter((_, i) => i !== index),
         }));
-        setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
+        setPreviewUrls((prev) => {
+            const newUrls = prev.filter((_, i) => i !== index);
+            if (prev[index]) URL.revokeObjectURL(prev[index]!);
+            return newUrls;
+        });
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
         setError(null);
-    
+
         try {
             const payload = {
                 ...formData,
                 date_of_birth: dob ? format(dob, "yyyy-MM-dd") : "",
-                registration_date: registrationDate ? format(registrationDate, "yyyy-MM-dd") : "",
+                registration_date: registrationDate
+                    ? format(registrationDate, "yyyy-MM-dd")
+                    : "",
+                courses: formData.courses.filter(
+                    (course) =>
+                        course.course_id &&
+                        course.timings.some((t) => t.from && t.to)
+                ),
             };
-    
+
+
+            console.log("Submission successful:", payload);
+
+            // const formDataPayload = new FormData();
+            // formDataPayload.append("name", payload.name);
+            // formDataPayload.append("guardian_name", payload.guardian_name);
+            // formDataPayload.append("email", payload.email);
+            // formDataPayload.append("contact_number", payload.contact_number);
+            // formDataPayload.append(
+            //     "alternate_contact_number",
+            //     payload.alternate_contact_number
+            // );
+            // formDataPayload.append("preferred_language", payload.preferred_language);
+            // formDataPayload.append("signature", payload.signature);
+            // formDataPayload.append("date_of_birth", payload.date_of_birth);
+            // formDataPayload.append("registration_date", payload.registration_date);
+
+            // // Append courses as JSON and receipt images with unique keys
+            // payload.courses.forEach((course, index) => {
+            //     if (course.billing.receipt_image) {
+            //         formDataPayload.append(
+            //             `receipt_images[${index}]`,
+            //             course.billing.receipt_image
+            //         );
+            //     }
+            // });
+            // formDataPayload.append("courses", JSON.stringify(payload.courses));
+
             const response = await postStudent.callApi(
                 "student/register",
                 payload,
@@ -234,8 +256,9 @@ const CreateStudentAccountForm = () => {
                 true,
                 true
             );
-    
             console.log("Submission successful:", response);
+
+
         } catch (error) {
             console.error("Error submitting form:", error);
             setError("Failed to submit form. Please try again.");
@@ -243,12 +266,10 @@ const CreateStudentAccountForm = () => {
             setIsSubmitting(false);
         }
     };
-    
 
     useEffect(() => {
         fetchCourses();
         return () => {
-            // Cleanup preview URLs to prevent memory leaks
             previewUrls.forEach((url) => {
                 if (url) URL.revokeObjectURL(url);
             });
@@ -284,13 +305,22 @@ const CreateStudentAccountForm = () => {
                                 <Label>Date of Birth</Label>
                                 <Popover>
                                     <PopoverTrigger asChild>
-                                        <Button variant="outline" className="w-full justify-start text-left">
-                                            {dob ? format(dob, "MM/dd/yyyy") : "Pick a date"}
+                                        <Button
+                                            variant="outline"
+                                            className="w-full justify-start text-left"
+                                        >
+                                            {dob
+                                                ? format(dob, "MM/dd/yyyy")
+                                                : "Pick a date"}
                                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                         </Button>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-auto p-0">
-                                        <Calendar mode="single" selected={dob} onSelect={setDob} />
+                                        <Calendar
+                                            mode="single"
+                                            selected={dob}
+                                            onSelect={setDob}
+                                        />
                                     </PopoverContent>
                                 </Popover>
                             </div>
@@ -371,7 +401,10 @@ const CreateStudentAccountForm = () => {
                                 <Label>Registration Date</Label>
                                 <Popover>
                                     <PopoverTrigger asChild>
-                                        <Button variant="outline" className="w-full justify-start text-left">
+                                        <Button
+                                            variant="outline"
+                                            className="w-full justify-start text-left"
+                                        >
                                             {registrationDate
                                                 ? format(registrationDate, "MM/dd/yyyy")
                                                 : "Pick a date"}
@@ -390,88 +423,132 @@ const CreateStudentAccountForm = () => {
                         </div>
 
                         <div className="space-y-6 mt-6">
-                            {formData.courses.map((course, index) => (
-                                <div key={index} className="border p-4 rounded-md space-y-4">
+                            {formData.courses.map((course, courseIndex) => (
+                                <div
+                                    key={courseIndex}
+                                    className="border p-4 rounded-md space-y-4"
+                                >
                                     <div className="flex justify-between items-center">
-                                        <Label>Course #{index + 1}</Label>
-                                        {index > 0 && (
+                                        <Label>Course #{courseIndex + 1}</Label>
+                                        {courseIndex > 0 && (
                                             <Button
                                                 variant="destructive"
                                                 size="icon"
-                                                onClick={() => handleRemoveCourse(index)}
+                                                onClick={() => handleRemoveCourse(courseIndex)}
                                             >
                                                 <Trash className="h-4 w-4" />
                                             </Button>
                                         )}
                                     </div>
 
-                                    <Select
-                                        onValueChange={(value) => handleCourseChange(index, value)}
-                                        value={course.courseID}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select course" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {courseList.map((c) => (
-                                                <SelectItem key={c.id} value={c.id}>
-                                                    {c.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-
-                                    {course.courseID && classesMap[course.courseID] && (
+                                    <div>
+                                        <Label>Course</Label>
                                         <Select
-                                            onValueChange={(value) => handleClassChange(index, value)}
-                                            value={course.classID}
+                                            onValueChange={(value) =>
+                                                handleCourseChange(courseIndex, value)
+                                            }
+                                            value={course.course_id}
                                         >
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select class" />
+                                                <SelectValue placeholder="Select course" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {classesMap[course.courseID].map((cls) => (
-                                                    <SelectItem key={cls.id} value={cls.id}>
-                                                        {cls.title}
+                                                {courseList.map((c) => (
+                                                    <SelectItem
+                                                        key={c.id}
+                                                        value={c.id.toString()}
+                                                    >
+                                                        {c.name}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
-                                    )}
+                                    </div>
 
-                                    {course.classID && classTimesMap[course.classID] && (
-                                        <Select
-                                            onValueChange={(value) => handleClassTimeChange(index, value)}
-                                            value={course.classTimeID}
+                                    <div className="space-y-2">
+                                        <Label>Timings</Label>
+                                        {course.timings.map((timing, timingIndex) => (
+                                            <div
+                                                key={timingIndex}
+                                                className="flex gap-4 items-center"
+                                            >
+                                                <div className="flex-1">
+                                                    <Label className="sr-only">
+                                                        From
+                                                    </Label>
+                                                    <Input
+                                                        type="time"
+                                                        placeholder="From"
+                                                        value={timing.from}
+                                                        onChange={(e) =>
+                                                            handleTimingChange(
+                                                                courseIndex,
+                                                                timingIndex,
+                                                                "from",
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <Label className="sr-only">To</Label>
+                                                    <Input
+                                                        type="time"
+                                                        placeholder="To"
+                                                        value={timing.to}
+                                                        onChange={(e) =>
+                                                            handleTimingChange(
+                                                                courseIndex,
+                                                                timingIndex,
+                                                                "to",
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                                {course.timings.length > 1 && (
+                                                    <Button
+                                                        variant="destructive"
+                                                        size="icon"
+                                                        onClick={() =>
+                                                            handleRemoveTiming(
+                                                                courseIndex,
+                                                                timingIndex
+                                                            )
+                                                        }
+                                                    >
+                                                        <Trash className="h-4 w-4" />
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        ))}
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handleAddTiming(courseIndex)}
                                         >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select class time" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {classTimesMap[course.classID].map((time) => (
-                                                    <SelectItem key={time.id} value={time.id}>
-                                                        {time.preferred_time_from} - {time.preferred_time_to}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    )}
+                                            <Plus className="w-4 h-4 mr-2" /> Add Timing
+                                        </Button>
+                                    </div>
 
                                     <div>
-                                        <Label htmlFor={`receipt_image_${index}`}>Receipt Image</Label>
+                                        <Label htmlFor={`receipt_image_${courseIndex}`}>
+                                            Receipt Image
+                                        </Label>
                                         <Input
-                                            id={`receipt_image_${index}`}
+                                            id={`receipt_image_${courseIndex}`}
                                             type="file"
                                             accept="image/*"
-                                            onChange={(e) => handleImageChange(e, index)}
+                                            onChange={(e) => handleImageChange(e, courseIndex)}
                                         />
                                     </div>
 
-                                    {previewUrls[index] && (
+                                    {previewUrls[courseIndex] && (
                                         <div>
                                             <img
-                                                src={previewUrls[index]!}
-                                                alt="Receipt Preview"
+                                                src={previewUrls[courseIndex]!}
+                                                alt={`Receipt Preview for Course ${courseIndex + 1}`}
                                                 className="mt-2 max-h-48 rounded-md border"
                                             />
                                         </div>
@@ -480,23 +557,35 @@ const CreateStudentAccountForm = () => {
                                     <div>
                                         <Label>Payment Method</Label>
                                         <Select
-                                            onValueChange={(value) => handlePaymentMethodChange(value, index)}
+                                            onValueChange={(value) =>
+                                                handlePaymentMethodChange(value, courseIndex)
+                                            }
                                             value={course.billing.payment_method}
                                         >
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select payment method" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="Credit Card">Credit Card</SelectItem>
-                                                <SelectItem value="PayPal">PayPal</SelectItem>
-                                                <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
+                                                <SelectItem value="Credit Card">
+                                                    Credit Card
+                                                </SelectItem>
+                                                <SelectItem value="PayPal">
+                                                    PayPal
+                                                </SelectItem>
+                                                <SelectItem value="Bank Transfer">
+                                                    Bank Transfer
+                                                </SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
                                 </div>
                             ))}
 
-                            <Button type="button" variant="outline" onClick={handleAddCourse}>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={handleAddCourse}
+                            >
                                 <Plus className="w-4 h-4 mr-2" /> Add Another Course
                             </Button>
                         </div>

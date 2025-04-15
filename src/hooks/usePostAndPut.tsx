@@ -47,6 +47,7 @@ const usePostAndPut = (method: ApiMethod) => {
             showMessage && toast.success(res.data.message)
             return res
         } catch (err: any) {
+            toast.error(err.response.data.error || err.response.data.message)
             setResponse(null);
             setError(err);
             console.log(err.response.data)

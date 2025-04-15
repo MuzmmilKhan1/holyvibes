@@ -37,7 +37,7 @@ const useGetAndDelete = (method: ApiMethod) => {
       setError(null);
       return data;
     } catch (err: any) {
-      toast.error(err.response.data.message)
+      toast.error(err.response.data.error || err.response.data.message)
       setResponse(null);
       setError(err);
       return err;

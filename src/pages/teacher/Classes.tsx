@@ -32,21 +32,33 @@ const Classes = () => {
     const [allClasses, setAllClasses] = useState<any[]>([]);
     const [showClassData, setShowClassData] = useState<boolean>(false);
     const [singleClass, setSingleClass] = useState<any>(null);
+    const [isEditing, setIsEditing] = useState<boolean>(false);
+    const [link, setLink] = useState<string>("");
 
     const getCourse = useGetAndDelete(axios.get);
     const postClass = usePostAndPut(axios.post);
     const getClass = useGetAndDelete(axios.get);
     const getSingleClass = useGetAndDelete(axios.get);
-
+    const editClass = usePostAndPut(axios.put);
 
 
 
     const getSingleClassData = async (classID: number) => {
         const response = await getSingleClass.callApi(`class/get/single-class-data/${classID}`, true, false);
+        setAvailableTimings(response.class.course.class_timings);
+        if (response?.class) {
+            setSingleClass(response.class);
+            setShowClassData(true);
+            setIsEditing(false);
+            setTitle(response.class.title);
+            setDescription(response.class.description);
+            setLink(response.class.classLink || "");
+            setSelectedTimingID(response.class.class_timings?.[0]?.id?.toString() || "");
+        }
         console.log(response.class)
         if (response?.class) {
             setSingleClass(response.class);
-            setShowClassData(true); 
+            setShowClassData(true);
         }
     }
 
@@ -58,15 +70,14 @@ const Classes = () => {
                 description,
                 selectedCourseId,
                 selectedTimingID,
+                link,
             },
             false,
             false,
             true
         );
         if (response) {
-            setAvailableTimings(prev =>
-                prev.filter(time => time.id !== Number(response.data.classTimingID))
-            );
+
             fetchClasses();
             setTitle("");
             setDescription("");
@@ -76,7 +87,6 @@ const Classes = () => {
 
     const fetchClasses = async () => {
         const response = await getClass.callApi("class/get", false, false);
-        console.log(response)
         if (response?.data) {
             setAllClasses(Array.isArray(response.data) ? response.data : [response.data]);
         }
@@ -89,6 +99,8 @@ const Classes = () => {
     useEffect(() => {
         const getCourses = async () => {
             const response = await getCourse.callApi("course/get-teacher-courses-time", false, false);
+
+
             if (response?.courses) {
                 setCourses(response.courses);
             }
@@ -104,6 +116,25 @@ const Classes = () => {
         return words.slice(0, wordLimit).join(' ') + '...';
     }
 
+    const handleEdit = async () => {
+        const response = await editClass.callApi('class/edit/by-teacher',
+            {
+                id: singleClass.id,
+                title,
+                description,
+                link,
+                selectedTimingID,
+            },
+            true,
+            false,
+            true,
+        )
+        if (response.status) {
+            fetchClasses();
+            setIsEditing(!isEditing)
+        }
+    }
+    
     useEffect(() => {
         const selected = courses.find(course => course.id === Number(selectedCourseId));
         if (selected) {
@@ -188,6 +219,7 @@ const Classes = () => {
                                         />
                                     </div>
 
+
                                     <div>
                                         <Label className="block text-sm font-medium">Description</Label>
                                         <Input
@@ -197,6 +229,17 @@ const Classes = () => {
                                             onChange={(e) => setDescription(e.target.value)}
                                             className="w-full mt-2"
                                             placeholder="Enter description of class"
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label className="block text-sm font-medium">Link</Label>
+                                        <Input
+                                            id="link"
+                                            type="text"
+                                            value={link}
+                                            onChange={(e) => setLink(e.target.value)}
+                                            className="w-full mt-2"
+                                            placeholder="Enter link"
                                         />
                                     </div>
 
@@ -255,61 +298,113 @@ const Classes = () => {
             {
                 showClassData && singleClass && (
                     <Card className="shadow-none">
-                        <CardHeader className=" ">
-                            <CardTitle className="text-2xl">{singleClass.title}</CardTitle>
-                            <p className="text-sm ">Course: {singleClass.course?.name ?? "N/A"}</p>
+                        <CardHeader>
+                            <CardTitle className="text-2xl">{isEditing ? "Edit Class" : singleClass.title}</CardTitle>
+                            <p className="text-sm">Course: {singleClass.course?.name ?? "N/A"}</p>
                         </CardHeader>
 
-                        <CardContent className=" space-y-4">
-                            <div>
-                                <h4 className="font-semibold">Description</h4>
-                                <p className="text-sm text-gray-700">{singleClass.description}</p>
-                            </div>
+                        <CardContent className="space-y-4">
+                            {isEditing ? (
+                                <>
+                                    <div>
+                                        <Label>Title</Label>
+                                        <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+                                    </div>
+                                    <div>
+                                        <Label>Description</Label>
+                                        <Input value={description} onChange={(e) => setDescription(e.target.value)} />
+                                    </div>
+                                    <div>
+                                        <Label>Link</Label>
+                                        <Input value={link} onChange={(e) => setLink(e.target.value)} />
+                                    </div>
+                                    <div>
+                                        <Label>Class Timing</Label>
+                                        <Select
+                                            onValueChange={(val) => setSelectedTimingID(val)}
+                                            value={selectedTimingID}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select timing" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {availableTimings.map((timing, index) => (
+                                                    <SelectItem
+                                                        key={index}
+                                                        value={timing.id.toString()}
+                                                    >
+                                                        {timing.preferred_time_from} - {timing.preferred_time_to}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div>
+                                        <h4 className="font-semibold">Description</h4>
+                                        <p className="text-sm text-gray-700">{singleClass.description}</p>
+                                    </div>
 
-                            <div className="grid grid-cols-2 gap-2">
-                                <div>
-                                    <h4 className="font-semibold">Timings</h4>
-                                    {
-                                        singleClass.class_timings?.length > 0 ? (
-                                            <p className="text-sm">
-                                                {singleClass.class_timings[0].preferred_time_from} - {singleClass.class_timings[0].preferred_time_to}
-                                            </p>
-                                        ) : (
-                                            <p className="text-sm text-gray-500">No timing available</p>
-                                        )
-                                    }
-                                </div>
-                                <div>
-                                    <h4 className="font-semibold">Teacher</h4>
-                                    <p className="text-sm">{singleClass.teacher?.name}</p>
-                                </div>
-                                <div>
-                                    <h4 className="font-semibold">Total Seats</h4>
-                                    <p className="text-sm">{singleClass.total_seats ?? "N/A"}</p>
-                                </div>
-                                <div>
-                                    <h4 className="font-semibold">Link</h4>
-                                    <p className="text-sm">{singleClass.classLink ?? "N/A"}</p>
-                                </div>
-                                <div>
-                                    <h4 className="font-semibold">Filled Seats</h4>
-                                    <p className="text-sm">{singleClass.filled_seats ?? "0"}</p>
-                                </div>
-                            </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <h4 className="font-semibold">Timings</h4>
+                                            {
+                                                singleClass.class_timings?.length > 0 ? (
+                                                    <p className="text-sm">
+                                                        {singleClass.class_timings[0].preferred_time_from} - {singleClass.class_timings[0].preferred_time_to}
+                                                    </p>
+                                                ) : (
+                                                    <p className="text-sm text-gray-500">No timing available</p>
+                                                )
+                                            }
+                                        </div>
+                                        <div>
+                                            <h4 className="font-semibold">Teacher</h4>
+                                            <p className="text-sm">{singleClass.teacher?.name}</p>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-semibold">Total Seats</h4>
+                                            <p className="text-sm">{singleClass.total_seats ?? "N/A"}</p>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-semibold">Link</h4>
+                                            <p className="text-sm">{singleClass.classLink ?? "N/A"}</p>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-semibold">Filled Seats</h4>
+                                            <p className="text-sm">{singleClass.filled_seats ?? "0"}</p>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </CardContent>
 
-                        <div className="flex items-center justify-end gap-2 px-4 ">
-                            <Button variant="outline" onClick={() => setShowClassData(false)}>
+                        <div className="flex items-center justify-end gap-2 px-4 pb-4">
+                            <Button variant="outline" onClick={() => {
+                                setShowClassData(false);
+                                setIsEditing(false);
+                            }}>
                                 Back
                             </Button>
-                            <Button >
-                                Edit
-                            </Button>
+
+                            {isEditing ? (
+                                <Button onClick={handleEdit}>
+                                    Save
+                                </Button>
+                            ) : (
+                                <Button onClick={() => setIsEditing(true)}>
+                                    Edit
+                                </Button>
+                            )}
+
                             <Button variant="destructive">
                                 Delete
                             </Button>
                         </div>
                     </Card>
+
                 )
             }
 

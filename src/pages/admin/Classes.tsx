@@ -41,7 +41,7 @@ const Classes = () => {
             id: data.id,
             title: data?.title || "",
             description: data?.description || "",
-            class_link: data?.class_link || "",
+            class_link: data?.classLink || "",
             total_seats: data?.total_seats || "",
             filled_seats: data?.filled_seats || "",
         });
@@ -61,13 +61,13 @@ const Classes = () => {
         }
     }
 
-    function shortenSentence(sentence:string, wordLimit = 15) {
-        const words = sentence.trim().split(/\s+/); 
+    function shortenSentence(sentence: string, wordLimit = 15) {
+        const words = sentence.trim().split(/\s+/);
         if (words.length <= wordLimit) {
-          return sentence;
+            return sentence;
         }
         return words.slice(0, wordLimit).join(' ') + '...';
-      }
+    }
 
     useEffect(() => {
         getAllClasses();
@@ -103,7 +103,7 @@ const Classes = () => {
                                             <TableCell >{shortenSentence(c.description)}</TableCell>
                                             <TableCell>{c.total_seats || 0}</TableCell>
                                             <TableCell>{c.filled_seats || 0}</TableCell>
-                                            <TableCell>{c.class_link || "N/A"}</TableCell>
+                                            <TableCell>{c.classLink || "N/A"}</TableCell>
                                             <TableCell>
                                                 <Button onClick={() => getSingleClassData(c.id)}>
                                                     See more
