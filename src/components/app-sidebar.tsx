@@ -61,8 +61,12 @@ let data = {
       title: "Student",
       url: "/admin/students",
       icon: PiStudentFill,
+      isActive: true,
       items: [
-
+        {
+          title: "Allot teachers",
+          url: "/admin/allot-teacher",
+        },
       ],
     },
     {

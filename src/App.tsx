@@ -13,6 +13,7 @@ import Event from './pages/admin/Event';
 import Classes from './pages/teacher/Classes';
 import Students from './pages/admin/Students';
 import TeacherCourse from './pages/teacher/TeacherCourse';
+import AllotTeacher from './pages/admin/AllotTeacher';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
           <Route path="classes" element={<AdminClasses />} />
           <Route path="policy" element={<StudentPolicy />} />
           <Route path="event" element={<Event />} />
+          <Route path="allot-teacher" element={<AllotTeacher />} />
           <Route path="students" element={<Students />} />
         </Route>
 

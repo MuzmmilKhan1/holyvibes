@@ -137,6 +137,7 @@ const Teacher = () => {
                                     <TableCaption>List of all teachers</TableCaption>
                                     <TableHeader>
                                         <TableRow>
+                                            <TableHead>Teacher ID</TableHead>
                                             <TableHead>Name</TableHead>
                                             <TableHead>Application Date</TableHead>
                                             <TableHead>Contact Number</TableHead>
@@ -150,6 +151,7 @@ const Teacher = () => {
                                     <TableBody>
                                         {getTeacher?.response?.teachers?.map((teacher: any) => (
                                             <TableRow key={teacher.id}>
+                                                <TableCell>{teacher.teach_id || 'N/A'}</TableCell>
                                                 <TableCell>{teacher.name}</TableCell>
                                                 <TableCell>{teacher.application_date}</TableCell>
                                                 <TableCell>{teacher.contact_number}</TableCell>

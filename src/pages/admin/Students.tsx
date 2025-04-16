@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import usePostAndPut from "@/hooks/usePostAndPut";
 
 interface Student {
+    std_id: number;
     id: number;
     name: string;
     email: string;
@@ -87,7 +88,7 @@ const Students = () => {
             console.log(selectedStudent.class_course_data);
             setFormData({
                 id: selectedStudent.id,
-                studentID:0,
+                studentID: 0,
                 name: selectedStudent.name,
                 email: selectedStudent.email,
                 password: "",
@@ -95,7 +96,7 @@ const Students = () => {
         } else {
             setFormData({
                 id: 0,
-                studentID:0,
+                studentID: 0,
                 name: "",
                 email: "",
                 password: "",
@@ -118,7 +119,7 @@ const Students = () => {
             await postLoginCredentials.callApi('student/assign_login_credentials', formData, true, false, true);
             setFormData({
                 id: 0,
-                studentID:0,
+                studentID: 0,
                 name: "",
                 email: "",
                 password: "",
@@ -167,6 +168,7 @@ const Students = () => {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
+                                        <TableHead>Student ID</TableHead>
                                         <TableHead>Name</TableHead>
                                         <TableHead>Email</TableHead>
                                         <TableHead>Contact</TableHead>
@@ -178,6 +180,7 @@ const Students = () => {
                                 <TableBody>
                                     {getStd.response?.students?.map((student: Student) => (
                                         <TableRow key={student.id}>
+                                            <TableCell>{student.std_id || 'N/A'}</TableCell>
                                             <TableCell>{student.name}</TableCell>
                                             <TableCell>{student.email}</TableCell>
                                             <TableCell>{student.contact_number}</TableCell>
