@@ -12,12 +12,14 @@ import axios from "axios";
 import { useEffect } from "react";
 
 type Course = {
-    id: React.Key | null;
-    image: string;
-    name: string;
-    description: string;
-    price: string | number;
-    course_duration: string;
+    course: {
+        id: React.Key | null;
+        image: string;
+        name: string;
+        description: string;
+        price: string | number;
+        course_duration: string;
+    };
 };
 
 const TeacherCourse = () => {
@@ -27,38 +29,40 @@ const TeacherCourse = () => {
         console.log(response);
     };
 
+
     useEffect(() => {
         getCourseData();
     }, []);
 
     return (
         <div className="p-6">
-            <div className="mt-3 w-full">
+            <div className=" w-full">
                 {getCourses.loading ? (
                     <SpinnerLoader color="black" />
                 ) : (
-                    <div className="flex items-start justify-start flex-row flex-wrap gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-4">
+
                         {getCourses?.response?.course?.map((course: Course) => (
                             <Card
-                                key={course.id}
-                                className="lg:w-[23%] shadow-none"
+                                key={course.course.id}
+                                className="w-full shadow-none"
                             >
                                 <CardHeader>
                                     <img
-                                        src={course.image}
-                                        alt={course.name}
+                                        src={course.course.image}
+                                        alt={course.course.name}
                                         className="w-full h-40 object-cover rounded-md"
                                     />
-                                    <CardTitle className="text-lg mt-1">{course.name}</CardTitle>
+                                    <CardTitle className="text-lg mt-1">{course.course.name}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="text-sm text-muted-foreground">{course.description}</p>
-                                    <p className="text-sm text-muted-foreground mt-3">
-                                        <strong className="text-foreground">Price:</strong> ${course.price}
+                                    <p className="text-sm "><strong>Description:</strong> {course.course.description}</p>
+                                    <p className="text-sm mt-1">
+                                        <strong className="text-foreground">Price:</strong> ${course.course.price}
                                     </p>
-                                    <p className="text-sm text-muted-foreground mt-1">
+                                    <p className="text-sm  mt-1">
                                         <strong className="text-foreground">Duration:</strong>{" "}
-                                        {course.course_duration}
+                                        {course.course.course_duration}
                                     </p>
                                 </CardContent>
                                 <CardFooter>

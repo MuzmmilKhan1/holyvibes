@@ -1,7 +1,7 @@
 import * as React from "react"
 import {
   Notebook,
-  School,
+  // School,
   Settings2,
   User,
 } from "lucide-react"
@@ -48,15 +48,15 @@ let data = {
 
       ],
     },
-    {
-      title: "Classes",
-      url: "/admin/classes",
-      icon: School,
-      isActive: true,
-      items: [
+    // {
+    //   title: "Classes",
+    //   url: "/admin/classes",
+    //   icon: School,
+    //   isActive: true,
+    //   items: [
 
-      ],
-    },
+    //   ],
+    // },
     {
       title: "Student",
       url: "/admin/students",
@@ -97,23 +97,23 @@ let data = {
   // student routers
   stdRoutes: [
     {
-      title: "Explore",
-      url: "#",
+      title: "Enrolled Courses",
+      url: "/student/enrolled-courses",
       icon: Notebook,
-      isActive: true,
+      isActive: false,
       items: [
-        {
-          title: "Enroll Courses",
-          url: "#",
-        },
-        {
-          title: "Upcomming Classes",
-          url: "#",
-        },
-        {
-          title: "Cohort",
-          url: "#",
-        },
+        // {
+        //   title: "Enrolled Courses",
+        //   url: "#",
+        // },
+        // {
+        //   title: "Upcomming Classes",
+        //   url: "#",
+        // },
+        // {
+        //   title: "Cohort",
+        //   url: "#",
+        // },
       ],
     },
   ],
@@ -122,14 +122,14 @@ let data = {
   teacherRoutes: [
     {
       title: "Class",
-      url: "#",
+      url: "/teacher/classes",
       icon: Notebook,
-      isActive: true,
+      isActive: false,
       items: [
-        {
-          title: "Create Class",
-          url: "/teacher/classes",
-        },
+        // {
+        //   title: "Create Class",
+        //   url: "/teacher/classes",
+        // },
         // {
         //   title: "Live Session",
         //   url: "#",
@@ -143,10 +143,10 @@ let data = {
       icon: SiCoursera,
       isActive: false,
       items: [
-        // {
-        //   title: "Live Session",
-        //   url: "#",
-        // },
+        {
+          title: "Students",
+          url: "/teacher/alloted-students",
+        },
       ],
     },
 

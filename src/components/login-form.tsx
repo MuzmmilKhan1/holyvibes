@@ -43,16 +43,25 @@ export function LoginForm({
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log(userData);
-    const res = await post.callApi("auth/login", userData, true, false, false);
+    const res = await post.callApi("auth/login", userData, true, false, true);
+    console.log(res.data);
     if (res.status == 200) {
       localStorage.setItem("token", res.data.token)
       if (res.data.user.role === "admin") {
         navigate(res.data.user.role + "/course")
       }
-      if (res.data.user.role === "teacher" && res.data.status === "allowed") {
+
+      if (res.data.user.role == "teacher" && res.data.status === "allowed") {
         navigate(res.data.user.role + "/classes")
       }
       else if (res.data.user.role === "teacher" && res.data.status === "blocked") {
+        navigate('/restriction-message')
+      }
+
+      if (res.data.user.role == "student" && res.data.status === "allowed") {
+        navigate(res.data.user.role + "/enrolled-courses")
+      }
+      else if (res.data.user.role === "student" && res.data.status === "blocked") {
         navigate('/restriction-message')
       }
 

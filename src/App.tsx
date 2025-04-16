@@ -14,6 +14,8 @@ import Classes from './pages/teacher/Classes';
 import Students from './pages/admin/Students';
 import TeacherCourse from './pages/teacher/TeacherCourse';
 import AllotTeacher from './pages/admin/AllotTeacher';
+import TeacherAllotment from './pages/teacher/TeacherAllotment';
+import EnrolledCourses from './pages/student/EnrolledCourses';
 
 function App() {
   return (
@@ -36,12 +38,13 @@ function App() {
         </Route>
 
         <Route path="/student" element={<Layout userType="student" />} >
-          <Route path="classes" element={<Teacher />} />
+          <Route path="enrolled-courses" element={<EnrolledCourses />} />
         </Route>
 
         <Route path="/teacher" element={<Layout userType="teacher" />} >
           <Route path="classes" element={<Classes />} />
           <Route path="course" element={<TeacherCourse />} />
+          <Route path="alloted-students" element={<TeacherAllotment />} />
         </Route>
 
       </Routes>

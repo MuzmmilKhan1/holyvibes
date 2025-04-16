@@ -85,12 +85,12 @@ const Students = () => {
 
     useEffect(() => {
         if (selectedStudent) {
-            console.log(selectedStudent.class_course_data);
+            console.log(selectedStudent?.class_course_data);
             setFormData({
-                id: selectedStudent.id,
+                id: selectedStudent?.id,
                 studentID: 0,
-                name: selectedStudent.name,
-                email: selectedStudent.email,
+                name: selectedStudent?.name,
+                email: selectedStudent?.email,
                 password: "",
             });
         } else {
@@ -115,26 +115,16 @@ const Students = () => {
     };
 
     const handleSaveDetails = async () => {
-        try {
-            await postLoginCredentials.callApi('student/assign_login_credentials', formData, true, false, true);
-            setFormData({
-                id: 0,
-                studentID: 0,
-                name: "",
-                email: "",
-                password: "",
-            });
-            setSelectedStudent(null);
-            getStudents();
-        } catch (error) {
-            console.error("Error assigning credentials:", error);
-        }
+
+        await postLoginCredentials.callApi('student/assign_login_credentials', formData, true, false, true);
+        getStudents();
+
     };
 
     const handleDelete = async () => {
         try {
             if (selectedStudent?.id) {
-                await getStd.callApi(`student/delete/${selectedStudent.id}`, false, true);
+                await getStd.callApi(`student/delete/${selectedStudent?.id}`, false, true);
                 setSelectedStudent(null);
                 getStudents();
             }
@@ -146,7 +136,7 @@ const Students = () => {
 
     const getBillingDetails = async () => {
         if (selectedStudent?.id) {
-            await getBilling.callApi(`student/get/billing-details/${selectedStudent.id}`, true, false);
+            await getBilling.callApi(`student/get/billing-details/${selectedStudent?.id}`, true, false);
             setShowBillingDetails(true);
         }
     };
@@ -215,18 +205,18 @@ const Students = () => {
                             <div className="flex flex-wrap w-full space-y-4 lg:space-y-0 lg:flex-row">
                                 <div className="w-full lg:w-1/4 space-y-2">
                                     <p className="underline"><strong>Contact Info</strong></p>
-                                    <p><strong>Name:</strong> {selectedStudent.name}</p>
-                                    <p><strong>Email:</strong> {selectedStudent.email}</p>
-                                    <p><strong>Contact:</strong> {selectedStudent.contact_number}</p>
-                                    <p><strong>Alternate Contact:</strong> {selectedStudent.alternate_contact_number}</p>
+                                    <p><strong>Name:</strong> {selectedStudent?.name}</p>
+                                    <p><strong>Email:</strong> {selectedStudent?.email}</p>
+                                    <p><strong>Contact:</strong> {selectedStudent?.contact_number}</p>
+                                    <p><strong>Alternate Contact:</strong> {selectedStudent?.alternate_contact_number}</p>
                                 </div>
                                 <div className="w-full lg:w-1/4 space-y-2">
                                     <p className="underline"><strong>Personal Details</strong></p>
-                                    <p><strong>Date of Birth:</strong> {selectedStudent.date_of_birth}</p>
-                                    <p><strong>Preferred Language:</strong> {selectedStudent.preferred_language}</p>
-                                    <p><strong>Guardian:</strong> {selectedStudent.guardian_name}</p>
-                                    <p><strong>Signature:</strong> {selectedStudent.signature}</p>
-                                    <p><strong>Registered On:</strong> {selectedStudent.registration_date}</p>
+                                    <p><strong>Date of Birth:</strong> {selectedStudent?.date_of_birth}</p>
+                                    <p><strong>Preferred Language:</strong> {selectedStudent?.preferred_language}</p>
+                                    <p><strong>Guardian:</strong> {selectedStudent?.guardian_name}</p>
+                                    <p><strong>Signature:</strong> {selectedStudent?.signature}</p>
+                                    <p><strong>Registered On:</strong> {selectedStudent?.registration_date}</p>
                                 </div>
                                 <div className="w-full lg:w-1/4 space-y-2 flex flex-col items-start">
                                     <p className="underline"><strong>Action</strong></p>
@@ -269,7 +259,7 @@ const Students = () => {
                                         <Input
                                             id="studentID"
                                             type="text"
-                                            value={formData.studentID}
+                                            value={formData?.studentID}
                                             onChange={handleInputChange}
                                             className="w-full mt-2"
                                         />
@@ -279,7 +269,7 @@ const Students = () => {
                                         <Input
                                             id="name"
                                             type="text"
-                                            value={formData.name}
+                                            value={formData?.name}
                                             onChange={handleInputChange}
                                             className="w-full mt-2"
                                         />
@@ -289,7 +279,7 @@ const Students = () => {
                                         <Input
                                             id="email"
                                             type="email"
-                                            value={formData.email}
+                                            value={formData?.email}
                                             onChange={handleInputChange}
                                             className="w-full mt-2"
                                         />
@@ -299,7 +289,7 @@ const Students = () => {
                                         <Input
                                             id="password"
                                             type="password"
-                                            value={formData.password}
+                                            value={formData?.password}
                                             onChange={handleInputChange}
                                             className="w-full mt-2"
                                         />
@@ -312,7 +302,7 @@ const Students = () => {
                         </Card>
                     )}
 
-                    {showStdClassTimings && selectedStudent?.class_course_data?.length > 0 ? (
+                    {showStdClassTimings && JSON.parse(selectedStudent?.class_course_data)?.length > 0 ? (
                         <Card className="shadow-none mt-6">
                             <CardHeader>
                                 <CardTitle className="text-xl underline">
