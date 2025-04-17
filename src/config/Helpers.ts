@@ -3,7 +3,7 @@
 class Helpers {
     static localhost: string = 'localhost:8000';
     static server: string = 'api.holyvibes.org';
-    static basePath: string = `http://${this.localhost}`;
+    static basePath: string = `http://${this.server}`;
     static apiUrl: string = `${this.basePath}/api/`;
     static imageUrl: string = `${this.basePath}/`;
     static serverImage = (name: string): string => {
