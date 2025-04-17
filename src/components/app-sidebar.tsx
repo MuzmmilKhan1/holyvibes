@@ -116,6 +116,16 @@ let data = {
         // },
       ],
     },
+
+    {
+      title: "Policy",
+      url: "/student/policy",
+      icon: MdPolicy,
+      isActive: false,
+      items: [
+
+      ],
+    },
   ],
 
   // teacher routers

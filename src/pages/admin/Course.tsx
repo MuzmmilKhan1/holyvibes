@@ -74,7 +74,7 @@ const Course: React.FC = () => {
     return (
         <div className="p-5">
             <div className="mx-auto p-6 border rounded-xl">
-                <h1 className="text-2xl font-bold mb-4">Add New Course</h1>
+                <h1 className="text-xl font-bold underline mb-5">Add New Course</h1>
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
                         <Label htmlFor="name">Course Name</Label>

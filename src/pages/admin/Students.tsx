@@ -150,7 +150,7 @@ const Students = () => {
                 !selectedStudent && !showBillingDetails && (
                     <Card className="shadow-none">
                         <CardHeader>
-                            <CardTitle className="text-xl underline">
+                            <CardTitle className="text-xl font-bold underline ">
                                 Registered Students
                             </CardTitle>
                         </CardHeader>
@@ -199,7 +199,7 @@ const Students = () => {
                 <div>
                     <Card className="shadow-none">
                         <CardHeader>
-                            <CardTitle className="text-lg underline">Student Details</CardTitle>
+                            <CardTitle className="text-xl font-bold underline ">Student Details</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="flex flex-wrap w-full space-y-4 lg:space-y-0 lg:flex-row">
@@ -305,7 +305,7 @@ const Students = () => {
                     {showStdClassTimings && JSON.parse(selectedStudent?.class_course_data)?.length > 0 ? (
                         <Card className="shadow-none mt-6">
                             <CardHeader>
-                                <CardTitle className="text-xl underline">
+                                <CardTitle className="text-xl font-bold underline ">
                                     Class Time
                                 </CardTitle>
                             </CardHeader>

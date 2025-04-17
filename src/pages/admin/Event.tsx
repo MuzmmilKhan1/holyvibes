@@ -91,7 +91,7 @@ const Event = () => {
         <div className="w-full mx-auto p-6 space-y-6">
             <Card className='shadow-none' >
                 <CardHeader>
-                    <CardTitle>{eventId === 0 ? 'Create Event' : 'Edit Event'}</CardTitle>
+                    <CardTitle className="text-xl font-bold underline " >{eventId === 0 ? 'Create Event' : 'Edit Event'}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -138,7 +138,7 @@ const Event = () => {
                     <SpinnerLoader color='black' /> :
                     <Card className='shadow-none' >
                         <CardHeader>
-                            <CardTitle>All Events</CardTitle>
+                            <CardTitle className="text-xl font-bold underline ">All Events</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <Table>

@@ -108,7 +108,7 @@ const StudentPolicy = () => {
                     <SpinnerLoader color='black' /> :
                     <Card className='shadow-none' >
                         <CardHeader>
-                            <CardTitle>Policies</CardTitle>
+                            <CardTitle className="text-xl font-bold underline ">Policies</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <Table>
@@ -116,7 +116,7 @@ const StudentPolicy = () => {
                                     <TableRow>
                                         <TableHead>ID</TableHead>
                                         <TableHead>Title</TableHead>
-                                        <TableHead>Description</TableHead>
+                                        <TableHead  >Description</TableHead>
                                         <TableHead>Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -127,7 +127,9 @@ const StudentPolicy = () => {
                                             <TableRow key={policy.id}>
                                                 <TableCell>{policy.id}</TableCell>
                                                 <TableCell>{policy.title}</TableCell>
-                                                <TableCell>{policy.description}</TableCell>
+                                                <TableCell className='truncate ' >
+                                                    {policy.description}
+                                                </TableCell>
                                                 <TableCell>
                                                     <Button onClick={() => handleEdit(policy)}>
                                                         Edit

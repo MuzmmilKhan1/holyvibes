@@ -81,7 +81,7 @@ const Classes = () => {
                 ) : !selectedClass ? (
                     <Card className="shadow-none">
                         <CardHeader>
-                            <CardTitle>Classes</CardTitle>
+                            <CardTitle className="text-xl font-bold underline ">Classes</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <Table>
@@ -118,7 +118,7 @@ const Classes = () => {
                 ) : (
                     <Card className="shadow-none">
                         <CardHeader>
-                            <CardTitle>Class Detail</CardTitle>
+                            <CardTitle className="text-xl font-bold underline ">Class Detail</CardTitle>
                         </CardHeader>
                         <CardContent>
                             {!isEditing ? (

@@ -122,7 +122,7 @@ const EnrolledCourses: React.FC = () => {
                     <div className="w-full" >
                         <Card className="shadow-none w-full">
                             <CardHeader >
-                                <CardTitle >All Classes</CardTitle>
+                                <CardTitle className="text-xl font-bold underline " >All Classes</CardTitle>
                             </CardHeader>
                             <CardContent >
                                 {getCourseClasses.response?.classes?.length ? (

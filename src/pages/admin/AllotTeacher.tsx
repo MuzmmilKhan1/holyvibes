@@ -187,7 +187,7 @@ const AllotTeacher = () => {
         <div className="p-6 space-y-10">
             <Card className="w-full shadow-none">
                 <CardHeader>
-                    <CardTitle>{editingId ? "Edit Allotment" : "Allot Teacher to Student"}</CardTitle>
+                    <CardTitle className="text-xl font-bold underline ">{editingId ? "Edit Allotment" : "Allot Teacher to Student"}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div>
@@ -235,7 +235,7 @@ const AllotTeacher = () => {
 
             <Card className="w-full shadow-none">
                 <CardHeader>
-                    <CardTitle>Allotted Teachers</CardTitle>
+                    <CardTitle className="text-xl font-bold underline ">Allotted Teachers</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Table>

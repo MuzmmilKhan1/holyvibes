@@ -130,7 +130,7 @@ const Teacher = () => {
                     ) : !showTeacherDetails ? (
                         <Card className="shadow-none">
                             <CardHeader>
-                                <CardTitle>Teachers</CardTitle>
+                                <CardTitle className="text-xl font-bold underline " >Teachers</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <Table>
@@ -362,7 +362,7 @@ const Teacher = () => {
                             <>
                                 <Card className="shadow-none">
                                     <CardHeader>
-                                        <CardTitle>Class Time</CardTitle>
+                                        <CardTitle className="text-xl font-bold underline -mb-3" >Class Time</CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <Table>

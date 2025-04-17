@@ -16,6 +16,7 @@ import TeacherCourse from './pages/teacher/TeacherCourse';
 import AllotTeacher from './pages/admin/AllotTeacher';
 import TeacherAllotment from './pages/teacher/TeacherAllotment';
 import EnrolledCourses from './pages/student/EnrolledCourses';
+import Policy from './pages/student/Policy';
 
 function App() {
   return (
@@ -39,6 +40,8 @@ function App() {
 
         <Route path="/student" element={<Layout userType="student" />} >
           <Route path="enrolled-courses" element={<EnrolledCourses />} />
+          <Route path="policy" element={<Policy />} />
+
         </Route>
 
         <Route path="/teacher" element={<Layout userType="teacher" />} >
