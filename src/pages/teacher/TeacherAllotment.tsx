@@ -75,7 +75,7 @@ const TeacherAllotment = () => {
         <SpinnerLoader color="black" />
       ) : (
         <Card className="w-full shadow-none">
-          <CardHeader>
+          <CardHeader className="text-xl font-bold underline " >
             <CardTitle>Students</CardTitle>
           </CardHeader>
           <CardContent>

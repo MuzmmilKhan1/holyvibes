@@ -114,7 +114,6 @@ const StudentPolicy = () => {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>ID</TableHead>
                                         <TableHead>Title</TableHead>
                                         <TableHead  >Description</TableHead>
                                         <TableHead>Actions</TableHead>
@@ -125,9 +124,8 @@ const StudentPolicy = () => {
                                         getPolicy?.response?.policy?.length > 0 &&
                                         getPolicy?.response?.policy.map((policy: Policy) => (
                                             <TableRow key={policy.id}>
-                                                <TableCell>{policy.id}</TableCell>
-                                                <TableCell>{policy.title}</TableCell>
-                                                <TableCell className='truncate ' >
+                                                <TableCell className='lg:text-wrap' >{policy.title}</TableCell>
+                                                <TableCell className='lg:text-wrap ' >
                                                     {policy.description}
                                                 </TableCell>
                                                 <TableCell>

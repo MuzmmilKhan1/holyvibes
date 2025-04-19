@@ -66,9 +66,7 @@ const EnrolledCourses: React.FC = () => {
         <div className="p-6">
             <div className="w-full">
                 {getCourses.loading ? (
-                    <div className="flex justify-center items-center h-64">
                         <SpinnerLoader color="black" />
-                    </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                         {!showClasses &&

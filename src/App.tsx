@@ -1,7 +1,7 @@
 import Layout from './pages/Layout';
 import './App.css';
 import Login from './pages/auth/Login';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import Course from './pages/admin/Course';
 import CreateTeacherAccount from './pages/auth/CreateTeacherAccount';
 import CreateStudentAccount from './pages/auth/CreateStudentAccount';
@@ -17,41 +17,62 @@ import AllotTeacher from './pages/admin/AllotTeacher';
 import TeacherAllotment from './pages/teacher/TeacherAllotment';
 import EnrolledCourses from './pages/student/EnrolledCourses';
 import Policy from './pages/student/Policy';
+import RouteProtector from './config/RouteProtector';
+import { useEffect } from 'react';
 
 function App() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const expiry = localStorage.getItem("expiry");
+    if (expiry && new Date().getTime() > parseInt(expiry, 10)) {
+      localStorage.clear();
+      navigate('/');
+    }
+  }, [navigate]);
   return (
-    <>
-      <Routes>
+    <Routes>
+      <Route path="/" element={
+        <RouteProtector isAuthenticate={false}>
+          <Login />
+        </RouteProtector>
+      } />
+      <Route path="/restriction-message" element={<RestrictionMessage />} />
+      <Route path="/create-teacher-account" element={<CreateTeacherAccount />} />
+      <Route path="/create-student-account" element={<CreateStudentAccount />} />
 
-        <Route path="/" element={<Login />} />
-        <Route path="/restriction-message" element={<RestrictionMessage />} />
-        <Route path="/create-teacher-account" element={<CreateTeacherAccount />} />
-        <Route path="/create-student-account" element={<CreateStudentAccount />} />
+      <Route path="/admin" element={
+        <RouteProtector isAuthenticate={true}>
+          <Layout userType="admin" />
+        </RouteProtector>
+      }>
+        <Route path="course" element={<Course />} />
+        <Route path="teacher" element={<Teacher />} />
+        <Route path="classes" element={<AdminClasses />} />
+        <Route path="policy" element={<StudentPolicy />} />
+        <Route path="event" element={<Event />} />
+        <Route path="allot-teacher" element={<AllotTeacher />} />
+        <Route path="students" element={<Students />} />
+      </Route>
 
-        <Route path="/admin" element={<Layout userType="admin" />}>
-          <Route path="course" element={<Course />} />
-          <Route path="teacher" element={<Teacher />} />
-          <Route path="classes" element={<AdminClasses />} />
-          <Route path="policy" element={<StudentPolicy />} />
-          <Route path="event" element={<Event />} />
-          <Route path="allot-teacher" element={<AllotTeacher />} />
-          <Route path="students" element={<Students />} />
-        </Route>
+      <Route path="/student" element={
+        <RouteProtector isAuthenticate={true}>
+          <Layout userType="student" />
+        </RouteProtector>
+      }>
+        <Route path="enrolled-courses" element={<EnrolledCourses />} />
+        <Route path="policy" element={<Policy />} />
+      </Route>
 
-        <Route path="/student" element={<Layout userType="student" />} >
-          <Route path="enrolled-courses" element={<EnrolledCourses />} />
-          <Route path="policy" element={<Policy />} />
-
-        </Route>
-
-        <Route path="/teacher" element={<Layout userType="teacher" />} >
-          <Route path="classes" element={<Classes />} />
-          <Route path="course" element={<TeacherCourse />} />
-          <Route path="alloted-students" element={<TeacherAllotment />} />
-        </Route>
-
-      </Routes>
-    </>
+      <Route path="/teacher" element={
+        <RouteProtector isAuthenticate={true}>
+          <Layout userType="teacher" />
+        </RouteProtector>
+      }>
+        <Route path="classes" element={<Classes />} />
+        <Route path="course" element={<TeacherCourse />} />
+        <Route path="alloted-students" element={<TeacherAllotment />} />
+      </Route>
+    </Routes>
   );
 }
 

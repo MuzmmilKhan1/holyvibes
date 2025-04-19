@@ -29,7 +29,6 @@ const TeacherCourse = () => {
         console.log(response);
     };
 
-
     useEffect(() => {
         getCourseData();
     }, []);

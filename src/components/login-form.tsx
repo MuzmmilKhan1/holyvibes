@@ -14,6 +14,8 @@ import { useNavigate } from "react-router-dom"
 import usePostAndPut from "@/hooks/usePostAndPut"
 import { useState } from "react"
 import axios from "axios"
+import CryptoJS from 'crypto-js';
+import Helpers from "@/config/Helpers"
 
 
 interface User {
@@ -44,13 +46,21 @@ export function LoginForm({
     e.preventDefault();
     console.log(userData);
     const res = await post.callApi("auth/login", userData, true, false, true);
-    console.log(res.data);
     if (res.status == 200) {
+      
+      const expiryTime = new Date().getTime() + 24 * 60 * 60 * 1000;
+      
       localStorage.setItem("token", res.data.token)
+      const encryptedRole = CryptoJS.AES.encrypt(res.data.user.role, Helpers.secretKey).toString();
+      const encryptedStatus = CryptoJS.AES.encrypt(res.data.status, Helpers.secretKey).toString();
+
+      localStorage.setItem("role", encryptedRole);
+      localStorage.setItem("status", encryptedStatus);
+      localStorage.setItem("expiry", expiryTime.toString());
+      
       if (res.data.user.role === "admin") {
         navigate(res.data.user.role + "/course")
       }
-
       if (res.data.user.role == "teacher" && res.data.status === "allowed") {
         navigate(res.data.user.role + "/classes")
       }

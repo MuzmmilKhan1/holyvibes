@@ -1,6 +1,6 @@
 import Helpers from "@/config/Helpers";
 import { useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 type ApiMethod = (url: string, data: any, config: { headers: any }) => Promise<any>;
 
@@ -19,8 +19,6 @@ const usePostAndPut = (method: ApiMethod) => {
         setLoading(true);
         setError(null);
 
-        console.log(data)
-
         const url = `${Helpers.apiUrl}${path}`;
         let headers;
 
@@ -32,27 +30,28 @@ const usePostAndPut = (method: ApiMethod) => {
             headers = fileHeaders
                 ? {
                     "Content-Type": "multipart/form-data",
-                    "token": `${localStorage.getItem("token")}`,
+                    token: `${localStorage.getItem("token")}`,
                 }
                 : {
                     "Content-Type": "application/json",
-                    "token": `${localStorage.getItem("token")}`,
+                    token: `${localStorage.getItem("token")}`,
                 };
         }
-
+        const toastId = toast.loading("Loading...");
         try {
             const res = await method(url, data, { headers });
             setResponse(res);
-            setError(null)
-            showMessage && toast.success(res.data.message)
-            return res
+            setError(null);
+            toast.dismiss(toastId);
+            showMessage && toast.success(res.data.message);
+            return res;
         } catch (err: any) {
-            toast.error(err.response.data.error || err.response.data.message)
+            toast.dismiss(toastId);
+            const errorMessage = err.response?.data?.error || err.response?.data?.message || "Something went wrong";
+            toast.error(errorMessage);
             setResponse(null);
             setError(err);
-            console.log(err.response.data)
-            showMessage && toast.error(err.response.data.message)
-            return err
+            return err;
         } finally {
             setLoading(false);
         }

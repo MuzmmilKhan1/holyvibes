@@ -37,7 +37,8 @@ export function NavUser({
   const { isMobile } = useSidebar()
   const navigate = useNavigate()
   const handleLogOut = () => {
-    localStorage.clear()
+    localStorage.clear();
+    
     navigate("/")
   }
   return (
