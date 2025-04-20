@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useState, FormEvent } from 'react';
 import axios from 'axios';
 import {
@@ -23,8 +21,14 @@ import { Button } from '@/components/ui/button';
 import useGetAndDelete from '@/hooks/useGetAndDelete';
 import usePostAndPut from '@/hooks/usePostAndPut';
 import SpinnerLoader from '@/components/SpinLoader';
+import {
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem,
+} from "@/components/ui/select";
 
-// Interfaces
 interface EventType {
     id: number;
     title: string;
@@ -37,6 +41,7 @@ interface EventType {
 interface EventMember {
     id: number;
     student: {
+        id: string;
         std_id: string;
         name: string;
     };
@@ -44,11 +49,21 @@ interface EventMember {
     is_member: boolean;
 }
 
+interface BillingDetails {
+    studentName: string;
+    payment_status: string;
+    paymentMethod?: string;
+    receipt?: string;
+}
 
 const Event = () => {
     const getEvent = useGetAndDelete(axios.get);
     const getEventMembers = useGetAndDelete(axios.get);
     const postEvent = usePostAndPut(axios.post);
+    const putEvent = usePostAndPut(axios.put);
+    const getStdBilling = useGetAndDelete(axios.get);
+    const deleteEvent = useGetAndDelete(axios.delete);
+    const updateMembership = useGetAndDelete(axios.get);
 
     const [formData, setFormData] = useState<Omit<EventType, 'id'>>({
         title: '',
@@ -59,6 +74,16 @@ const Event = () => {
     });
     const [eventId, setEventId] = useState<number>(0);
     const [showMembers, setShowMembers] = useState<boolean>(false);
+    const [showMemberBilling, setShowMemberBilling] = useState<boolean>(false);
+
+    const [data, setData] = useState(
+        {
+            studentID: '',
+            eventID: '',
+            paymentStatus: '',
+        }
+    );
+
 
     const fetchEvents = async () => {
         try {
@@ -107,18 +132,52 @@ const Event = () => {
         });
     };
 
-    const getEventMembersData = async (eventId: number) => {
+    const handleDelete = async (eventId: number) => {
         try {
+            await deleteEvent.callApi(`event/delete/${eventId}`, true, false);
+            fetchEvents();
+        } catch (error) {
+            console.error('Error deleting event:', error);
+        }
+    };
+
+    const getEventMembersData = async (eventId: number) => {
+        setEventId(eventId);
+        try {
+            setData({ ...data, eventID: eventId.toString() });
             await getEventMembers.callApi(`event/get-event-members/${eventId}`, true, false);
             setShowMembers(true);
+            setShowMemberBilling(false);
         } catch (error) {
             console.error('Error fetching event members:', error);
         }
     };
 
+    const fetchMemberBillingDetails = async (studentId: string) => {
+        console.log(studentId, eventId)
+        setData({ ...data, studentID: studentId.toString() });
+        try {
+            const response = await getStdBilling.callApi(`event/get-std-event-billing/${studentId}/${eventId}`, true, false);
+            console.log(response)
+            setShowMemberBilling(true);
+        } catch (error) {
+            console.error('Error fetching billing details:', error);
+            setShowMemberBilling(false);
+        }
+    };
+
+    const saveBillingChanges = async () => {
+        await putEvent.callApi('event/update-payemnt-status', data, true, false, true)
+    }
+
+    const cancelMembershipOrJoin = async (eventID: number, studentID: string) => {
+        await updateMembership.callApi(`event/join-cancel-membership/${eventID}/${studentID}`, false, false)
+        await getEventMembersData(eventID);
+    }
+
     return (
         <div className="w-full mx-auto p-6">
-            {!showMembers && (
+            {!showMembers && !showMemberBilling && (
                 <div className="space-y-6 mx-auto">
                     <Card className="shadow-none">
                         <CardHeader>
@@ -198,9 +257,9 @@ const Event = () => {
                     {getEvent?.loading ? (
                         <SpinnerLoader color="black" />
                     ) : (
-                        <Card className='shadow-none' >
+                        <Card className="shadow-none">
                             <CardHeader>
-                                <CardTitle className="text-xl font-bold underline ">All Events</CardTitle>
+                                <CardTitle className="text-xl font-bold underline">All Events</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <Table>
@@ -216,34 +275,44 @@ const Event = () => {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {getEvent?.response?.event.map((event: EventType) => (
-                                            <TableRow key={event.id}>
-                                                <TableCell>{event.title}</TableCell>
-                                                <TableCell>
-                                                    <span className="lg:text-wrap">
-                                                        {event.description}
-                                                    </span>
-                                                </TableCell>
-                                                <TableCell>{event.price !== null ? `$${event.price}` : 'Free'}</TableCell>
-                                                <TableCell>{new Date(event.time).toLocaleString()}</TableCell>
-                                                <TableCell className='lg:text-wrap' >{event.link || '—'}</TableCell>
-                                                <TableCell>
-                                                    <Button size="sm" onClick={() => handleEdit(event)}>
-                                                        Edit
-                                                    </Button>
-                                                    <Button variant='destructive' className='ml-2' size="sm" onClick={() => handleEdit(event)}>
-                                                        Delete
-                                                    </Button>
-                                                    <Button variant='outline' className='ml-2' size="sm" onClick={
-                                                        async () => {
-                                                            await getEventMembersData(event.id);
-                                                        }
-                                                    }>
-                                                        Members
-                                                    </Button>
-                                                </TableCell>
+                                        {getEvent?.response?.event?.length > 0 ? (
+                                            getEvent.response.event.map((event: EventType) => (
+                                                <TableRow key={event.id}>
+                                                    <TableCell>{event.title}</TableCell>
+                                                    <TableCell>
+                                                        <span className="lg:text-wrap">{event.description}</span>
+                                                    </TableCell>
+                                                    <TableCell>{event.price !== null ? `$${event.price}` : 'Free'}</TableCell>
+                                                    <TableCell>{new Date(event.time).toLocaleString()}</TableCell>
+                                                    <TableCell className="lg:text-wrap">{event.link || '—'}</TableCell>
+                                                    <TableCell>
+                                                        <Button size="sm" onClick={() => handleEdit(event)}>
+                                                            Edit
+                                                        </Button>
+                                                        <Button
+                                                            variant="destructive"
+                                                            className="ml-2"
+                                                            size="sm"
+                                                            onClick={() => handleDelete(event.id)}
+                                                        >
+                                                            Delete
+                                                        </Button>
+                                                        <Button
+                                                            variant="outline"
+                                                            className="ml-2"
+                                                            size="sm"
+                                                            onClick={() => getEventMembersData(event.id)}
+                                                        >
+                                                            Members
+                                                        </Button>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
+                                        ) : (
+                                            <TableRow>
+                                                <TableCell colSpan={6}>No events found.</TableCell>
                                             </TableRow>
-                                        ))}
+                                        )}
                                     </TableBody>
                                 </Table>
                             </CardContent>
@@ -252,52 +321,147 @@ const Event = () => {
                 </div>
             )}
 
-            {showMembers && (
-                <>
-                    {getEventMembers?.loading ? (
-                        <SpinnerLoader color="black" />
-                    ) : (
-                        <Card className="shadow-none">
-                            <CardHeader>
-                                <CardTitle className="text-xl font-bold underline">Event Members</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <Table>
-                                    <TableCaption>List of event members.</TableCaption>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Student ID</TableHead>
-                                            <TableHead>Name</TableHead>
-                                            <TableHead>Payment Status</TableHead>
-                                            <TableHead>Is Member</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {getEventMembers?.response?.event?.map((member: EventMember) => (
+            {showMembers && !showMemberBilling && (
+                <Card className="shadow-none">
+                    <CardHeader>
+                        <CardTitle className="text-xl font-bold underline">Event Members</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {getEventMembers?.loading ? (
+                            <SpinnerLoader color="black" />
+                        ) : (
+                            <Table>
+                                <TableCaption>List of event members.</TableCaption>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Student ID</TableHead>
+                                        <TableHead>Name</TableHead>
+                                        <TableHead>Payment Status</TableHead>
+                                        <TableHead>Is Member</TableHead>
+                                        <TableHead>Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {getEventMembers?.response?.event?.length > 0 ? (
+                                        getEventMembers.response.event.map((member: EventMember) => (
                                             <TableRow key={member.id}>
                                                 <TableCell>{member.student.std_id}</TableCell>
                                                 <TableCell>{member.student.name}</TableCell>
                                                 <TableCell>{member.payment_status}</TableCell>
                                                 <TableCell>{member.is_member ? 'Yes' : 'No'}</TableCell>
+                                                <TableCell className='flex gap-3' >
+                                                    {
+                                                        member.payment_status !== "not_required" &&
+                                                        <Button onClick={() => fetchMemberBillingDetails(member.student.id)}>
+                                                            See billing details
+                                                        </Button>
+                                                    }
+                                                    {
+                                                        member.is_member ? (
+                                                            <Button variant='destructive' onClick={() => cancelMembershipOrJoin(eventId, member.student.id)}>
+                                                                Leave
+                                                            </Button>
+                                                        ) : (
+                                                            <Button variant='outline' onClick={() => cancelMembershipOrJoin(eventId, member.student.id)}>
+                                                                Join
+                                                            </Button>
+                                                        )
+                                                    }
+                                                </TableCell>
                                             </TableRow>
-                                        )) || (
-                                                <TableRow>
-                                                    <TableCell colSpan={4}>No members found.</TableCell>
-                                                </TableRow>
-                                            )}
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={5}>No members found.</TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        )}
+                        <Button onClick={() => setShowMembers(false)} className="mt-5">
+                            Back
+                        </Button>
+                    </CardContent>
+                </Card>
+            )}
 
-                                        <Button
-                                            onClick={() => setShowMembers(false)}
-                                            className="mt-5"
-                                        >
-                                            Back
-                                        </Button>
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
+            {showMemberBilling && (
+                <div className="shadow-none border-none space-y-6 ">
+
+                    <Card className="shadow-none">
+                        <CardHeader>
+                            <CardTitle className="text-xl font-bold underline">
+                                Update Event Billing Payment Status
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="font-medium">Payment Status</label>
+                                    <Select
+                                        onValueChange={(value) => {
+                                            setData({ ...data, paymentStatus: value });
+                                        }}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select payment status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="pending">Pending</SelectItem>
+                                            <SelectItem value="paid">Paid</SelectItem>
+                                            <SelectItem value="rejected">Rejected</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="flex gap-2">
+                                    <Button onClick={saveBillingChanges} >
+                                        Save Changes
+                                    </Button>
+                                    <Button
+                                        onClick={() => {
+                                            setShowMemberBilling(false);
+                                        }}
+                                    >
+                                        Back to Members
+                                    </Button>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {getStdBilling?.loading ? (
+                        <SpinnerLoader color="black" />
+                    ) : getStdBilling?.response?.billingDetails?.length > 0 ? (
+                        <div className="w-full ">
+                            <div className="flex flex-row flex-wrap  gap-4">
+                                {getStdBilling.response.billingDetails.map((item: BillingDetails, index: number) => (
+                                    <div key={index} className="border rounded-xl flex flex-col items-center justify-center  p-3">
+                                        {item.receipt ? (
+                                            <div>
+                                                <img
+                                                    src={item.receipt}
+                                                    alt="Receipt"
+                                                    className="max-w-full border h-auto rounded-md"
+                                                />
+                                            </div>
+                                        ) : (
+                                            <p>No receipt image available.</p>
+                                        )}
+                                        <p className="mt-4">
+                                            <strong>Payment Method:</strong> {item.paymentMethod || 'Not specified'}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+
+                        </div>
+                    ) : (
+                        <>
+                            <p>Billing details not found for this student.</p>
+                        </>
                     )}
-                </>
+                </div>
             )}
         </div>
     );

@@ -19,6 +19,7 @@ import EnrolledCourses from './pages/student/EnrolledCourses';
 import Policy from './pages/student/Policy';
 import RouteProtector from './config/RouteProtector';
 import { useEffect } from 'react';
+import UpcommmingEvents from './pages/student/UpcommmingEvents';
 
 function App() {
   const navigate = useNavigate();
@@ -61,6 +62,7 @@ function App() {
       }>
         <Route path="enrolled-courses" element={<EnrolledCourses />} />
         <Route path="policy" element={<Policy />} />
+        <Route path="event" element={<UpcommmingEvents />} />
       </Route>
 
       <Route path="/teacher" element={

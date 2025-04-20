@@ -116,7 +116,13 @@ let data = {
         // },
       ],
     },
-
+    {
+      title: "Upcomming Events",
+      url: "/student/event",
+      icon: MdUpcoming,
+      items: [
+      ],
+    },
     {
       title: "Policy",
       url: "/student/policy",
