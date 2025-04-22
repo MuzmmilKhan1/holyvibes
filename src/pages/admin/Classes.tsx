@@ -79,6 +79,7 @@ const Classes = () => {
                 getClass.loading ? (
                     <SpinnerLoader color="black" />
                 ) : !selectedClass ? (
+                    getClass?.response?.data?.length > 0 &&
                     <Card className="shadow-none">
                         <CardHeader>
                             <CardTitle className="text-xl font-bold underline ">Classes</CardTitle>
@@ -98,12 +99,12 @@ const Classes = () => {
                                 </TableHeader>
                                 <TableBody>
                                     {getClass?.response?.data?.map((c: any) => (
-                                        <TableRow key={c.id}>
-                                            <TableCell>{c.title}</TableCell>
+                                        <TableRow key={c?.id}>
+                                            <TableCell>{c?.title}</TableCell>
                                             <TableCell >{shortenSentence(c.description)}</TableCell>
-                                            <TableCell>{c.total_seats || 0}</TableCell>
-                                            <TableCell>{c.filled_seats || 0}</TableCell>
-                                            <TableCell>{c.classLink || "N/A"}</TableCell>
+                                            <TableCell>{c?.total_seats || 0}</TableCell>
+                                            <TableCell>{c?.filled_seats || 0}</TableCell>
+                                            <TableCell>{c?.classLink || "N/A"}</TableCell>
                                             <TableCell>
                                                 <Button onClick={() => getSingleClassData(c.id)}>
                                                     See more

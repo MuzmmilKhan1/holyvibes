@@ -67,6 +67,10 @@ let data = {
           title: "Allot teachers",
           url: "/admin/allot-teacher",
         },
+        {
+          title: "Performance report",
+          url: "/admin/student-Performance-report",
+        },
       ],
     },
     {
@@ -97,23 +101,15 @@ let data = {
   // student routers
   stdRoutes: [
     {
-      title: "Enrolled Courses",
-      url: "/student/enrolled-courses",
+      title: "Courses",
+      url: "/student/courses",
       icon: Notebook,
-      isActive: false,
+      isActive: true,
       items: [
-        // {
-        //   title: "Enrolled Courses",
-        //   url: "#",
-        // },
-        // {
-        //   title: "Upcomming Classes",
-        //   url: "#",
-        // },
-        // {
-        //   title: "Cohort",
-        //   url: "#",
-        // },
+        {
+          title: "Enrolled Courses",
+          url: "/student/enrolled-courses",
+        },
       ],
     },
     {
@@ -142,14 +138,6 @@ let data = {
       icon: Notebook,
       isActive: false,
       items: [
-        // {
-        //   title: "Create Class",
-        //   url: "/teacher/classes",
-        // },
-        // {
-        //   title: "Live Session",
-        //   url: "#",
-        // },
       ],
     },
 
@@ -162,6 +150,10 @@ let data = {
         {
           title: "Students",
           url: "/teacher/alloted-students",
+        },
+        {
+          title: "Performance Report",
+          url: "/teacher/student-performance",
         },
       ],
     },

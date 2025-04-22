@@ -20,6 +20,9 @@ import Policy from './pages/student/Policy';
 import RouteProtector from './config/RouteProtector';
 import { useEffect } from 'react';
 import UpcommmingEvents from './pages/student/UpcommmingEvents';
+import Courses from './pages/student/Courses';
+import StudentPerformance from './pages/teacher/StudentPerformance';
+import StudentPerformanceReport from './pages/admin/StudentPerformanceReport';
 
 function App() {
   const navigate = useNavigate();
@@ -53,6 +56,7 @@ function App() {
         <Route path="event" element={<Event />} />
         <Route path="allot-teacher" element={<AllotTeacher />} />
         <Route path="students" element={<Students />} />
+        <Route path="student-Performance-report" element={<StudentPerformanceReport />} />
       </Route>
 
       <Route path="/student" element={
@@ -63,6 +67,8 @@ function App() {
         <Route path="enrolled-courses" element={<EnrolledCourses />} />
         <Route path="policy" element={<Policy />} />
         <Route path="event" element={<UpcommmingEvents />} />
+        <Route path="courses" element={<Courses />} />
+
       </Route>
 
       <Route path="/teacher" element={
@@ -73,6 +79,8 @@ function App() {
         <Route path="classes" element={<Classes />} />
         <Route path="course" element={<TeacherCourse />} />
         <Route path="alloted-students" element={<TeacherAllotment />} />
+        <Route path="student-performance" element={<StudentPerformance />} />
+
       </Route>
     </Routes>
   );

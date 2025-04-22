@@ -142,7 +142,6 @@ const Event = () => {
     };
 
     const getEventMembersData = async (eventId: number) => {
-        setEventId(eventId);
         try {
             setData({ ...data, eventID: eventId.toString() });
             await getEventMembers.callApi(`event/get-event-members/${eventId}`, true, false);
@@ -154,10 +153,9 @@ const Event = () => {
     };
 
     const fetchMemberBillingDetails = async (studentId: string) => {
-        console.log(studentId, eventId)
         setData({ ...data, studentID: studentId.toString() });
         try {
-            const response = await getStdBilling.callApi(`event/get-std-event-billing/${studentId}/${eventId}`, true, false);
+            const response = await getStdBilling.callApi(`event/get-std-event-billing/${studentId}/${data.eventID}`, true, false);
             console.log(response)
             setShowMemberBilling(true);
         } catch (error) {
@@ -168,6 +166,7 @@ const Event = () => {
 
     const saveBillingChanges = async () => {
         await putEvent.callApi('event/update-payemnt-status', data, true, false, true)
+        await getEventMembersData(data.eventID as unknown as number);
     }
 
     const cancelMembershipOrJoin = async (eventID: number, studentID: string) => {

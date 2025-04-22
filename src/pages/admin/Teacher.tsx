@@ -1,26 +1,40 @@
-import {
-    Table,
-    TableBody,
-    TableCaption,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Label } from "@radix-ui/react-dropdown-menu";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import useGetAndDelete from "@/hooks/useGetAndDelete";
 import usePostAndPut from "@/hooks/usePostAndPut";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import SpinnerLoader from "@/components/SpinLoader";
+import TeacherClassTimings from "@/components/TeacherClassTimings";
+import TeacherTable from "@/components/TeacherTable";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 const Teacher = () => {
     const getTeacher = useGetAndDelete(axios.get);
     const postTeacherData = usePostAndPut(axios.post);
     const getTeacherClassTime = useGetAndDelete(axios.get);
+    const getCourses = useGetAndDelete(axios.get);
+    const postCourse = usePostAndPut(axios.post);
+    const getTeacCourse = useGetAndDelete(axios.get);
+
 
     const [showTeacherDetails, setShowTeacherDetails] = useState(false);
     const [selectedTeacher, setSelectedTeacher] = useState<any>(null);
@@ -28,29 +42,30 @@ const Teacher = () => {
     const [teacherEmail, setTeacherEmail] = useState<string>("");
     const [teacherPassword, setTeacherPassword] = useState<string>("");
     const [teacherID, setTeacherID] = useState<string>("");
-
+    const [showEditScreen, setShowEditScreen] = useState<boolean>(false);
     const [showClassManagement, setShowClassManagement] = useState<boolean>(false);
+    const [showAssignCourseDialog, setShowAssignCourseDialog] = useState<boolean>(false);
+    const [assignCourse, setAssignCourse] = useState({
+        courseId: "",
+    });
+
+
 
     const getRequestedTeacher = async () => {
         const response = await getTeacher.callApi("teacher/get", false, false);
         console.log(response.teachers);
     };
 
-    // const fetchCourses = async () => {
-    //     try {
-    //         const response = await getCourses.callApi("course/get", false, false);
-    //         setCourses(response.course);
-    //     } catch (error) {
-    //         console.error("Error fetching courses:", error);
-    //     }
-    // };
-
-    useEffect(() => {
-        getRequestedTeacher();
-    }, []);
+    const fetchCourses = async () => {
+        try {
+            await getCourses.callApi("course/get", false, false);
+        } catch (error) {
+            console.error("Error fetching courses:", error);
+        }
+    };
 
     const handleTeacherDetails = (teacher: any) => {
-        console.log(JSON.parse(teacher.class_timings))
+        setTeacherID(teacher.teach_id);
         setSelectedTeacher(teacher);
         setTeacherName(teacher.name);
         setTeacherEmail(teacher.email);
@@ -66,7 +81,7 @@ const Teacher = () => {
                 email: teacherEmail,
                 password: teacherPassword,
                 teacherID: selectedTeacher.id,
-                courseIds: JSON.parse(selectedTeacher.class_timings),
+                isEdit: showEditScreen,
             },
             true,
             false,
@@ -74,6 +89,7 @@ const Teacher = () => {
         );
         if (response.status === 200) {
             setShowTeacherDetails(!showTeacherDetails);
+            setShowEditScreen(!showEditScreen)
             getRequestedTeacher();
         }
     };
@@ -81,9 +97,7 @@ const Teacher = () => {
     const deleteUser = async () => {
         const response = await postTeacherData.callApi(
             "teacher/delete",
-            {
-                teacherID: selectedTeacher.id,
-            },
+            { teacherID: selectedTeacher.id },
             true,
             false,
             true
@@ -97,10 +111,7 @@ const Teacher = () => {
     const blockUser = async (status: string, id: string) => {
         const response = await postTeacherData.callApi(
             "teacher/block",
-            {
-                teacherID: id,
-                status: status,
-            },
+            { teacherID: id, status: status },
             true,
             false,
             true
@@ -112,7 +123,6 @@ const Teacher = () => {
     };
 
     const handleTeacherClassTimeManagement = async () => {
-        //delete this
         await getTeacherClassTime.callApi(
             `class-time/get_class_time/${selectedTeacher.id}`,
             true,
@@ -120,6 +130,25 @@ const Teacher = () => {
         );
     };
 
+    const getTeacherAssignedCourses = async () => {
+        const response = await getTeacCourse.callApi(`course/get-teacher-assiged-course/${selectedTeacher.id}`, true, false)
+        console.log(response)
+    }
+
+    const handleAssignCourse = async () => {
+        const payload = {
+            teacherID: selectedTeacher.id,
+            courseID: assignCourse.courseId
+        }
+        const response = await postCourse.callApi('course/assign-course', payload, true, false, true)
+        console.log(response)
+    }
+
+
+    useEffect(() => {
+        fetchCourses();
+        getRequestedTeacher();
+    }, []);
 
     return (
         <div className="p-6">
@@ -128,48 +157,10 @@ const Teacher = () => {
                     {getTeacher.loading ? (
                         <SpinnerLoader color="black" />
                     ) : !showTeacherDetails ? (
-                        <Card className="shadow-none">
-                            <CardHeader>
-                                <CardTitle className="text-xl font-bold underline " >Teachers</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <Table>
-                                    <TableCaption>List of all teachers</TableCaption>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Teacher ID</TableHead>
-                                            <TableHead>Name</TableHead>
-                                            <TableHead>Application Date</TableHead>
-                                            <TableHead>Contact Number</TableHead>
-                                            <TableHead>Current Address</TableHead>
-                                            <TableHead>Date of Birth</TableHead>
-                                            <TableHead>Email</TableHead>
-                                            <TableHead>Experience in Quran</TableHead>
-                                            <TableHead>Action</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {getTeacher?.response?.teachers?.map((teacher: any) => (
-                                            <TableRow key={teacher.id}>
-                                                <TableCell>{teacher.teach_id || 'N/A'}</TableCell>
-                                                <TableCell>{teacher.name}</TableCell>
-                                                <TableCell>{teacher.application_date}</TableCell>
-                                                <TableCell>{teacher.contact_number}</TableCell>
-                                                <TableCell>{teacher.current_address}</TableCell>
-                                                <TableCell>{teacher.date_of_birth}</TableCell>
-                                                <TableCell>{teacher.email}</TableCell>
-                                                <TableCell>{teacher.experience_Quran}</TableCell>
-                                                <TableCell>
-                                                    <Button onClick={() => handleTeacherDetails(teacher)}>
-                                                        See more
-                                                    </Button>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
+                        <TeacherTable
+                            teachers={getTeacher?.response?.teachers}
+                            handleTeacherDetails={handleTeacherDetails}
+                        />
                     ) : (
                         <div className="w-full">
                             <Card className="shadow-none w-full">
@@ -181,126 +172,137 @@ const Teacher = () => {
                                 <CardContent>
                                     <div className="flex flex-wrap w-full space-y-4 lg:space-y-0 lg:flex-row">
                                         <div className="w-full lg:w-1/3">
-                                            <h4 className="text-lg font-bold underline">
-                                                Basic Information
-                                            </h4>
-                                            <p className="text-gray-800">
-                                                <strong>Name:</strong> {selectedTeacher.name}
-                                            </p>
-                                            <p className="text-gray-800">
-                                                <strong>Email:</strong> {selectedTeacher.email}
-                                            </p>
-                                            <p className="text-gray-800">
-                                                <strong>Application Date:</strong>{" "}
-                                                {selectedTeacher.application_date}
-                                            </p>
-                                            <p className="text-gray-800">
-                                                <strong>Contact Number:</strong>{" "}
-                                                {selectedTeacher.contact_number}
-                                            </p>
-                                            <p className="text-gray-800">
-                                                <strong>Current Address:</strong>{" "}
-                                                {selectedTeacher.current_address}
-                                            </p>
-                                            <p className="text-gray-800">
-                                                <strong>Date of Birth:</strong>{" "}
-                                                {selectedTeacher.date_of_birth}
-                                            </p>
+                                            <h4 className="text-lg font-bold underline">Basic Information</h4>
+                                            <p className="text-gray-800"><strong>Name:</strong> {selectedTeacher.name}</p>
+                                            <p className="text-gray-800"><strong>Email:</strong> {selectedTeacher.email}</p>
+                                            <p className="text-gray-800"><strong>Application Date:</strong> {selectedTeacher.application_date}</p>
+                                            <p className="text-gray-800"><strong>Contact Number:</strong> {selectedTeacher.contact_number}</p>
+                                            <p className="text-gray-800"><strong>Current Address:</strong> {selectedTeacher.current_address}</p>
+                                            <p className="text-gray-800"><strong>Date of Birth:</strong> {selectedTeacher.date_of_birth}</p>
                                         </div>
-
                                         <div className="w-full lg:w-1/3">
-                                            <h4 className="text-lg font-bold underline">
-                                                Experience & Qualifications
-                                            </h4>
-                                            <p className="text-gray-800">
-                                                <strong>Experience in Quran:</strong>{" "}
-                                                {selectedTeacher.experience_Quran}
-                                            </p>
-                                            <p className="text-gray-800">
-                                                <strong>Gender:</strong> {selectedTeacher.gender}
-                                            </p>
-                                            <p className="text-gray-800">
-                                                <strong>Institution:</strong> {selectedTeacher.institution}
-                                            </p>
-                                            <p className="text-gray-800">
-                                                <strong>Languages Spoken:</strong>{" "}
-                                                {selectedTeacher.languages_spoken}
-                                            </p>
-                                            <p className="text-gray-800">
-                                                <strong>Nationality:</strong> {selectedTeacher.nationality}
-                                            </p>
-                                            <p className="text-gray-800">
-                                                <strong>Other Experience:</strong>{" "}
-                                                {selectedTeacher.other_experience}
-                                            </p>
-                                            <p className="text-gray-800">
-                                                <strong>Qualification:</strong>{" "}
-                                                {selectedTeacher.qualification}
-                                            </p>
-                                            <p className="text-gray-800">
-                                                <strong>Status:</strong> {selectedTeacher.status}
-                                            </p>
+                                            <h4 className="text-lg font-bold underline">Experience & Qualifications</h4>
+                                            <p className="text-gray-800"><strong>Experience in Quran:</strong> {selectedTeacher.experience_Quran}</p>
+                                            <p className="text-gray-800"><strong>Gender:</strong> {selectedTeacher.gender}</p>
+                                            <p className="text-gray-800"><strong>Institution:</strong> {selectedTeacher.institution}</p>
+                                            <p className="text-gray-800"><strong>Languages Spoken:</strong> {selectedTeacher.languages_spoken}</p>
+                                            <p className="text-gray-800"><strong>Nationality:</strong> {selectedTeacher.nationality}</p>
+                                            <p className="text-gray-800"><strong>Other Experience:</strong> {selectedTeacher.other_experience}</p>
+                                            <p className="text-gray-800"><strong>Qualification:</strong> {selectedTeacher.qualification}</p>
+                                            <p className="text-gray-800"><strong>Status:</strong> {selectedTeacher.status}</p>
                                         </div>
-
                                         <div>
-                                            <div>
-                                                <h4 className="text-lg font-bold underline mt-3 flex items-start">
-                                                    Action buttons
-                                                </h4>
-                                                <div className="flex flex-col flex-wrap gap-2">
+                                            <h4 className="text-lg font-bold underline mt-3">Action buttons</h4>
+                                            <div className="flex flex-col gap-2">
+                                                <div className="flex gap-2 flex-wrap">
+                                                <Button variant="secondary" onClick={()=>setShowTeacherDetails(!showTeacherDetails)}>Close</Button>
+                                                    <Button variant="destructive" onClick={deleteUser}>Delete</Button>
+                                                    <Button onClick={() => {
+                                                        handleTeacherClassTimeManagement();
+                                                        setShowClassManagement(!showClassManagement);
+                                                    }}>
+                                                        Class timings
+                                                    </Button>
+                                                    <Dialog open={showAssignCourseDialog} onOpenChange={setShowAssignCourseDialog}>
+                                                        <DialogTrigger asChild>
+                                                            <Button
+                                                                onClick={() => getTeacherAssignedCourses()}
+                                                                variant="outline">Assign course</Button>
+                                                        </DialogTrigger>
+                                                        <DialogContent className="sm:max-w-[600px]">
+                                                            <DialogHeader>
+                                                                <DialogTitle>Assign Course to Teacher</DialogTitle>
+                                                                <DialogDescription>
+                                                                    Select a course and set timings for {selectedTeacher.name}
+                                                                </DialogDescription>
+                                                            </DialogHeader>
+                                                            <div className="grid gap-4 py-4">
+                                                                <div className="grid grid-cols-3 gap-4">
+                                                                    <div className="space-y-2">
+                                                                        <Label htmlFor="course">Course</Label>
+                                                                        <Select
+                                                                            value={assignCourse.courseId}
+                                                                            onValueChange={(value) => setAssignCourse(prev => ({ ...prev, courseId: value }))}
+                                                                        >
+                                                                            <SelectTrigger id="course">
+                                                                                <SelectValue placeholder="Choose a course" />
+                                                                            </SelectTrigger>
+                                                                            <SelectContent>
+                                                                                {getCourses?.response?.course?.map((course: { name: string, id: number }) => (
+                                                                                    <SelectItem key={course.id} value={course.id.toString()}>
+                                                                                        {course.name}
+                                                                                    </SelectItem>
+                                                                                ))}
+                                                                            </SelectContent>
+                                                                        </Select>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="mt-4">
+                                                                    <Table>
+                                                                        <TableHeader>
+                                                                            <TableRow>
+                                                                                <TableHead>Id</TableHead>
+                                                                                <TableHead>Course Name</TableHead>
+                                                                                <TableHead>Action</TableHead>
+                                                                            </TableRow>
+                                                                        </TableHeader>
+                                                                        <TableBody>
+                                                                            {getTeacCourse.response?.courses.map((course: { course: { id: number, name: string }, id: number }, index: number) => (
+                                                                                <TableRow key={course.id}>
+                                                                                    <TableCell>{index}</TableCell>
+                                                                                    <TableCell>{course.course.name}</TableCell>
+                                                                                    <TableCell>
+                                                                                        <Button variant='destructive' size='sm' className="ml-2" >
+                                                                                            Delete
+                                                                                        </Button>
+                                                                                    </TableCell>
+                                                                                </TableRow>
+                                                                            ))}
+                                                                        </TableBody>
+                                                                    </Table>
+                                                                </div>
+                                                            </div>
+                                                            <DialogFooter>
+                                                                <Button variant="outline" onClick={() => setShowAssignCourseDialog(false)}>
+                                                                    Cancel
+                                                                </Button>
+                                                                <Button onClick={handleAssignCourse}>Assign</Button>
+                                                            </DialogFooter>
+                                                        </DialogContent>
+                                                    </Dialog>
+                                                </div>
+                                                {selectedTeacher.status !== "pending" && (
                                                     <div className="flex gap-2">
-                                                        <Button variant="destructive" onClick={deleteUser}>
-                                                            Delete
-                                                        </Button>
-                                                        <Button onClick={() => {
-                                                            handleTeacherClassTimeManagement();
-                                                            setShowClassManagement(!showClassManagement);
-                                                        }}>
-                                                            Class timings
-                                                        </Button>
-                                                        {selectedTeacher.status !== "pending" && (
-                                                            <Button variant="outline">Edit</Button>
-                                                        )}
                                                         <Button
-                                                            onClick={() =>
-                                                                setShowTeacherDetails(!showTeacherDetails)
-                                                            }
-                                                            variant="secondary"
+                                                            onClick={() => blockUser(selectedTeacher.status, selectedTeacher.id)}
+                                                            variant="destructive"
                                                         >
-                                                            Close
+                                                            {selectedTeacher.status === "blocked" ? "Unblock" : "Block"}
+                                                        </Button>
+                                                        <Button
+                                                            onClick={() => setShowEditScreen(!showEditScreen)}
+                                                            variant="outline"
+                                                        >
+                                                            Edit
                                                         </Button>
                                                     </div>
-                                                    {selectedTeacher.status !== "pending" && (
-                                                        <div className="flex gap-2">
-                                                            <Button
-                                                                onClick={() =>
-                                                                    blockUser(selectedTeacher.status, selectedTeacher.id)
-                                                                }
-                                                                variant="destructive"
-                                                            >
-                                                                {selectedTeacher.status === "blocked" && "Unblock"}
-                                                                {selectedTeacher.status === "allowed" && "Block"}
-                                                            </Button>
-
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
                                 </CardContent>
                             </Card>
-                            {selectedTeacher.status === "pending" && (
+                            {(selectedTeacher.status === "pending" || showEditScreen) && (
                                 <Card className="shadow-none mt-6">
                                     <CardHeader>
                                         <CardTitle className="text-xl font-bold underline">
-                                            Assign Login Credentials & teacher ID
+                                            {showEditScreen ? "Update Login Credentials & teacher ID" : "Assign Login Credentials & teacher ID"}
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <div className="space-y-4">
                                             <div>
-                                                <Label className="block text-sm font-medium">teacher ID</Label>
+                                                <Label className="block text-sm font-medium">Teacher ID</Label>
                                                 <Input
                                                     id="teacherId"
                                                     type="text"
@@ -330,9 +332,7 @@ const Teacher = () => {
                                                 />
                                             </div>
                                             <div>
-                                                <Label className="block text-sm font-medium">
-                                                    Password
-                                                </Label>
+                                                <Label className="block text-sm font-medium">Password</Label>
                                                 <Input
                                                     id="teacherPassword"
                                                     type="password"
@@ -342,7 +342,9 @@ const Teacher = () => {
                                                 />
                                             </div>
                                             <div className="mt-4">
-                                                <Button onClick={handleSaveDetails}>Assign</Button>
+                                                <Button onClick={handleSaveDetails}>
+                                                    {showEditScreen ? "Update" : "Assign"}
+                                                </Button>
                                             </div>
                                         </div>
                                     </CardContent>
@@ -351,55 +353,20 @@ const Teacher = () => {
                         </div>
                     )}
                 </div>
-            )
-            }
-            {
-                showClassManagement && (
-                    <div>
-                        {JSON.parse(selectedTeacher?.class_timings) > 0 ? (
-                            <SpinnerLoader color="black" />
-                        ) : (
-                            <>
-                                <Card className="shadow-none">
-                                    <CardHeader>
-                                        <CardTitle className="text-xl font-bold underline -mb-3" >Class Time</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <Table>
-                                            <TableCaption>List of all teacher's class timings</TableCaption>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead>Course</TableHead>
-                                                    <TableHead>Preferred Time From</TableHead>
-                                                    <TableHead>Preferred Time To</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {JSON.parse(selectedTeacher?.class_timings).map((ct: any) => (
-                                                    <TableRow key={ct.id}>
-                                                        <TableCell>{ct.course_name}</TableCell>
-                                                        <TableCell>{ct.from}</TableCell>
-                                                        <TableCell>{ct.to}</TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                        <div className="mt-4">
-                                            <Button
-                                                variant="secondary"
-                                                onClick={() => setShowClassManagement(false)}
-                                            >
-                                                Close
-                                            </Button>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </>
-                        )}
-                    </div>
-                )
-            }
-        </div >
+            )}
+            {showClassManagement && (
+                <div>
+                    {JSON.parse(selectedTeacher?.class_timings) > 0 ? (
+                        <SpinnerLoader color="black" />
+                    ) : (
+                        <TeacherClassTimings
+                            classTimings={JSON.parse(selectedTeacher?.class_timings)}
+                            setShowClassManagement={setShowClassManagement}
+                        />
+                    )}
+                </div>
+            )}
+        </div>
     );
 };
 

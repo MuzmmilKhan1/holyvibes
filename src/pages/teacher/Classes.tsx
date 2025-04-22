@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,13 +9,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import useGetAndDelete from "@/hooks/useGetAndDelete";
 import usePostAndPut from "@/hooks/usePostAndPut";
 import axios from "axios";
@@ -28,6 +22,7 @@ import {
 } from "@/components/ui/table";
 import SpinnerLoader from "@/components/SpinLoader";
 import ReactSelect from 'react-select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface OptionType {
     value: string;
@@ -46,7 +41,7 @@ const ClassForm = () => {
     const [link, setLink] = useState("");
     const [timeFrom, setTimeFrom] = useState("");
     const [timeTo, setTimeTo] = useState("");
-    const [selectedCourseId, setSelectedCourseId] = useState("");
+    const [selectedCourseIds, setSelectedCourseIds] = useState<OptionType[]>([]);
     const [showAttendenceForm, setShowAttendenceForm] = useState(false);
     const [attendenceData, setAttendenceData] = useState(defaultAttendenceData);
     const [stdOptions, setStdOptions] = useState<OptionType[]>([]);
@@ -69,10 +64,16 @@ const ClassForm = () => {
                 from: timeFrom,
                 to: timeTo,
             },
-            courseId: selectedCourseId,
+            courseIds: selectedCourseIds.map(course => course.value), // Send array of course IDs
         };
+        console.log(formData)
         await postClass.callApi("class/create", formData, false, false, true);
         await getClassData();
+        setTitle("");
+        setLink("");
+        setTimeFrom("");
+        setTimeTo("");
+        setSelectedCourseIds([]);
     };
 
     const getCourseData = async () => {
@@ -80,7 +81,7 @@ const ClassForm = () => {
     };
 
     const getClassData = async () => {
-        await getClass.callApi('class/get', false, false);
+        console.log(await getClass.callApi('class/get', false, false))
     };
 
     const fetchStudentsForClass = async (classId: string) => {
@@ -95,7 +96,7 @@ const ClassForm = () => {
             setStdOptions([]);
         }
     };
-    
+
     const fetchAttendeceData = async (classId: string) => {
         await getAttendence.callApi(`attendence/get/${classId}`, false, false);
     };
@@ -111,6 +112,12 @@ const ClassForm = () => {
         await fetchAttendeceData(attendenceData.classId);
     };
 
+    // Prepare course options for React Select
+    const courseOptions = getCourse.response?.course?.map((course: any) => ({
+        value: course.course.id.toString(),
+        label: course.course.name
+    })) || [];
+
     useEffect(() => {
         getCourseData();
         getClassData();
@@ -122,24 +129,20 @@ const ClassForm = () => {
                 <div className="space-y-10">
                     <Card className="shadow-none">
                         <CardHeader>
-                            <CardTitle className="text-xl font-bold underline">Create.Class</CardTitle>
+                            <CardTitle className="text-xl font-bold underline">Create Class</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div>
-                                <Label htmlFor="course">Select Course</Label>
-                                <Select onValueChange={(value) => setSelectedCourseId(value)}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Choose a course" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {getCourse.response?.course?.length > 0 &&
-                                            getCourse.response.course.map((course: any) => (
-                                                <SelectItem key={course.course.id} value={course.course.id}>
-                                                    {course?.course.name}
-                                                </SelectItem>
-                                            ))}
-                                    </SelectContent>
-                                </Select>
+                                <Label htmlFor="courses">Select Courses</Label>
+                                <ReactSelect
+                                    isMulti
+                                    options={courseOptions}
+                                    value={selectedCourseIds}
+                                    onChange={(selected) => setSelectedCourseIds(selected as OptionType[])}
+                                    placeholder="Select courses..."
+                                    className="basic-multi-select"
+                                    classNamePrefix="select"
+                                />
                             </div>
                             <div>
                                 <Label htmlFor="title">Title</Label>
@@ -206,35 +209,41 @@ const ClassForm = () => {
                                                 <TableRow>
                                                     <TableHead>Title</TableHead>
                                                     <TableHead>Link</TableHead>
-                                                    <TableHead>Course</TableHead>
+                                                    <TableHead>Courses</TableHead>
                                                     <TableHead>Time</TableHead>
                                                     <TableHead>Actions</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
                                                 {getClass.response.data.map((classItem: any) => (
-                                                    <TableRow key={classItem.id}>
-                                                        <TableCell>{classItem.title}</TableCell>
+                                                    <TableRow key={classItem?.id}>
+                                                        <TableCell>{classItem?.title}</TableCell>
                                                         <TableCell>
                                                             <a
                                                                 href={
-                                                                    classItem.classLink.startsWith('http://') ||
-                                                                        classItem.classLink.startsWith('https://')
+                                                                    classItem?.classLink?.startsWith('http://') ||
+                                                                        classItem.classLink?.startsWith('https://')
                                                                         ? classItem.classLink
-                                                                        : `https://${classItem.classLink}`
+                                                                        : `https://${classItem?.classLink}`
                                                                 }
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="text-blue-600 hover:underline"
                                                             >
-                                                                {classItem.classLink}
+                                                                {classItem?.classLink}
                                                             </a>
                                                         </TableCell>
-                                                        <TableCell>{classItem.course?.name || "N/A"}</TableCell>
                                                         <TableCell>
-                                                            {classItem.teacher_class_timings?.map((time: any, index: number) => (
+                                                            {classItem.courses?.map((course: any) => (
+                                                                <div>
+                                                                    {course.name}
+                                                                </div>
+                                                            )) || "N/A"}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {classItem.timings?.map((time: any, index: number) => (
                                                                 <div key={index}>
-                                                                    {time.preferred_time_from || "-"} to {time.preferred_time_to || "-"}
+                                                                    {time.from || "-"} to {time.to || "-"}
                                                                 </div>
                                                             ))}
                                                         </TableCell>
@@ -313,7 +322,7 @@ const ClassForm = () => {
                                     }
                                     value={attendenceData.status}
                                 >
-                                    <SelectTrigger>
+                                    <SelectTrigger >
                                         <SelectValue placeholder="Select status" />
                                     </SelectTrigger>
                                     <SelectContent>
