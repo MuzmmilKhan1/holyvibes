@@ -16,7 +16,7 @@ import { Link } from "react-router-dom";
 import useGetAndDelete from "@/hooks/useGetAndDelete";
 import usePostAndPut from "@/hooks/usePostAndPut";
 import axios from "axios";
-import { Trash, Trash2 } from "lucide-react";
+import { Trash } from "lucide-react";
 
 const CreateTeacherAccountForm = ({
     className,
