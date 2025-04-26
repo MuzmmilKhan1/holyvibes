@@ -34,6 +34,7 @@ const Teacher = () => {
     const getCourses = useGetAndDelete(axios.get);
     const postCourse = usePostAndPut(axios.post);
     const getTeacCourse = useGetAndDelete(axios.get);
+    const removeCourse = useGetAndDelete(axios.delete);
 
 
     const [showTeacherDetails, setShowTeacherDetails] = useState(false);
@@ -89,7 +90,6 @@ const Teacher = () => {
         );
         if (response.status === 200) {
             setShowTeacherDetails(!showTeacherDetails);
-            setShowEditScreen(!showEditScreen)
             getRequestedTeacher();
         }
     };
@@ -141,6 +141,7 @@ const Teacher = () => {
             courseID: assignCourse.courseId
         }
         const response = await postCourse.callApi('course/assign-course', payload, true, false, true)
+        getTeacherAssignedCourses()
         console.log(response)
     }
 
@@ -195,7 +196,7 @@ const Teacher = () => {
                                             <h4 className="text-lg font-bold underline mt-3">Action buttons</h4>
                                             <div className="flex flex-col gap-2">
                                                 <div className="flex gap-2 flex-wrap">
-                                                <Button variant="secondary" onClick={()=>setShowTeacherDetails(!showTeacherDetails)}>Close</Button>
+                                                    <Button variant="secondary" onClick={() => setShowTeacherDetails(!showTeacherDetails)}>Close</Button>
                                                     <Button variant="destructive" onClick={deleteUser}>Delete</Button>
                                                     <Button onClick={() => {
                                                         handleTeacherClassTimeManagement();
@@ -241,18 +242,24 @@ const Teacher = () => {
                                                                     <Table>
                                                                         <TableHeader>
                                                                             <TableRow>
-                                                                                <TableHead>Id</TableHead>
                                                                                 <TableHead>Course Name</TableHead>
                                                                                 <TableHead>Action</TableHead>
                                                                             </TableRow>
                                                                         </TableHeader>
                                                                         <TableBody>
-                                                                            {getTeacCourse.response?.courses.map((course: { course: { id: number, name: string }, id: number }, index: number) => (
+                                                                            {getTeacCourse.response?.courses.map((course: { course: { id: number, name: string }, id: number }) => (
                                                                                 <TableRow key={course.id}>
-                                                                                    <TableCell>{index}</TableCell>
                                                                                     <TableCell>{course.course.name}</TableCell>
                                                                                     <TableCell>
-                                                                                        <Button variant='destructive' size='sm' className="ml-2" >
+                                                                                        <Button 
+                                                                                        onClick={
+                                                                                            async ()=>{
+                                                                                                const response = await removeCourse.callApi(`teacher/remove-allocated-course/${course.course.id}`,true,false)
+                                                                                                console.log(response)
+                                                                                                await getTeacherAssignedCourses()
+                                                                                            }
+                                                                                        }
+                                                                                        variant='destructive' size='sm' className="ml-2" >
                                                                                             Delete
                                                                                         </Button>
                                                                                     </TableCell>
@@ -283,7 +290,11 @@ const Teacher = () => {
                                                             onClick={() => setShowEditScreen(!showEditScreen)}
                                                             variant="outline"
                                                         >
-                                                            Edit
+                                                            {
+                                                                showEditScreen ?
+                                                                    "Cancel Edit" :
+                                                                    "Edit"
+                                                            }
                                                         </Button>
                                                     </div>
                                                 )}

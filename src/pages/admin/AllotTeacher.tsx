@@ -36,6 +36,7 @@ interface Course {
 }
 
 interface TimeSlot {
+    id?: string; // Added to store the class timing ID
     from: string;
     to: string;
 }
@@ -45,14 +46,15 @@ const AllotTeacher = () => {
     const getTeachers = useGetAndDelete(axios.get);
     const getCourses = useGetAndDelete(axios.get);
     const postAllotment = usePostAndPut(axios.post);
-    // const updateAllotment = usePostAndPut(axios.put);
     const getStdAllotment = useGetAndDelete(axios.get);
     const deleteAllotment = useGetAndDelete(axios.delete);
+    const deleteStdClassTime = useGetAndDelete(axios.delete);
+    const updateAllotment = usePostAndPut(axios.put);
+
 
     const [stdOptions, setStdOptions] = useState<OptionType[]>([]);
     const [teacherOptions, setTeacherOptions] = useState<OptionType[]>([]);
     const [courseOptions, setCourseOptions] = useState<OptionType[]>([]);
-
     const [selectedStudent, setSelectedStudent] = useState<OptionType | null>(null);
     const [selectedTeacher, setSelectedTeacher] = useState<OptionType | null>(null);
     const [selectedCourse, setSelectedCourse] = useState<OptionType | null>(null);
@@ -93,7 +95,6 @@ const AllotTeacher = () => {
     };
 
     const handleTimeChange = (index: number, field: keyof TimeSlot, value: string) => {
-        console.log(index, field, value);
         const updatedTimes = [...classTimes];
         updatedTimes[index][field] = value;
         setClassTimes(updatedTimes);
@@ -103,7 +104,12 @@ const AllotTeacher = () => {
         setClassTimes([...classTimes, { from: "", to: "" }]);
     };
 
-    const handleRemoveTimeSlot = (index: number) => {
+    const handleRemoveTimeSlot = async (index: number, ctID?: string) => {
+        if (ctID) {
+            console.log("Class Timing ID:", ctID);
+            await deleteStdClassTime.callApi(`student/delete-std-time/${ctID}`, true, false)
+            await getStdAllotmentData();
+        }
         const updatedTimes = [...classTimes];
         updatedTimes.splice(index, 1);
         setClassTimes(updatedTimes);
@@ -123,8 +129,7 @@ const AllotTeacher = () => {
         };
 
         if (editingId) {
-            console.log(payload)
-            // await updateAllotment.callApi(`teacher-allotment/update/${editingId}`, payload, true, false, true);
+            await updateAllotment.callApi(`teacher-allotment/update/${editingId}`, payload, true, false, true);
         } else {
             await postAllotment.callApi('teacher-allotment/allot', payload, true, false, true);
         }
@@ -148,7 +153,6 @@ const AllotTeacher = () => {
     };
 
     const handleEdit = (allotment: any) => {
-
         setEditingId(allotment.id);
 
         setSelectedStudent({
@@ -173,7 +177,6 @@ const AllotTeacher = () => {
                 to: t.preferred_time_to,
             }))
         );
-
     };
 
     useEffect(() => {
@@ -187,7 +190,9 @@ const AllotTeacher = () => {
         <div className="p-6 space-y-10">
             <Card className="w-full shadow-none">
                 <CardHeader>
-                    <CardTitle className="text-xl font-bold underline ">{editingId ? "Edit Allotment" : "Allot Teacher to Student"}</CardTitle>
+                    <CardTitle className="text-xl font-bold underline ">
+                        {editingId ? "Edit Allotment" : "Allot Teacher to Student"}
+                    </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div>
@@ -205,29 +210,46 @@ const AllotTeacher = () => {
                     <div>
                         <label className="block mb-2 text-sm font-medium">Class Times</label>
                         {classTimes.map((slot, index) => (
-                            <div key={index} className="flex gap-2 items-center mb-2">
-                                <Input type="time" value={slot.from} onChange={(e) => handleTimeChange(index, "from", e.target.value)} className="w-[45%]" />
+                            <div key={index} className="flex flex-wrap gap-2 items-center mb-2">
+                                <Input
+                                    type="time"
+                                    value={slot.from}
+                                    onChange={(e) => handleTimeChange(index, "from", e.target.value)}
+                                    className="w-[45%]"
+                                />
                                 <span className="text-gray-500">to</span>
-                                <Input type="time" value={slot.to} onChange={(e) => handleTimeChange(index, "to", e.target.value)} className="w-[45%]" />
+                                <Input
+                                    type="time"
+                                    value={slot.to}
+                                    onChange={(e) => handleTimeChange(index, "to", e.target.value)}
+                                    className="w-[45%]"
+                                />
                                 {classTimes.length > 1 && (
-                                    <Button variant="destructive" size="icon" onClick={() => handleRemoveTimeSlot(index)}>
+                                    <Button
+                                        variant="destructive"
+                                        size="icon"
+                                        onClick={() => handleRemoveTimeSlot(index, slot.id)}
+                                    >
                                         <Trash size={16} />
                                     </Button>
                                 )}
                             </div>
                         ))}
-                        {
-                            !editingId &&
+                        {!editingId && (
                             <Button variant="outline" onClick={handleAddTimeSlot}>
                                 Add Time Slot
                             </Button>
-                        }
+                        )}
                     </div>
 
                     <div className="w-full flex justify-start gap-4">
-                        <Button onClick={handleAllot}>{editingId ? "Update Allotment" : "Allot"}</Button>
+                        <Button onClick={handleAllot}>
+                            {editingId ? "Update Allotment" : "Allot"}
+                        </Button>
                         {editingId && (
-                            <Button variant="secondary" onClick={resetForm}>Cancel Edit</Button>
+                            <Button variant="secondary" onClick={resetForm}>
+                                Cancel Edit
+                            </Button>
                         )}
                     </div>
                 </CardContent>
@@ -265,7 +287,7 @@ const AllotTeacher = () => {
                                         <Button size="icon" variant="outline" onClick={() => handleEdit(allotment)}>
                                             <Pencil size={16} />
                                         </Button>
-                                        <Button size="icon" variant="destructive" onClick={() => handleDelete(allotment._id)}>
+                                        <Button size="icon" variant="destructive" onClick={() => handleDelete(allotment.id)}>
                                             <Trash size={16} />
                                         </Button>
                                     </TableCell>

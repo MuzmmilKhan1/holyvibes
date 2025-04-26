@@ -28,6 +28,10 @@ import {
     SelectContent,
     SelectItem,
 } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import ReactSelect from "react-select"
 
 interface EventType {
     id: number;
@@ -56,6 +60,12 @@ interface BillingDetails {
     receipt?: string;
 }
 
+interface OptionType {
+    value: string;
+    label: string;
+}
+
+
 const Event = () => {
     const getEvent = useGetAndDelete(axios.get);
     const getEventMembers = useGetAndDelete(axios.get);
@@ -64,6 +74,9 @@ const Event = () => {
     const getStdBilling = useGetAndDelete(axios.get);
     const deleteEvent = useGetAndDelete(axios.delete);
     const updateMembership = useGetAndDelete(axios.get);
+    const getStd = useGetAndDelete(axios.get);
+    const addStd = usePostAndPut(axios.post);
+
 
     const [formData, setFormData] = useState<Omit<EventType, 'id'>>({
         title: '',
@@ -75,6 +88,8 @@ const Event = () => {
     const [eventId, setEventId] = useState<number>(0);
     const [showMembers, setShowMembers] = useState<boolean>(false);
     const [showMemberBilling, setShowMemberBilling] = useState<boolean>(false);
+    const [studentOptions, setStudentOptions] = useState([]);
+    const [selectedStudents, setSelectedStudents] = useState<OptionType[]>([]);
 
     const [data, setData] = useState(
         {
@@ -93,8 +108,27 @@ const Event = () => {
         }
     };
 
+    const getStudents = async () => {
+        try {
+            const response = await getStd.callApi("student/get", true, false);
+            if (response?.students) {
+                const options = response.students.map((student: any) => ({
+                    value: student.id.toString(),
+                    label: `${student.std_id} - ${student.name}`
+                }));
+                setStudentOptions(options);
+            }
+        } catch (error) {
+            console.error("Error fetching students", error);
+            toast.error("Error fetching students");
+        }
+    };
+
+
+
     useEffect(() => {
         fetchEvents();
+        getStudents()
     }, []);
 
     const handleSubmit = async (e: FormEvent) => {
@@ -142,6 +176,7 @@ const Event = () => {
     };
 
     const getEventMembersData = async (eventId: number) => {
+        setEventId(eventId)
         try {
             setData({ ...data, eventID: eventId.toString() });
             await getEventMembers.callApi(`event/get-event-members/${eventId}`, true, false);
@@ -304,6 +339,59 @@ const Event = () => {
                                                         >
                                                             Members
                                                         </Button>
+                                                        <Dialog>
+                                                            <DialogTrigger asChild>
+                                                                <Button
+                                                                    variant="secondary"
+                                                                    className="ml-2"
+                                                                    size="sm"
+                                                                    onClick={() => {
+                                                                    }}
+                                                                >
+                                                                    Add Students
+                                                                </Button>
+                                                            </DialogTrigger>
+                                                            <DialogContent className="sm:max-w-[425px]">
+                                                                <DialogHeader>
+                                                                    <DialogTitle>Edit profile</DialogTitle>
+                                                                    <DialogDescription>
+                                                                        Make changes to your profile here. Click save when you're done.
+                                                                    </DialogDescription>
+                                                                </DialogHeader>
+                                                                <div className="grid gap-4 py-4">
+                                                                    <div className="grid  items-center gap-4">
+                                                                        <Label htmlFor="name" className="text-right">
+                                                                            Select Students
+                                                                        </Label>
+                                                                        <ReactSelect
+                                                                            id="students"
+                                                                            options={studentOptions}
+                                                                            value={selectedStudents}
+                                                                            onChange={(selected) => setSelectedStudents(selected as OptionType[])}
+                                                                            placeholder="Select students..."
+                                                                            isMulti
+                                                                            isSearchable
+                                                                            className="basic-multi-select"
+                                                                            classNamePrefix="select"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                                <DialogFooter>
+                                                                    <Button
+                                                                        onClick={
+                                                                            async () => {
+                                                                                console.log(event.id);
+                                                                                let students: string[] = []
+                                                                                selectedStudents.map((std) => {
+                                                                                    students.push(std.value)
+                                                                                })
+                                                                                await addStd.callApi(`event/add-students/${event.id}`, { students }, true, false, true)
+                                                                            }
+                                                                        }
+                                                                        type="submit">Submit</Button>
+                                                                </DialogFooter>
+                                                            </DialogContent>
+                                                        </Dialog>
                                                     </TableCell>
                                                 </TableRow>
                                             ))
@@ -377,7 +465,13 @@ const Event = () => {
                                 </TableBody>
                             </Table>
                         )}
-                        <Button onClick={() => setShowMembers(false)} className="mt-5">
+                        <Button onClick={
+                            () => {
+                                setShowMembers(false)
+                                setEventId(0)
+                            }
+                        }
+                            className="mt-5">
                             Back
                         </Button>
                     </CardContent>

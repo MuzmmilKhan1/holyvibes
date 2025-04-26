@@ -23,6 +23,7 @@ import UpcommmingEvents from './pages/student/UpcommmingEvents';
 import Courses from './pages/student/Courses';
 import StudentPerformance from './pages/teacher/StudentPerformance';
 import StudentPerformanceReport from './pages/admin/StudentPerformanceReport';
+import AddStudent from './pages/teacher/AddStudent';
 
 function App() {
   const navigate = useNavigate();
@@ -80,7 +81,8 @@ function App() {
         <Route path="course" element={<TeacherCourse />} />
         <Route path="alloted-students" element={<TeacherAllotment />} />
         <Route path="student-performance" element={<StudentPerformance />} />
-
+        <Route path="add-student" element={<AddStudent />} />
+        
       </Route>
     </Routes>
   );

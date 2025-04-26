@@ -56,7 +56,7 @@ const TeacherCourse = () => {
                                     <img
                                         src={course.course.image}
                                         alt={course.course.name}
-                                        className="w-full h-48 object-cover"
+                                        className="w-full h-48 object-none"
                                     />
                                     <div className="p-4">
                                         <h2 className="text-lg font-bold text-gray-800">{course.course.name}</h2>

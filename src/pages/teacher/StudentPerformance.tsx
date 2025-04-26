@@ -47,7 +47,8 @@ interface CourseApiResponse {
 
 const StudentPerformance = () => {
     const [formData, setFormData] = useState({
-        classId:'',
+        id: 0,
+        classId: '',
         studentId: '',
         courseId: '',
         attendance: '',
@@ -56,15 +57,16 @@ const StudentPerformance = () => {
         suggestions: '',
     })
 
+    const [isEditing, setIsEditing] = useState(false)
     const [studentOptions, setStudentOptions] = useState<Option[]>([])
     const [courseOptions, setCourseOptions] = useState<Option[]>([])
     const [classOptions, setClassOptions] = useState<Option[]>([])
-
 
     const getAllottedStudents = useGetAndDelete(axios.get)
     const getCourses = useGetAndDelete(axios.get)
     const getStdPerformance = useGetAndDelete(axios.get)
     const postPerformance = usePostAndPut(axios.post)
+    const deletePerformance = useGetAndDelete(axios.delete)
     const getClass = useGetAndDelete(axios.get)
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -82,7 +84,6 @@ const StudentPerformance = () => {
     const handleClassChange = (selected: Option | null) => {
         setFormData({ ...formData, classId: selected ? selected.value : '' })
     }
-
 
     const getAllottedStudentsData = async () => {
         try {
@@ -123,15 +124,6 @@ const StudentPerformance = () => {
         console.log(response)
     }
 
-
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        console.log(formData)
-        await postPerformance.callApi('student-performance/add', formData, false, false, true);
-        getStdPerformanceData()
-    }
-
     const getClassData = async () => {
         const response = await getClass.callApi('class/get', false, false);
         const options = response.data.map((classes: any) => ({
@@ -141,6 +133,63 @@ const StudentPerformance = () => {
         setClassOptions(options)
     };
 
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        try {
+            await postPerformance.callApi(
+                'student-performance/add-edit',
+                formData,
+                false,
+                false,
+                true
+            )
+            resetForm()
+            getStdPerformanceData()
+        } catch (error) {
+            console.error("Error submitting performance", error)
+        }
+    }
+
+    const handleEdit = (performance: any) => {
+        setIsEditing(true)
+        setFormData({
+            id: performance.id,
+            classId: performance.class?.id || '',
+            studentId: performance.student.id,
+            courseId: performance.course.id,
+            attendance: performance.attendance,
+            testRemarks: performance.test_remarks,
+            classParticipation: performance.participation,
+            suggestions: performance.suggestions || '',
+        })
+    }
+
+    const handleDelete = async (id: string) => {
+        try {
+            await deletePerformance.callApi(
+                `student-performance/delete/${id}`,
+                false,
+                false
+            )
+            getStdPerformanceData()
+        } catch (error) {
+            console.error("Error deleting performance", error)
+        }
+    }
+
+    const resetForm = () => {
+        setFormData({
+            id: 0,
+            classId: '',
+            studentId: '',
+            courseId: '',
+            attendance: '',
+            testRemarks: '',
+            classParticipation: '',
+            suggestions: '',
+        })
+        setIsEditing(false)
+    }
 
     useEffect(() => {
         getClassData()
@@ -152,12 +201,12 @@ const StudentPerformance = () => {
     return (
         <div className="p-6 space-y-5">
             <Card className="mx-auto shadow-none">
-                <CardHeader className="text-xl font-bold underline " >
+                <CardHeader className="text-xl font-bold underline">
                     <CardTitle>
                         Student Performance Report
                     </CardTitle>
                 </CardHeader>
-                <CardContent className=" space-y-4">
+                <CardContent className="space-y-4">
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <Label htmlFor="courseId">Course</Label>
@@ -165,6 +214,7 @@ const StudentPerformance = () => {
                                 id="courseId"
                                 options={courseOptions}
                                 onChange={handleCourseChange}
+                                value={courseOptions.find(option => option.value === formData.courseId)}
                                 placeholder="Select course"
                             />
                         </div>
@@ -175,17 +225,19 @@ const StudentPerformance = () => {
                                 id="studentId"
                                 options={studentOptions}
                                 onChange={handleStudentChange}
+                                value={studentOptions.find(option => option.value === formData.studentId)}
                                 placeholder="Select student ID"
                             />
                         </div>
 
                         <div>
-                            <Label htmlFor="courseId">Class</Label>
+                            <Label htmlFor="classId">Class</Label>
                             <Select
-                                id="courseId"
+                                id="classId"
                                 options={classOptions}
                                 onChange={handleClassChange}
-                                placeholder="Select course"
+                                value={classOptions.find(option => option.value === formData.classId)}
+                                placeholder="Select class"
                             />
                         </div>
 
@@ -236,29 +288,34 @@ const StudentPerformance = () => {
                             />
                         </div>
 
-                        <div className="flex w-full items-start">
-                            <Button type="submit">Submit Report</Button>
+                        <div className="flex w-full items-start space-x-2">
+                            <Button type="submit">
+                                {isEditing ? 'Update Report' : 'Submit Report'}
+                            </Button>
+                            {isEditing && (
+                                <Button type="button" variant="outline" onClick={resetForm}>
+                                    Cancel
+                                </Button>
+                            )}
                         </div>
                     </form>
                 </CardContent>
             </Card>
 
-
-
             <Card className="mx-auto shadow-none">
-                <CardHeader className="text-xl font-bold underline " >
+                <CardHeader className="text-xl font-bold underline">
                     <CardTitle>
                         Student Performance Table
                     </CardTitle>
                 </CardHeader>
-                <CardContent className=" space-y-4">
+                <CardContent className="space-y-4">
                     <Table>
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Student ID</TableHead>
                                 <TableHead>Course</TableHead>
-                                <TableHead>Attendence</TableHead>
-                                <TableHead>class</TableHead>
+                                <TableHead>Attendance</TableHead>
+                                <TableHead>Class</TableHead>
                                 <TableHead>Oral/Written Test Remarks</TableHead>
                                 <TableHead>Participation</TableHead>
                                 <TableHead>Suggestions</TableHead>
@@ -266,28 +323,30 @@ const StudentPerformance = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {
-                                getStdPerformance?.response?.data?.length > 0 &&
+                            {getStdPerformance?.response?.data?.length > 0 &&
                                 getStdPerformance.response?.data.map((items: any) => (
-                                    <TableRow >
+                                    <TableRow key={items.id}>
                                         <TableCell>{items.student.std_id}</TableCell>
                                         <TableCell>{items.course.name}</TableCell>
                                         <TableCell>{items.attendance}</TableCell>
-                                        <TableCell className="text-wrap" >{items?.class?.title || 'N/A'}</TableCell>
+                                        <TableCell className="text-wrap">{items?.class?.title || 'N/A'}</TableCell>
                                         <TableCell>{items.test_remarks || 'N/A'}</TableCell>
                                         <TableCell>{items.participation || 'N/A'}</TableCell>
                                         <TableCell>{items.suggestions || 'N/A'}</TableCell>
                                         <TableCell>
-                                            <Button>
+                                            <Button onClick={() => handleEdit(items)}>
                                                 Edit
                                             </Button>
-                                            <Button className='ml-2' variant='destructive' >
+                                            <Button
+                                                className='ml-2'
+                                                variant='destructive'
+                                                onClick={() => handleDelete(items.id)}
+                                            >
                                                 Delete
                                             </Button>
                                         </TableCell>
                                     </TableRow>
-                                ))
-                            }
+                                ))}
                         </TableBody>
                     </Table>
                 </CardContent>

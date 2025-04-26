@@ -24,6 +24,7 @@ import {
 import axios from "axios";
 import useGetAndDelete from "@/hooks/useGetAndDelete";
 import usePostAndPut from "@/hooks/usePostAndPut";
+import { Link } from "react-router-dom";
 
 // Define TypeScript interfaces
 interface Course {
@@ -597,6 +598,12 @@ const CreateStudentAccountForm = () => {
                         </CardFooter>
                     </form>
                 </CardContent>
+                <div className="col-span-full mt-4 text-center text-sm">
+                    Already have an account?{" "}
+                    <Link to="/" className="underline underline-offset-4 ">
+                        Login
+                    </Link>
+                </div>
             </Card>
         </div>
     );

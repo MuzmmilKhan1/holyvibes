@@ -1,25 +1,12 @@
-
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import useGetAndDelete from "@/hooks/useGetAndDelete";
 import usePostAndPut from "@/hooks/usePostAndPut";
 import axios from "axios";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import SpinnerLoader from "@/components/SpinLoader";
 import ReactSelect from 'react-select';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -27,6 +14,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 interface OptionType {
     value: string;
     label: string;
+}
+
+interface ClassTiming {
+    id: number;
+    from: string;
+    to: string;
+}
+
+interface ClassItem {
+    id: number;
+    title: string;
+    classLink: string;
+    courses: { id: number; name: string }[];
+    timings: ClassTiming[];
 }
 
 const ClassForm = () => {
@@ -41,39 +42,67 @@ const ClassForm = () => {
     const [link, setLink] = useState("");
     const [timeFrom, setTimeFrom] = useState("");
     const [timeTo, setTimeTo] = useState("");
+    const [timingId, setTimingId] = useState<number | null>(null); // Track timing ID for editing
     const [selectedCourseIds, setSelectedCourseIds] = useState<OptionType[]>([]);
     const [showAttendenceForm, setShowAttendenceForm] = useState(false);
     const [attendenceData, setAttendenceData] = useState(defaultAttendenceData);
     const [stdOptions, setStdOptions] = useState<OptionType[]>([]);
     const [selectedStudent, setSelectedStudent] = useState<OptionType | null>(null);
     const [isEdit, setIsEdit] = useState<boolean>(false);
+    const [editClassId, setEditClassId] = useState<number | null>(null); // Track class ID for editing
     const [attendenceID, setAttendenceID] = useState<number>(0);
 
     const getCourse = useGetAndDelete(axios.get);
     const postClass = usePostAndPut(axios.post);
+    const putClass = usePostAndPut(axios.put);
     const getClass = useGetAndDelete(axios.get);
     const getStudents = useGetAndDelete(axios.get);
     const postAttendence = usePostAndPut(axios.post);
     const getAttendence = useGetAndDelete(axios.get);
+    const deleteAttendence = useGetAndDelete(axios.delete);
+    const deleteClass = useGetAndDelete(axios.delete);
+
 
     const handleSubmit = async () => {
         const formData = {
             title,
             link,
             classTime: {
+                id: timingId,
                 from: timeFrom,
                 to: timeTo,
             },
-            courseIds: selectedCourseIds.map(course => course.value), // Send array of course IDs
+            ...(isEdit ? {} : { courseIds: selectedCourseIds.map(course => course.value) }),
         };
-        console.log(formData)
-        await postClass.callApi("class/create", formData, false, false, true);
-        await getClassData();
+
+        if (isEdit) {
+            await putClass.callApi(`class/edit/${editClassId}`, formData, false, false, true);
+        } else {
+            await postClass.callApi("class/create", formData, false, false, true);
+        }
         setTitle("");
         setLink("");
         setTimeFrom("");
         setTimeTo("");
+        setTimingId(null);
         setSelectedCourseIds([]);
+        setIsEdit(false);
+        setEditClassId(null);
+        await getClassData();
+    };
+
+    const handleEditClass = (classItem: ClassItem) => {
+        // Populate form with class data
+        setTitle(classItem.title);
+        setLink(classItem.classLink);
+        // Assuming only one timing per class for simplicity; adjust if multiple timings
+        if (classItem.timings && classItem.timings.length > 0) {
+            setTimeFrom(classItem.timings[0].from);
+            setTimeTo(classItem.timings[0].to);
+            setTimingId(classItem.timings[0].id);
+        }
+        setEditClassId(classItem.id);
+        setIsEdit(true);
     };
 
     const getCourseData = async () => {
@@ -81,7 +110,8 @@ const ClassForm = () => {
     };
 
     const getClassData = async () => {
-        console.log(await getClass.callApi('class/get', false, false))
+        const response = await getClass.callApi('class/get', false, false);
+        console.log("Classes Data:", response);
     };
 
     const fetchStudentsForClass = async (classId: string) => {
@@ -129,21 +159,26 @@ const ClassForm = () => {
                 <div className="space-y-10">
                     <Card className="shadow-none">
                         <CardHeader>
-                            <CardTitle className="text-xl font-bold underline">Create Class</CardTitle>
+                            <CardTitle className="text-xl font-bold underline">
+                                {isEdit ? "Edit Class" : "Create Class"}
+                            </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div>
-                                <Label htmlFor="courses">Select Courses</Label>
-                                <ReactSelect
-                                    isMulti
-                                    options={courseOptions}
-                                    value={selectedCourseIds}
-                                    onChange={(selected) => setSelectedCourseIds(selected as OptionType[])}
-                                    placeholder="Select courses..."
-                                    className="basic-multi-select"
-                                    classNamePrefix="select"
-                                />
-                            </div>
+                            {!isEdit && (
+                                <div>
+                                    <Label htmlFor="courses">Select Courses</Label>
+                                    <ReactSelect
+                                        isMulti
+                                        options={courseOptions}
+                                        value={selectedCourseIds}
+                                        onChange={(selected) => setSelectedCourseIds(selected as OptionType[])}
+                                        placeholder="Select courses..."
+                                        className="basic-multi-select"
+                                        classNamePrefix="select"
+                                        isDisabled={isEdit} // Disable course selection in edit mode
+                                    />
+                                </div>
+                            )}
                             <div>
                                 <Label htmlFor="title">Title</Label>
                                 <Input
@@ -185,11 +220,27 @@ const ClassForm = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="w-full flex items-start">
+                            <div className="w-full flex items-start gap-2">
                                 {postClass.loading ? (
                                     <Button disabled>Please wait...</Button>
                                 ) : (
-                                    <Button onClick={handleSubmit}>Submit</Button>
+                                    <Button onClick={handleSubmit}>{isEdit ? "Update" : "Submit"}</Button>
+                                )}
+                                {isEdit && (
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            setTitle("");
+                                            setLink("");
+                                            setTimeFrom("");
+                                            setTimeTo("");
+                                            setTimingId(null);
+                                            setIsEdit(false);
+                                            setEditClassId(null);
+                                        }}
+                                    >
+                                        Cancel Edit
+                                    </Button>
                                 )}
                             </div>
                         </CardContent>
@@ -215,50 +266,65 @@ const ClassForm = () => {
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
-                                                {getClass.response.data.map((classItem: any) => (
-                                                    <TableRow key={classItem?.id}>
-                                                        <TableCell>{classItem?.title}</TableCell>
+                                                {getClass.response.data.map((classItem: ClassItem) => (
+                                                    <TableRow key={classItem.id}>
+                                                        <TableCell>{classItem.title}</TableCell>
                                                         <TableCell>
                                                             <a
                                                                 href={
-                                                                    classItem?.classLink?.startsWith('http://') ||
-                                                                        classItem.classLink?.startsWith('https://')
+                                                                    classItem.classLink.startsWith('http://') ||
+                                                                        classItem.classLink.startsWith('https://')
                                                                         ? classItem.classLink
-                                                                        : `https://${classItem?.classLink}`
+                                                                        : `https://${classItem.classLink}`
                                                                 }
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="text-blue-600 hover:underline"
                                                             >
-                                                                {classItem?.classLink}
+                                                                {classItem.classLink}
                                                             </a>
                                                         </TableCell>
                                                         <TableCell>
-                                                            {classItem.courses?.map((course: any) => (
-                                                                <div>
-                                                                    {course.name}
-                                                                </div>
-                                                            )) || "N/A"}
+                                                            {classItem.courses?.length > 0
+                                                                ? classItem.courses.map((course) => course.name).join(', ')
+                                                                : "N/A"}
                                                         </TableCell>
                                                         <TableCell>
-                                                            {classItem.timings?.map((time: any, index: number) => (
-                                                                <div key={index}>
-                                                                    {time.from || "-"} to {time.to || "-"}
-                                                                </div>
-                                                            ))}
+                                                            {classItem.timings?.length > 0 ? (
+                                                                classItem.timings.map((time, index) => (
+                                                                    <div key={index}>
+                                                                        {time.from || "-"} to {time.to || "-"}
+                                                                    </div>
+                                                                ))
+                                                            ) : (
+                                                                "N/A"
+                                                            )}
                                                         </TableCell>
                                                         <TableCell className="flex gap-2">
-                                                            <Button>Edit</Button>
-                                                            <Button variant="destructive">Delete</Button>
+                                                            <Button
+                                                                onClick={() => handleEditClass(classItem)}
+                                                            >
+                                                                Edit
+                                                            </Button>
+                                                            <Button
+                                                                onClick={async () => {
+                                                                    console.log("Delete Class:", classItem.id);
+                                                                    await deleteClass.callApi(`class/delete/${classItem.id}`, true, false)
+                                                                    getClassData();
+                                                                }}
+                                                                variant="destructive"
+                                                            >
+                                                                Delete
+                                                            </Button>
                                                             <Button
                                                                 variant="outline"
                                                                 onClick={async () => {
                                                                     setAttendenceData({
                                                                         ...attendenceData,
-                                                                        classId: classItem.id,
+                                                                        classId: classItem.id.toString(),
                                                                     });
-                                                                    await fetchStudentsForClass(classItem.id);
-                                                                    await fetchAttendeceData(classItem.id);
+                                                                    await fetchStudentsForClass(classItem.id.toString());
+                                                                    await fetchAttendeceData(classItem.id.toString());
                                                                     setShowAttendenceForm(true);
                                                                 }}
                                                             >
@@ -322,7 +388,7 @@ const ClassForm = () => {
                                     }
                                     value={attendenceData.status}
                                 >
-                                    <SelectTrigger >
+                                    <SelectTrigger>
                                         <SelectValue placeholder="Select status" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -370,7 +436,6 @@ const ClassForm = () => {
                             </div>
                         </CardContent>
                     </Card>
-
                     {getAttendence.loading ? (
                         <SpinnerLoader color="black" />
                     ) : (
@@ -416,7 +481,19 @@ const ClassForm = () => {
                                                             >
                                                                 Edit
                                                             </Button>
-                                                            <Button variant="destructive">Delete</Button>
+                                                            <Button
+                                                                onClick={async () => {
+                                                                    await deleteAttendence.callApi(
+                                                                        `attendence/delete/${attendence.id}`,
+                                                                        true,
+                                                                        false
+                                                                    );
+                                                                    await fetchAttendeceData(attendenceData.classId);
+                                                                }}
+                                                                variant="destructive"
+                                                            >
+                                                                Delete
+                                                            </Button>
                                                         </TableCell>
                                                     </TableRow>
                                                 ))}

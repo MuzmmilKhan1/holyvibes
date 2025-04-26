@@ -45,6 +45,7 @@ interface FormData {
     name: string;
     email: string;
     password: string;
+    isEdit: boolean;
 }
 
 interface Course {
@@ -63,16 +64,19 @@ const Students = () => {
     const getStd = useGetAndDelete(axios.get);
     const getBilling = useGetAndDelete(axios.get);
     const postLoginCredentials = usePostAndPut(axios.post);
+    const deleteStd = useGetAndDelete(axios.delete);
 
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const [showBillingDetails, setShowBillingDetails] = useState<boolean>(false);
     const [showStdClassTimings, setShowStdClassTimings] = useState<boolean>(false);
+    const [showEditScreen, setShowEditScreen] = useState<boolean>(false);
     const [formData, setFormData] = useState<FormData>({
         id: 0,
         studentID: 0,
         name: "",
         email: "",
         password: "",
+        isEdit: false,
     });
 
     const getStudents = async () => {
@@ -92,6 +96,7 @@ const Students = () => {
                 name: selectedStudent?.name,
                 email: selectedStudent?.email,
                 password: "",
+                isEdit: false,
             });
         } else {
             setFormData({
@@ -100,6 +105,7 @@ const Students = () => {
                 name: "",
                 email: "",
                 password: "",
+                isEdit: false,
             });
             setShowBillingDetails(false);
             setShowStdClassTimings(false);
@@ -115,8 +121,10 @@ const Students = () => {
     };
 
     const handleSaveDetails = async () => {
-
         await postLoginCredentials.callApi('student/assign_login_credentials', formData, true, false, true);
+        if (showEditScreen) {
+            setShowEditScreen(!showEditScreen)
+        }
         getStudents();
 
     };
@@ -124,7 +132,7 @@ const Students = () => {
     const handleDelete = async () => {
         try {
             if (selectedStudent?.id) {
-                await getStd.callApi(`student/delete/${selectedStudent?.id}`, false, true);
+                await deleteStd.callApi(`student/delete/${selectedStudent?.id}`, false, true);
                 setSelectedStudent(null);
                 getStudents();
             }
@@ -238,8 +246,27 @@ const Students = () => {
                                             <Button variant="destructive" onClick={handleDelete}>
                                                 Delete
                                             </Button>
-                                            <Button variant="secondary">
-                                                Edit
+                                            <Button
+                                                onClick={
+                                                    () => {
+                                                        setShowEditScreen(!showEditScreen)
+                                                        setFormData({
+                                                            id: selectedStudent.id,
+                                                            studentID: selectedStudent.std_id,
+                                                            name: selectedStudent.name,
+                                                            email: selectedStudent.email,
+                                                            password: "",
+                                                            isEdit: true,
+                                                        });
+                                                    }
+                                                }
+                                                variant="secondary">
+                                                {
+                                                    showEditScreen ?
+                                                        "Close" :
+                                                        "Edit"
+                                                }
+
                                             </Button>
                                         </div>
                                     </div>
@@ -247,10 +274,16 @@ const Students = () => {
                             </div>
                         </CardContent>
                     </Card>
-                    {selectedStudent?.status === 'pending' && !showStdClassTimings && (
+                    {selectedStudent?.status === 'pending' && !showStdClassTimings || showEditScreen && (
                         <Card className="shadow-none mt-6">
                             <CardHeader>
-                                <CardTitle className="text-xl font-bold underline">Assign Login Credentials</CardTitle>
+                                <CardTitle className="text-xl font-bold underline">
+                                    {
+                                        showEditScreen ?
+                                            "Edit Login Credentials" :
+                                            "Assign Login Credentials"
+                                    }
+                                </CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
@@ -295,7 +328,13 @@ const Students = () => {
                                         />
                                     </div>
                                     <div className="mt-4">
-                                        <Button onClick={handleSaveDetails}>Assign</Button>
+                                        <Button onClick={handleSaveDetails}>
+                                            {
+                                                showEditScreen ?
+                                                    "Edit" :
+                                                    "Assign"
+                                            }
+                                        </Button>
                                     </div>
                                 </div>
                             </CardContent>

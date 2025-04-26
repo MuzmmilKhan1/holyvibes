@@ -1,21 +1,22 @@
-import { useEffect, useState } from "react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Link } from "react-router-dom"
-import useGetAndDelete from "@/hooks/useGetAndDelete"
-import usePostAndPut from "@/hooks/usePostAndPut"
-import axios from "axios"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Link } from "react-router-dom";
+import useGetAndDelete from "@/hooks/useGetAndDelete";
+import usePostAndPut from "@/hooks/usePostAndPut";
+import axios from "axios";
+import { Trash, Trash2 } from "lucide-react";
 
 const CreateTeacherAccountForm = ({
     className,
@@ -40,9 +41,9 @@ const CreateTeacherAccountForm = ({
             {
                 id: "",
                 name: "",
-                timings: [{ from: "", to: "" }]
-            }
-        ]
+                timings: [{ from: "", to: "" }],
+            },
+        ],
     });
 
     const getCourse = useGetAndDelete(axios.get);
@@ -80,11 +81,29 @@ const CreateTeacherAccountForm = ({
         setFormData(prev => ({ ...prev, course: updatedCourses }));
     };
 
+    const removeTimeSlot = (courseIndex: number, timeIndex: number) => {
+        const updatedCourses = [...formData.course];
+        // Ensure there's at least one time slot remaining
+        if (updatedCourses[courseIndex].timings.length > 1) {
+            updatedCourses[courseIndex].timings.splice(timeIndex, 1);
+            setFormData(prev => ({ ...prev, course: updatedCourses }));
+        }
+    };
+
     const addMoreCourses = () => {
         setFormData(prev => ({
             ...prev,
             course: [...prev.course, { id: "", name: "", timings: [{ from: "", to: "" }] }],
         }));
+    };
+
+    const removeCourse = (courseIndex: number) => {
+        const updatedCourses = [...formData.course];
+        // Ensure there's at least one course remaining
+        if (updatedCourses.length > 1) {
+            updatedCourses.splice(courseIndex, 1);
+            setFormData(prev => ({ ...prev, course: updatedCourses }));
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -184,7 +203,7 @@ const CreateTeacherAccountForm = ({
 
                             <div className="col-span-full space-y-6">
                                 {formData.course.map((courseObj, courseIndex) => (
-                                    <div key={courseIndex} className="border p-4 rounded-md space-y-4">
+                                    <div key={courseIndex} className="border p-4 rounded-md space-y-4 relative">
                                         <div>
                                             <Label>Course {courseIndex + 1}</Label>
                                             <Select
@@ -210,7 +229,7 @@ const CreateTeacherAccountForm = ({
                                         <div className="space-y-2">
                                             <Label>Preferred Timings</Label>
                                             {courseObj.timings.map((time, timeIndex) => (
-                                                <div key={timeIndex} className="grid grid-cols-2 gap-4">
+                                                <div key={timeIndex} className="grid grid-cols-2 gap-3 items-end">
                                                     <div>
                                                         <Label>From</Label>
                                                         <Input
@@ -222,16 +241,29 @@ const CreateTeacherAccountForm = ({
                                                             required
                                                         />
                                                     </div>
-                                                    <div>
-                                                        <Label>To</Label>
-                                                        <Input
-                                                            type="time"
-                                                            value={time.to}
-                                                            onChange={(e) =>
-                                                                handleTimeChange(courseIndex, timeIndex, "to", e.target.value)
-                                                            }
-                                                            required
-                                                        />
+                                                    <div className="flex items-center ">
+                                                        <div className="flex-1">
+                                                            <Label>To</Label>
+                                                            <Input
+                                                                type="time"
+                                                                value={time.to}
+                                                                onChange={(e) =>
+                                                                    handleTimeChange(courseIndex, timeIndex, "to", e.target.value)
+                                                                }
+                                                                required
+                                                            />
+                                                        </div>
+                                                        {courseObj.timings.length > 1 && (
+                                                            <Button
+                                                                type="button"
+                                                                variant="destructive"
+                                                                size="sm"
+                                                                className="-mb-3 ml-2"
+                                                                onClick={() => removeTimeSlot(courseIndex, timeIndex)}
+                                                            >
+                                                                <Trash/>
+                                                            </Button>
+                                                        )}
                                                     </div>
                                                 </div>
                                             ))}
@@ -243,6 +275,18 @@ const CreateTeacherAccountForm = ({
                                                 + Add More Time
                                             </Button>
                                         </div>
+
+                                        {formData.course.length > 1 && (
+                                            <Button
+                                                type="button"
+                                                variant="destructive"
+                                                size="sm"
+                                                className=""
+                                                onClick={() => removeCourse(courseIndex)}
+                                            >
+                                                Remove Course
+                                            </Button>
+                                        )}
                                     </div>
                                 ))}
                                 <Button type="button" variant="outline" onClick={addMoreCourses}>
@@ -288,7 +332,7 @@ const CreateTeacherAccountForm = ({
 
                             <div className="col-span-full mt-4 text-center text-sm">
                                 Already have an account?{" "}
-                                <Link to="/" className="underline underline-offset-4 text-blue-600">
+                                <Link to="/" className="underline underline-offset-4 ">
                                     Login
                                 </Link>
                             </div>
@@ -297,7 +341,7 @@ const CreateTeacherAccountForm = ({
                 </CardContent>
             </Card>
         </div>
-    )
-}
+    );
+};
 
-export default CreateTeacherAccountForm
+export default CreateTeacherAccountForm;

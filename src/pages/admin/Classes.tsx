@@ -10,64 +10,128 @@ import SpinnerLoader from "@/components/SpinLoader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import usePostAndPut from "@/hooks/usePostAndPut";
+import toast from "react-hot-toast";
 
 const Classes = () => {
     const getClass = useGetAndDelete(axios.get);
-    const getClassData = useGetAndDelete(axios.get);
     const putClass = usePostAndPut(axios.put);
+    const deleteClass = useGetAndDelete(axios.delete);
 
-
-    const [selectedClass, setSelectedClass] = useState<any>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
         id: "",
         title: "",
-        description: "",
-        class_link: "",
-        total_seats: "",
-        filled_seats: ""
+        link: "",
+        classTime: {
+            id: 0,
+            from: "",
+            to: ""
+        }
     });
 
     const getAllClasses = async () => {
-        await getClass.callApi("class/get-all", true, false);
+        try {
+            const response = await getClass.callApi("class/get-all", true, false);
+            if (!response?.data) {
+                toast.error("Failed to load classes");
+            }
+        } catch (error) {
+            console.error("Error fetching classes", error);
+            toast.error("Error fetching classes");
+        }
     };
 
-    const getSingleClassData = async (id: string) => {
-        const response = await getClassData.callApi(`class/get/single-class-data/${id}`, true, false);
-        const data = response?.class;
-        setSelectedClass(data);
-        setIsEditing(false);
+    const handleEditClick = (classData: any) => {
+        setIsEditing(true);
         setFormData({
-            id: data.id,
-            title: data?.title || "",
-            description: data?.description || "",
-            class_link: data?.classLink || "",
-            total_seats: data?.total_seats || "",
-            filled_seats: data?.filled_seats || "",
+            id: classData.id,
+            title: classData.title || "",
+            link: classData.classLink || "",
+            classTime: classData.teacher_class_timings?.[0] ? {
+                id: classData.teacher_class_timings[0].id || 0,
+                from: classData.teacher_class_timings[0].preferred_time_from || "",
+                to: classData.teacher_class_timings[0].preferred_time_to || ""
+            } : {
+                id: 0,
+                from: "",
+                to: ""
+            }
         });
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        if (name === "from" || name === "to") {
+            setFormData(prev => ({
+                ...prev,
+                classTime: {
+                    ...prev.classTime,
+                    [name]: value
+                }
+            }));
+        } else {
+            setFormData(prev => ({ ...prev, [name]: value }));
+        }
+    };
+
+    const validateForm = () => {
+        if (!formData.title.trim()) {
+            toast.error("Title is required");
+            return false;
+        }
+        if (formData.title.length > 255) {
+            toast.error("Title must not exceed 255 characters");
+            return false;
+        }
+        if (!formData.link.trim()) {
+            toast.error("Class link is required");
+            return false;
+        }
+        if (formData.link.length > 255) {
+            toast.error("Class link must not exceed 255 characters");
+            return false;
+        }
+        if (!formData.classTime.from || !formData.classTime.to) {
+            toast.error("Class timings (from and to) are required");
+            return false;
+        }
+        if (formData.classTime.id <= 0) {
+            toast.error("Invalid class timing ID");
+            return false;
+        }
+        return true;
     };
 
     const editClass = async () => {
-        const response = await putClass.callApi(`class/edit`, formData, true, false, true)
-        if (response.status == 200) {
-            setIsEditing(false);
-            setSelectedClass(null);
-            getAllClasses()
+        if (!validateForm()) {
+            return;
         }
-    }
 
-    function shortenSentence(sentence: string, wordLimit = 15) {
-        const words = sentence.trim().split(/\s+/);
-        if (words.length <= wordLimit) {
-            return sentence;
+        try {
+            const payload = {
+                id: formData.id,
+                title: formData.title,
+                link: formData.link,
+                classTime: {
+                    id: formData.classTime.id,
+                    from: formData.classTime.from,
+                    to: formData.classTime.to
+                }
+            };
+
+            const response = await putClass.callApi(`class/edit/${formData.id}`, payload, true, false, true);
+            if (response?.status === 200) {
+                toast.success("Class updated successfully");
+                setIsEditing(false);
+                await getAllClasses();
+            } else {
+                toast.error("Failed to update class");
+            }
+        } catch (error) {
+            console.error("Error updating class", error);
+            toast.error("Error updating class");
         }
-        return words.slice(0, wordLimit).join(' ') + '...';
-    }
+    };
 
     useEffect(() => {
         getAllClasses();
@@ -78,107 +142,120 @@ const Classes = () => {
             {
                 getClass.loading ? (
                     <SpinnerLoader color="black" />
-                ) : !selectedClass ? (
-                    getClass?.response?.data?.length > 0 &&
-                    <Card className="shadow-none">
-                        <CardHeader>
-                            <CardTitle className="text-xl font-bold underline ">Classes</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableCaption>List of all classes</TableCaption>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Title</TableHead>
-                                        <TableHead>Description</TableHead>
-                                        <TableHead>Available Seats</TableHead>
-                                        <TableHead>Occupied Seats</TableHead>
-                                        <TableHead>Class Link</TableHead>
-                                        <TableHead>Action</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {getClass?.response?.data?.map((c: any) => (
-                                        <TableRow key={c?.id}>
-                                            <TableCell>{c?.title}</TableCell>
-                                            <TableCell >{shortenSentence(c.description)}</TableCell>
-                                            <TableCell>{c?.total_seats || 0}</TableCell>
-                                            <TableCell>{c?.filled_seats || 0}</TableCell>
-                                            <TableCell>{c?.classLink || "N/A"}</TableCell>
-                                            <TableCell>
-                                                <Button onClick={() => getSingleClassData(c.id)}>
-                                                    See more
-                                                </Button>
-                                            </TableCell>
+                ) : !isEditing ? (
+                    getClass?.response?.data?.length > 0 ? (
+                        <Card className="shadow-none">
+                            <CardHeader>
+                                <CardTitle className="text-xl font-bold underline">Classes</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <Table>
+                                    <TableCaption>List of all classes</TableCaption>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>TeacherID</TableHead>
+                                            <TableHead>Title</TableHead>
+                                            <TableHead>Class Link</TableHead>
+                                            <TableHead>Class Time</TableHead>
+                                            <TableHead>Action</TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {getClass?.response?.data?.map((c: any) => (
+                                            <TableRow key={c?.id}>
+                                                <TableCell>{c?.teacherID || "N/A"}</TableCell>
+                                                <TableCell>{c?.title}</TableCell>
+                                                <TableCell>{c?.classLink || 'N/A'}</TableCell>
+                                                <TableCell>
+                                                    {c.teacher_class_timings?.length > 0 ? (
+                                                        c.teacher_class_timings.map((ct: any, idx: number) => (
+                                                            <div key={idx}>
+                                                                {ct.preferred_time_from} - {ct.preferred_time_to}
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        "No timings"
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="space-x-2">
+                                                    <Button
+                                                        onClick={() => handleEditClick(c)}
+                                                        variant='outline'
+                                                    >
+                                                        Edit
+                                                    </Button>
+                                                    <Button
+                                                     onClick={async () => {
+                                                        await deleteClass.callApi(`class/delete/${c.id}`, true, false)
+                                                        getAllClasses();
+                                                    }}
+
+                                                    variant='destructive'>
+                                                        Delete
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                    ) : (
+                        <p>No classes found.</p>
+                    )
                 ) : (
                     <Card className="shadow-none">
                         <CardHeader>
-                            <CardTitle className="text-xl font-bold underline ">Class Detail</CardTitle>
+                            <CardTitle className="text-xl font-bold underline">Edit Class</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            {!isEditing ? (
-                                <>
-                                    <p><strong>Title:</strong> {selectedClass.title}</p>
-                                    <p><strong>Description:</strong> {selectedClass.description}</p>
-                                    <p><strong>Class Link:</strong> {selectedClass.class_link || "N/A"}</p>
-                                    <p><strong>Available Seats:</strong> {selectedClass.total_seats || 0}</p>
-                                    <p><strong>Occupied Seats:</strong> {selectedClass.filled_seats || 0}</p>
-                                    <p><strong>Teacher:</strong> {selectedClass.teacher?.name || selectedClass.teacher?.email || "N/A"}</p>
-
-                                    <h4 className="mt-4 font-semibold">Class Timings</h4>
-                                    {
-                                        selectedClass.class_timings?.length > 0 ? (
-                                            <ul className="list-disc list-inside">
-                                                {selectedClass.class_timings.map((timing: any, idx: number) => (
-                                                    <li key={idx}>
-                                                        {timing.preferred_time_from} — {timing.preferred_time_to}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        ) : (
-                                            <p>No timings available.</p>
-                                        )
-                                    }
-                                </>
-                            ) : (
-                                <div className="flex flex-col gap-4">
-                                    <Input name="title" value={formData.title} onChange={handleInputChange} placeholder="Title" />
-                                    <Input name="description" value={formData.description} onChange={handleInputChange} placeholder="Description" />
-                                    <Input name="class_link" value={formData.class_link} onChange={handleInputChange} placeholder="Class Link" />
-                                    <Input name="total_seats" value={formData.total_seats} onChange={handleInputChange} placeholder="Total Seats" />
-                                    <Input name="filled_seats" value={formData.filled_seats} onChange={handleInputChange} placeholder="Filled Seats" />
+                            <div className="flex flex-col gap-4">
+                                <Input
+                                    name="title"
+                                    value={formData.title}
+                                    onChange={handleInputChange}
+                                    placeholder="Title"
+                                    maxLength={255}
+                                />
+                                <Input
+                                    name="link"
+                                    value={formData.link}
+                                    onChange={handleInputChange}
+                                    placeholder="Class Link"
+                                    maxLength={255}
+                                />
+                                <div className="flex gap-4">
+                                    <Input
+                                        name="from"
+                                        type="time"
+                                        value={formData.classTime.from}
+                                        onChange={handleInputChange}
+                                        placeholder="From"
+                                    />
+                                    <Input
+                                        name="to"
+                                        type="time"
+                                        value={formData.classTime.to}
+                                        onChange={handleInputChange}
+                                        placeholder="To"
+                                    />
                                 </div>
-                            )}
-
-                            <div className="mt-4 flex flex-row w-full gap-2">
-                                <Button variant="outline" onClick={() => setSelectedClass(null)}>
-                                    Close
+                            </div>
+                            <div className="mt-4 flex gap-2">
+                                <Button
+                                    onClick={editClass}
+                                    disabled={putClass.loading}
+                                >
+                                    {putClass.loading ? "Saving..." : "Save"}
                                 </Button>
-                                {!isEditing ? (
-                                    <>
-                                        <Button onClick={() => setIsEditing(true)}>
-                                            Edit
-                                        </Button>
-                                        <Button variant="destructive" >
-                                            Delete
-                                        </Button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Button onClick={editClass}>
-                                            Save
-                                        </Button>
-                                        <Button variant="destructive" onClick={() => setIsEditing(false)}>
-                                            Cancel
-                                        </Button>
-                                    </>
-                                )}
+                                <Button
+                                    variant="destructive"
+                                    onClick={() => {
+                                        setIsEditing(false);
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
                             </div>
                         </CardContent>
                     </Card>

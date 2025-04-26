@@ -1,8 +1,9 @@
 import * as React from "react"
 import {
   Notebook,
+  School,
   // School,
-  Settings2,
+  // Settings2,
   User,
 } from "lucide-react"
 import { PiStudentFill } from "react-icons/pi";
@@ -45,18 +46,18 @@ let data = {
       icon: User,
       isActive: true,
       items: [
-
+        {
+          title: "Classes",
+          url: "/admin/classes",
+          icon: School,
+          isActive: true,
+          items: [
+    
+          ],
+        },
       ],
     },
-    // {
-    //   title: "Classes",
-    //   url: "/admin/classes",
-    //   icon: School,
-    //   isActive: true,
-    //   items: [
-
-    //   ],
-    // },
+    
     {
       title: "Student",
       url: "/admin/students",
@@ -87,14 +88,14 @@ let data = {
       items: [
       ],
     },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
+    // {
+    //   title: "Settings",
+    //   url: "#",
+    //   icon: Settings2,
+    //   items: [
 
-      ],
-    },
+    //   ],
+    // },
   ],
 
 
@@ -138,6 +139,10 @@ let data = {
       icon: Notebook,
       isActive: false,
       items: [
+        {
+          title: "Add Students",
+          url: "/teacher/add-student",
+        },
       ],
     },
 
