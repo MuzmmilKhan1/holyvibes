@@ -100,43 +100,51 @@ const EnrolledCourses: React.FC = () => {
                     ) : (
                         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                             {!showClasses && performance == undefined &&
-                                getCourses?.response?.courses?.map((course: Course) => (
-                                    <div
-                                        key={course.id}
-                                        className="bg-white rounded-2xl border overflow-hidden"
-                                    >
-                                        <img
-                                            src={course.image}
-                                            alt={course.name}
-                                            className="w-full h-48 object-none"
-                                        />
-                                        <div className="p-4">
-                                            <h2 className="text-lg font-bold text-gray-800">{course.name}</h2>
-                                            <p className="text-gray-600 mt-1 text-sm">{course.description}</p>
-                                            <div className="mt-3 flex flex-col justify-between items-start">
-                                                <div className="flex items-center justify-between w-full px-1">
-                                                    <span className="text-gray-600 font-semibold">${course.price}</span>
-                                                    <span className="text-sm text-gray-500">{course.course_duration}</span>
-                                                </div>
-                                                <div className="flex mt-2 items-center justify-between w-full">
-                                                    <Button
-                                                        onClick={() => fetchCourseOutlines(course.id)}
-                                                        size="sm"
-                                                        variant='outline'
-                                                    >
-                                                        See outlines
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        onClick={() => getCourseClassesData(course.id)}
-                                                    >
-                                                        Classes
-                                                    </Button>
+                                (
+                                    getCourses?.response?.courses?.length > 0 ?
+                                        getCourses?.response?.courses?.map((course: Course) => (
+                                            <div
+                                                key={course.id}
+                                                className="bg-white rounded-2xl border overflow-hidden"
+                                            >
+                                                <img
+                                                    src={course.image}
+                                                    alt={course.name}
+                                                    className="w-full h-48 object-none"
+                                                />
+                                                <div className="p-4">
+                                                    <h2 className="text-lg font-bold text-gray-800">{course.name}</h2>
+                                                    <p className="text-gray-600 mt-1 text-sm">{course.description}</p>
+                                                    <div className="mt-3 flex flex-col justify-between items-start">
+                                                        <div className="flex items-center justify-between w-full px-1">
+                                                            <span className="text-gray-600 font-semibold">${course.price}</span>
+                                                            <span className="text-sm text-gray-500">{course.course_duration}</span>
+                                                        </div>
+                                                        <div className="flex mt-2 items-center justify-between w-full">
+                                                            <Button
+                                                                onClick={() => fetchCourseOutlines(course.id)}
+                                                                size="sm"
+                                                                variant='outline'
+                                                            >
+                                                                See outlines
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                onClick={() => getCourseClassesData(course.id)}
+                                                            >
+                                                                Classes
+                                                            </Button>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
+                                        )
+                                        ) :
+                                        <div>
+                                            No enrolled courses found.
                                         </div>
-                                    </div>
-                                ))}
+                                )
+                            }
                         </div>
                     )}
 

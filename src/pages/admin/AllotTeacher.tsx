@@ -134,7 +134,7 @@ const AllotTeacher = () => {
             await postAllotment.callApi('teacher-allotment/allot', payload, true, false, true);
         }
 
-        resetForm();
+        // resetForm();
         getStdAllotmentData();
     };
 

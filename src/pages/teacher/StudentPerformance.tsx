@@ -85,22 +85,32 @@ const StudentPerformance = () => {
         setFormData({ ...formData, classId: selected ? selected.value : '' })
     }
 
-    const getAllottedStudentsData = async () => {
+    const getAllottedStudentsData = async (): Promise<void> => {
         try {
             const response: StudentApiResponse = await getAllottedStudents.callApi(
                 "teacher-allotment/get-teacher-allotment",
                 false,
                 false
-            )
-            const options: Option[] = response.teacherAllotment.map((allotment) => ({
-                value: allotment.student.id,
-                label: allotment.student.std_id,
-            }))
-            setStudentOptions(options)
+            );
+            const uniqueStudentsMap: Map<number, Option> = new Map();
+            response.teacherAllotment.forEach((allotment) => {
+                const studentId: number = Number(allotment.student.id);
+                const studentStdId: string = allotment.student.std_id;
+                if (!uniqueStudentsMap.has(studentId)) {
+                    uniqueStudentsMap.set(studentId, {
+                        value: studentId.toString(),
+                        label: studentStdId,
+                    });
+                }
+            });
+            const options: Option[] = Array.from(uniqueStudentsMap.values());
+            console.log(response.teacherAllotment);
+            setStudentOptions(options);
         } catch (error) {
-            console.error("Error fetching allotments", error)
+            console.error("Error fetching allotments", error);
         }
-    }
+    };
+    
 
     const getCourseData = async () => {
         try {

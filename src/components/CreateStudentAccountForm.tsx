@@ -53,6 +53,7 @@ interface FormData {
     name: string;
     guardian_name: string;
     email: string;
+    password: string;
     contact_number: string;
     alternate_contact_number: string;
     preferred_language: string;
@@ -65,6 +66,7 @@ const CreateStudentAccountForm = () => {
         name: "",
         guardian_name: "",
         email: "",
+        password: "",
         contact_number: "",
         alternate_contact_number: "",
         preferred_language: "",
@@ -85,6 +87,7 @@ const CreateStudentAccountForm = () => {
     const [previewUrls, setPreviewUrls] = useState<(string | null)[]>([null]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     const getCourse = useGetAndDelete(axios.get);
     const postStudent = usePostAndPut(axios.post);
@@ -93,7 +96,6 @@ const CreateStudentAccountForm = () => {
         try {
             const response = await getCourse.callApi("course/get", false, false);
             if (response?.course) {
-                console.log(response?.course)
                 setCourseList(response.course);
             }
         } catch (err) {
@@ -137,10 +139,9 @@ const CreateStudentAccountForm = () => {
 
     const handleCourseChange = (index: number, courseId: string) => {
         const updatedCourses = [...formData.courses];
-        console.log(courseList.find((c) => c.id == courseId)?.name || "")
         updatedCourses[index] = {
             course_id: courseId,
-            course_name: courseList.find((c) => c.id == courseId)?.name ?? undefined,
+            course_name: courseList.find((c) => c.id === courseId)?.name ?? undefined,
             timings: updatedCourses[index].timings || [{ from: "", to: "" }],
             billing: updatedCourses[index].billing,
         };
@@ -207,6 +208,7 @@ const CreateStudentAccountForm = () => {
         e.preventDefault();
         setIsSubmitting(true);
         setError(null);
+        setSuccessMessage(null);
 
         try {
             const payload = {
@@ -215,54 +217,39 @@ const CreateStudentAccountForm = () => {
                 registration_date: registrationDate
                     ? format(registrationDate, "yyyy-MM-dd")
                     : "",
-                courses: formData.courses.filter(
+                courses: formData.courses.length > 0 ? formData.courses.filter(
                     (course) =>
                         course.course_id &&
                         course.timings.some((t) => t.from && t.to)
-                ),
+                ) : [],
             };
-
-
-            console.log("Submission successful:", payload);
-
-            // const formDataPayload = new FormData();
-            // formDataPayload.append("name", payload.name);
-            // formDataPayload.append("guardian_name", payload.guardian_name);
-            // formDataPayload.append("email", payload.email);
-            // formDataPayload.append("contact_number", payload.contact_number);
-            // formDataPayload.append(
-            //     "alternate_contact_number",
-            //     payload.alternate_contact_number
-            // );
-            // formDataPayload.append("preferred_language", payload.preferred_language);
-            // formDataPayload.append("signature", payload.signature);
-            // formDataPayload.append("date_of_birth", payload.date_of_birth);
-            // formDataPayload.append("registration_date", payload.registration_date);
-
-            // // Append courses as JSON and receipt images with unique keys
-            // payload.courses.forEach((course, index) => {
-            //     if (course.billing.receipt_image) {
-            //         formDataPayload.append(
-            //             `receipt_images[${index}]`,
-            //             course.billing.receipt_image
-            //         );
-            //     }
-            // });
-            // formDataPayload.append("courses", JSON.stringify(payload.courses));
-
-            const response = await postStudent.callApi(
+            await postStudent.callApi(
                 "student/register",
                 payload,
                 true,
                 true,
                 true
             );
-            console.log("Submission successful:", response);
-
-
-        } catch (error) {
-            console.error("Error submitting form:", error);
-            setError("Failed to submit form. Please try again.");
+        } catch (error: any) {
+            console.error(error);
+            setFormData({
+                name: "",
+                guardian_name: "",
+                email: "",
+                password: "",
+                contact_number: "",
+                alternate_contact_number: "",
+                preferred_language: "",
+                signature: "",
+                courses: [
+                    {
+                        course_id: "",
+                        course_name: "",
+                        timings: [{ from: "", to: "" }],
+                        billing: { receipt_image: null, payment_method: "" },
+                    },
+                ],
+            })
         } finally {
             setIsSubmitting(false);
         }
@@ -289,6 +276,9 @@ const CreateStudentAccountForm = () => {
 
                 <CardContent className="space-y-6">
                     {error && <div className="text-red-500">{error}</div>}
+                    {successMessage && (
+                        <div className="text-green-500">{successMessage}</div>
+                    )}
                     <form onSubmit={handleSubmit}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -297,6 +287,30 @@ const CreateStudentAccountForm = () => {
                                     name="name"
                                     placeholder="Student Name"
                                     value={formData.name}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <Label>Email</Label>
+                                <Input
+                                    name="email"
+                                    type="email"
+                                    placeholder="example@email.com"
+                                    value={formData.email}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <Label>Password</Label>
+                                <Input
+                                    name="password"
+                                    type="password"
+                                    placeholder="Password..."
+                                    value={formData.password}
                                     onChange={handleInputChange}
                                     required
                                 />
@@ -332,18 +346,6 @@ const CreateStudentAccountForm = () => {
                                     name="guardian_name"
                                     placeholder="Guardian's Full Name"
                                     value={formData.guardian_name}
-                                    onChange={handleInputChange}
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <Label>Email</Label>
-                                <Input
-                                    name="email"
-                                    type="email"
-                                    placeholder="example@email.com"
-                                    value={formData.email}
                                     onChange={handleInputChange}
                                     required
                                 />
@@ -600,7 +602,7 @@ const CreateStudentAccountForm = () => {
                 </CardContent>
                 <div className="col-span-full mt-4 text-center text-sm">
                     Already have an account?{" "}
-                    <Link to="/" className="underline underline-offset-4 ">
+                    <Link to="/" className="underline underline-offset-4">
                         Login
                     </Link>
                 </div>

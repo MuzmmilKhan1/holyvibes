@@ -47,11 +47,20 @@ const usePostAndPut = (method: ApiMethod) => {
             return res;
         } catch (err: any) {
             toast.dismiss(toastId);
-            const errorMessage = err.response?.data?.error || err.response?.data?.message || "Something went wrong";
+            let errorMessage: string;
+            if (err.response?.data?.error && typeof err.response.data.error === "object") {
+                errorMessage = "Validation failed";
+                const validationErrors = Object.values(err.response.data.error).flat();
+                if (validationErrors.length > 0) {
+                    errorMessage += ": " + validationErrors.join("; ");
+                }
+            } else {
+                errorMessage = err.response?.data?.error || err.response?.data?.message || "Something went wrong";
+            }
             toast.error(errorMessage);
             setResponse(null);
-            setError(err);
-            return err;
+            setError(errorMessage);
+            throw new Error(errorMessage);
         } finally {
             setLoading(false);
         }

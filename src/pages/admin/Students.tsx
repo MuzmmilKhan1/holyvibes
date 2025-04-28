@@ -42,10 +42,6 @@ interface Student {
 interface FormData {
     id: number;
     studentID: number;
-    name: string;
-    email: string;
-    password: string;
-    isEdit: boolean;
 }
 
 interface Course {
@@ -69,14 +65,9 @@ const Students = () => {
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const [showBillingDetails, setShowBillingDetails] = useState<boolean>(false);
     const [showStdClassTimings, setShowStdClassTimings] = useState<boolean>(false);
-    const [showEditScreen, setShowEditScreen] = useState<boolean>(false);
     const [formData, setFormData] = useState<FormData>({
         id: 0,
         studentID: 0,
-        name: "",
-        email: "",
-        password: "",
-        isEdit: false,
     });
 
     const getStudents = async () => {
@@ -92,20 +83,12 @@ const Students = () => {
             console.log(selectedStudent?.class_course_data);
             setFormData({
                 id: selectedStudent?.id,
-                studentID: 0,
-                name: selectedStudent?.name,
-                email: selectedStudent?.email,
-                password: "",
-                isEdit: false,
+                studentID: selectedStudent.std_id ? selectedStudent.std_id : 0,
             });
         } else {
             setFormData({
                 id: 0,
                 studentID: 0,
-                name: "",
-                email: "",
-                password: "",
-                isEdit: false,
             });
             setShowBillingDetails(false);
             setShowStdClassTimings(false);
@@ -122,9 +105,6 @@ const Students = () => {
 
     const handleSaveDetails = async () => {
         await postLoginCredentials.callApi('student/assign_login_credentials', formData, true, false, true);
-        if (showEditScreen) {
-            setShowEditScreen(!showEditScreen)
-        }
         getStudents();
 
     };
@@ -144,8 +124,11 @@ const Students = () => {
 
     const getBillingDetails = async () => {
         if (selectedStudent?.id) {
-            await getBilling.callApi(`student/get/billing-details/${selectedStudent?.id}`, true, false);
-            setShowBillingDetails(true);
+            const response = await getBilling.callApi(`student/get/billing-details/${selectedStudent?.id}`, true, false);
+            console.log(response);
+            if (response?.data?.length > 0) {
+                setShowBillingDetails(!showBillingDetails);
+            }
         }
     };
 
@@ -246,42 +229,18 @@ const Students = () => {
                                             <Button variant="destructive" onClick={handleDelete}>
                                                 Delete
                                             </Button>
-                                            <Button
-                                                onClick={
-                                                    () => {
-                                                        setShowEditScreen(!showEditScreen)
-                                                        setFormData({
-                                                            id: selectedStudent.id,
-                                                            studentID: selectedStudent.std_id,
-                                                            name: selectedStudent.name,
-                                                            email: selectedStudent.email,
-                                                            password: "",
-                                                            isEdit: true,
-                                                        });
-                                                    }
-                                                }
-                                                variant="secondary">
-                                                {
-                                                    showEditScreen ?
-                                                        "Close" :
-                                                        "Edit"
-                                                }
-
-                                            </Button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
-                    {selectedStudent?.status === 'pending' && !showStdClassTimings || showEditScreen && (
+                    {(
                         <Card className="shadow-none mt-6">
                             <CardHeader>
                                 <CardTitle className="text-xl font-bold underline">
                                     {
-                                        showEditScreen ?
-                                            "Edit Login Credentials" :
-                                            "Assign Login Credentials"
+                                        "Assign and Edit ID"
                                     }
                                 </CardTitle>
                             </CardHeader>
@@ -297,42 +256,10 @@ const Students = () => {
                                             className="w-full mt-2"
                                         />
                                     </div>
-                                    <div>
-                                        <Label className="block text-sm font-medium">Name</Label>
-                                        <Input
-                                            id="name"
-                                            type="text"
-                                            value={formData?.name}
-                                            onChange={handleInputChange}
-                                            className="w-full mt-2"
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label className="block text-sm font-medium">Email</Label>
-                                        <Input
-                                            id="email"
-                                            type="email"
-                                            value={formData?.email}
-                                            onChange={handleInputChange}
-                                            className="w-full mt-2"
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label className="block text-sm font-medium">Password</Label>
-                                        <Input
-                                            id="password"
-                                            type="password"
-                                            value={formData?.password}
-                                            onChange={handleInputChange}
-                                            className="w-full mt-2"
-                                        />
-                                    </div>
                                     <div className="mt-4">
                                         <Button onClick={handleSaveDetails}>
                                             {
-                                                showEditScreen ?
-                                                    "Edit" :
-                                                    "Assign"
+                                                "Submit"
                                             }
                                         </Button>
                                     </div>
@@ -373,19 +300,19 @@ const Students = () => {
                         </Card>
                     ) : showStdClassTimings && (
                         <div className="mt-6">
-                            No enrollment details available.
+                            No classtime and course details found.
                         </div>
                     )}
                 </div>
             )}
 
-            {showBillingDetails && getBilling.response?.billingDetails && getBilling.response?.billingDetails?.length > 0 && (
+            {showBillingDetails && getBilling.response?.data && getBilling.response?.data?.length > 0 && (
                 <div>
                     <div className="underline text-xl font-bold mb-5">
                         Billing details
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-5">
-                        {getBilling.response?.billingDetails.map((billing: BillingDetail, index: number) => (
+                        {getBilling.response?.data.map((billing: BillingDetail, index: number) => (
                             <Card key={index} className="shadow-none">
                                 <CardContent>
                                     <div className="space-y-2">
