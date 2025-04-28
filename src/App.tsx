@@ -24,6 +24,8 @@ import Courses from './pages/student/Courses';
 import StudentPerformance from './pages/teacher/StudentPerformance';
 import StudentPerformanceReport from './pages/admin/StudentPerformanceReport';
 import AddStudent from './pages/teacher/AddStudent';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
 
 function App() {
   const navigate = useNavigate();
@@ -44,7 +46,10 @@ function App() {
       <Route path="/restriction-message" element={<RestrictionMessage />} />
       <Route path="/create-teacher-account" element={<CreateTeacherAccount />} />
       <Route path="/create-student-account" element={<CreateStudentAccount />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password/:token/:email" element={<ResetPassword />} />
 
+      
       <Route path="/admin" element={
         <RouteProtector isAuthenticate={true}>
           <Layout userType="admin" />
