@@ -138,7 +138,6 @@ const Courses = () => {
                                         Payment Details
                                     </CardTitle>
                                     <div className="space-y-6 ">
-                                        {/* Pakistani Students */}
                                         <div>
                                             <h3 className="text-lg font-semibold underline mb-3">For Pakistani Students</h3>
                                             <div className="space-y-2">
@@ -206,6 +205,7 @@ const Courses = () => {
                                     </ol>
                                 </div>
                             </div>
+                            
                             <Card className="w-full shadow-none">
                                 <CardHeader>
                                     <CardTitle className="text-xl font-bold underline ">

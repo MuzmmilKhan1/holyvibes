@@ -272,16 +272,20 @@ const ClassForm = () => {
                                                         <TableCell>
                                                             <a
                                                                 href={
-                                                                    classItem.classLink.startsWith('http://') ||
-                                                                        classItem.classLink.startsWith('https://')
-                                                                        ? classItem.classLink
-                                                                        : `https://${classItem.classLink}`
+                                                                    classItem.classLink ?
+                                                                    (
+                                                                        classItem.classLink.startsWith('http://') ||
+                                                                            classItem.classLink.startsWith('https://')
+                                                                            ? classItem.classLink
+                                                                            : `https://${classItem.classLink}`
+                                                                    ):
+                                                                    'N/A'
                                                                 }
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="text-blue-600 hover:underline"
                                                             >
-                                                                {classItem.classLink}
+                                                                {classItem.classLink || 'N/A'}
                                                             </a>
                                                         </TableCell>
                                                         <TableCell>

@@ -176,13 +176,13 @@ const EnrolledCourses: React.FC = () => {
                                                                     href={
                                                                         classItem?.class?.classLink?.startsWith('http')
                                                                             ? classItem?.class?.classLink
-                                                                            : `https://${classItem?.class?.classLink}`
+                                                                            : `https://${classItem?.class?.classLink}` 
                                                                     }
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
                                                                     className="text-blue-600 hover:underline"
                                                                 >
-                                                                    {classItem.class.classLink}
+                                                                    {classItem.class.classLink || 'N/A' }
                                                                 </a>
                                                             </TableCell>
                                                             <TableCell>{classItem?.course?.name || "N/A"}</TableCell>
