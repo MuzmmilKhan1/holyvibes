@@ -59,7 +59,7 @@ export function LoginForm({
       localStorage.setItem("expiry", expiryTime.toString());
 
       if (res.data.user.role === "admin") {
-        navigate(res.data.user.role + "/course")
+        navigate(res.data.user.role + "/dashboard")
       }
       if (res.data.user.role == "teacher" && res.data.status === "allowed") {
         navigate(res.data.user.role + "/dashboard")
