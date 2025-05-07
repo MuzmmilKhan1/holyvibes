@@ -245,7 +245,7 @@ const StudentPerformanceReport = () => {
     }, []);
 
     return (
-        <div className='p-6'>
+        <div className='p-5'>
             {isEditing ? (
                 <Card className="mx-auto shadow-none">
                     <CardHeader>

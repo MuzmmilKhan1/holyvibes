@@ -18,6 +18,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import SpinnerLoader from '@/components/SpinLoader'
 
 // Types
 interface Option {
@@ -110,7 +111,7 @@ const StudentPerformance = () => {
             console.error("Error fetching allotments", error);
         }
     };
-    
+
 
     const getCourseData = async () => {
         try {
@@ -209,7 +210,7 @@ const StudentPerformance = () => {
     }, [])
 
     return (
-        <div className="p-6 space-y-5">
+        <div className="p-5 space-y-5">
             <Card className="mx-auto shadow-none">
                 <CardHeader className="text-xl font-bold underline">
                     <CardTitle>
@@ -312,55 +313,60 @@ const StudentPerformance = () => {
                 </CardContent>
             </Card>
 
-            <Card className="mx-auto shadow-none">
-                <CardHeader className="text-xl font-bold underline">
-                    <CardTitle>
-                        Student Performance Table
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Student ID</TableHead>
-                                <TableHead>Course</TableHead>
-                                <TableHead>Attendance</TableHead>
-                                <TableHead>Class</TableHead>
-                                <TableHead>Oral/Written Test Remarks</TableHead>
-                                <TableHead>Participation</TableHead>
-                                <TableHead>Suggestions</TableHead>
-                                <TableHead>Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {getStdPerformance?.response?.data?.length > 0 &&
-                                getStdPerformance.response?.data.map((items: any) => (
-                                    <TableRow key={items.id}>
-                                        <TableCell>{items.student.std_id}</TableCell>
-                                        <TableCell>{items.course.name}</TableCell>
-                                        <TableCell>{items.attendance}</TableCell>
-                                        <TableCell className="text-wrap">{items?.class?.title || 'N/A'}</TableCell>
-                                        <TableCell>{items.test_remarks || 'N/A'}</TableCell>
-                                        <TableCell>{items.participation || 'N/A'}</TableCell>
-                                        <TableCell>{items.suggestions || 'N/A'}</TableCell>
-                                        <TableCell>
-                                            <Button onClick={() => handleEdit(items)}>
-                                                Edit
-                                            </Button>
-                                            <Button
-                                                className='ml-2'
-                                                variant='destructive'
-                                                onClick={() => handleDelete(items.id)}
-                                            >
-                                                Delete
-                                            </Button>
-                                        </TableCell>
+            {
+                getStdPerformance.loading ?
+                    <SpinnerLoader color='black' /> :
+                    <Card className="mx-auto shadow-none">
+                        <CardHeader className="text-xl font-bold underline">
+                            <CardTitle>
+                                Student Performance Table
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Student ID</TableHead>
+                                        <TableHead>Course</TableHead>
+                                        <TableHead>Attendance</TableHead>
+                                        <TableHead>Class</TableHead>
+                                        <TableHead>Oral/Written Test Remarks</TableHead>
+                                        <TableHead>Participation</TableHead>
+                                        <TableHead>Suggestions</TableHead>
+                                        <TableHead>Actions</TableHead>
                                     </TableRow>
-                                ))}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+                                </TableHeader>
+                                <TableBody>
+                                    {getStdPerformance?.response?.data?.length > 0 &&
+                                        getStdPerformance.response?.data.map((items: any) => (
+                                            <TableRow key={items.id}>
+                                                <TableCell>{items.student.std_id}</TableCell>
+                                                <TableCell>{items.course.name}</TableCell>
+                                                <TableCell>{items.attendance}</TableCell>
+                                                <TableCell className="text-wrap">{items?.class?.title || 'N/A'}</TableCell>
+                                                <TableCell>{items.test_remarks || 'N/A'}</TableCell>
+                                                <TableCell>{items.participation || 'N/A'}</TableCell>
+                                                <TableCell>{items.suggestions || 'N/A'}</TableCell>
+                                                <TableCell>
+                                                    <Button onClick={() => handleEdit(items)}>
+                                                        Edit
+                                                    </Button>
+                                                    <Button
+                                                        className='ml-2'
+                                                        variant='destructive'
+                                                        onClick={() => handleDelete(items.id)}
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+            }
+
         </div>
     )
 }

@@ -70,7 +70,7 @@ const TeacherAllotment = () => {
 
 
   return (
-    <div className="p-6">
+    <div className="p-5">
       {getAllottedStudents.loading ? (
         <SpinnerLoader color="black" />
       ) : (

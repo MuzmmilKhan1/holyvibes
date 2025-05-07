@@ -138,7 +138,7 @@ const Classes = () => {
     }, []);
 
     return (
-        <div className="p-6">
+        <div className="p-5">
             {
                 getClass.loading ? (
                     <SpinnerLoader color="black" />
@@ -185,12 +185,12 @@ const Classes = () => {
                                                         Edit
                                                     </Button>
                                                     <Button
-                                                     onClick={async () => {
-                                                        await deleteClass.callApi(`class/delete/${c.id}`, true, false)
-                                                        getAllClasses();
-                                                    }}
+                                                        onClick={async () => {
+                                                            await deleteClass.callApi(`class/delete/${c.id}`, true, false)
+                                                            getAllClasses();
+                                                        }}
 
-                                                    variant='destructive'>
+                                                        variant='destructive'>
                                                         Delete
                                                     </Button>
                                                 </TableCell>

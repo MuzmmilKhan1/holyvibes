@@ -47,9 +47,9 @@ export function LoginForm({
     console.log(userData);
     const res = await post.callApi("auth/login", userData, true, false, true);
     if (res.status == 200) {
-      
+
       const expiryTime = new Date().getTime() + 24 * 60 * 60 * 1000;
-      
+
       localStorage.setItem("token", res.data.token)
       const encryptedRole = CryptoJS.AES.encrypt(res.data.user.role, Helpers.secretKey).toString();
       const encryptedStatus = CryptoJS.AES.encrypt(res.data.status, Helpers.secretKey).toString();
@@ -57,12 +57,12 @@ export function LoginForm({
       localStorage.setItem("role", encryptedRole);
       localStorage.setItem("status", encryptedStatus);
       localStorage.setItem("expiry", expiryTime.toString());
-      
+
       if (res.data.user.role === "admin") {
         navigate(res.data.user.role + "/course")
       }
       if (res.data.user.role == "teacher" && res.data.status === "allowed") {
-        navigate(res.data.user.role + "/classes")
+        navigate(res.data.user.role + "/dashboard")
       }
       else if (res.data.user.role === "teacher" && res.data.status === "blocked") {
         navigate('/restriction-message')

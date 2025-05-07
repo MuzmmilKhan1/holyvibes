@@ -88,6 +88,8 @@ const CreateStudentAccountForm = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [showCoursesForm, setShowCoursesForm] = useState<boolean>(false);
+
 
     const getCourse = useGetAndDelete(axios.get);
     const postStudent = usePostAndPut(axios.post);
@@ -139,12 +141,15 @@ const CreateStudentAccountForm = () => {
 
     const handleCourseChange = (index: number, courseId: string) => {
         const updatedCourses = [...formData.courses];
+        console.log(updatedCourses)
         updatedCourses[index] = {
             course_id: courseId,
-            course_name: courseList.find((c) => c.id === courseId)?.name ?? undefined,
+            course_name: courseList.find((c) => c.id == courseId)?.name ?? undefined,
             timings: updatedCourses[index].timings || [{ from: "", to: "" }],
             billing: updatedCourses[index].billing,
         };
+        // console.log(courseList.find((c) => c.id == courseId))
+
         setFormData((prev) => ({ ...prev, courses: updatedCourses }));
     };
 
@@ -217,12 +222,8 @@ const CreateStudentAccountForm = () => {
                 registration_date: registrationDate
                     ? format(registrationDate, "yyyy-MM-dd")
                     : "",
-                courses: formData.courses.length > 0 ? formData.courses.filter(
-                    (course) =>
-                        course.course_id &&
-                        course.timings.some((t) => t.from && t.to)
-                ) : [],
             };
+            console.log(payload)
             await postStudent.callApi(
                 "student/register",
                 payload,
@@ -232,24 +233,6 @@ const CreateStudentAccountForm = () => {
             );
         } catch (error: any) {
             console.error(error);
-            setFormData({
-                name: "",
-                guardian_name: "",
-                email: "",
-                password: "",
-                contact_number: "",
-                alternate_contact_number: "",
-                preferred_language: "",
-                signature: "",
-                courses: [
-                    {
-                        course_id: "",
-                        course_name: "",
-                        timings: [{ from: "", to: "" }],
-                        billing: { receipt_image: null, payment_method: "" },
-                    },
-                ],
-            })
         } finally {
             setIsSubmitting(false);
         }
@@ -266,164 +249,216 @@ const CreateStudentAccountForm = () => {
 
     return (
         <div className="max-w-7xl mx-auto p-5">
-            <Card className="shadow-none">
-                <CardHeader>
-                    <CardTitle>Create Student Account</CardTitle>
-                    <CardDescription>
-                        Fill in the information below to request admin approval.
-                    </CardDescription>
-                </CardHeader>
+            {
+                !showCoursesForm &&
+                <Card className="shadow-none">
+                    <CardHeader>
+                        <CardTitle>Create Student Account</CardTitle>
+                        <CardDescription>
+                            Fill in the information below to create your account.
+                        </CardDescription>
+                    </CardHeader>
 
-                <CardContent className="space-y-6">
-                    {error && <div className="text-red-500">{error}</div>}
-                    {successMessage && (
-                        <div className="text-green-500">{successMessage}</div>
-                    )}
-                    <form onSubmit={handleSubmit}>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <Label>Name</Label>
-                                <Input
-                                    name="name"
-                                    placeholder="Student Name"
-                                    value={formData.name}
-                                    onChange={handleInputChange}
-                                    required
-                                />
+                    <CardContent className="space-y-6">
+                        {error && <div className="text-red-500">{error}</div>}
+                        {successMessage && (
+                            <div className="text-green-500">{successMessage}</div>
+                        )}
+                        <form onSubmit={handleSubmit}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <Label>Name</Label>
+                                    <Input
+                                        name="name"
+                                        placeholder="Student Name"
+                                        value={formData.name}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label>Email</Label>
+                                    <Input
+                                        name="email"
+                                        type="email"
+                                        placeholder="example@email.com"
+                                        value={formData.email}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label>Password</Label>
+                                    <Input
+                                        name="password"
+                                        type="password"
+                                        placeholder="Password..."
+                                        value={formData.password}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label>Date of Birth</Label>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                className="w-full justify-start text-left"
+                                            >
+                                                {dob
+                                                    ? format(dob, "MM/dd/yyyy")
+                                                    : "Pick a date"}
+                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0">
+                                            <Calendar
+                                                mode="single"
+                                                selected={dob}
+                                                onSelect={setDob}
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+
+                                <div>
+                                    <Label>Guardian Name</Label>
+                                    <Input
+                                        name="guardian_name"
+                                        placeholder="Guardian's Full Name"
+                                        value={formData.guardian_name}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label>Contact Number</Label>
+                                    <Input
+                                        name="contact_number"
+                                        placeholder="Phone number"
+                                        value={formData.contact_number}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label>Alternate Contact Number</Label>
+                                    <Input
+                                        name="alternate_contact_number"
+                                        placeholder="Optional"
+                                        value={formData.alternate_contact_number}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label>Languages Spoken</Label>
+                                    <Select
+                                        onValueChange={handleLanguageChange}
+                                        value={formData.preferred_language}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select language" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="urdu">Urdu</SelectItem>
+                                            <SelectItem value="english">English</SelectItem>
+                                            <SelectItem value="arabic">Arabic</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div>
+                                    <Label>Signature</Label>
+                                    <Input
+                                        name="signature"
+                                        placeholder="Type signature"
+                                        value={formData.signature}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label>Registration Date</Label>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                className="w-full justify-start text-left"
+                                            >
+                                                {registrationDate
+                                                    ? format(registrationDate, "MM/dd/yyyy")
+                                                    : "Pick a date"}
+                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0">
+                                            <Calendar
+                                                mode="single"
+                                                selected={registrationDate}
+                                                onSelect={setRegistrationDate}
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+
+                                <div>
+                                    <Label> Select Courses (Optional) </Label>
+                                    <Button
+                                        type="button"
+                                        size='sm' variant='outline'
+                                        onClick={
+                                            () => {
+                                                setShowCoursesForm(!showCoursesForm)
+                                            }
+                                        }
+                                    >
+                                        Select
+                                    </Button>
+                                </div>
+
                             </div>
 
-                            <div>
-                                <Label>Email</Label>
-                                <Input
-                                    name="email"
-                                    type="email"
-                                    placeholder="example@email.com"
-                                    value={formData.email}
-                                    onChange={handleInputChange}
-                                    required
-                                />
-                            </div>
 
-                            <div>
-                                <Label>Password</Label>
-                                <Input
-                                    name="password"
-                                    type="password"
-                                    placeholder="Password..."
-                                    value={formData.password}
-                                    onChange={handleInputChange}
-                                    required
-                                />
-                            </div>
 
-                            <div>
-                                <Label>Date of Birth</Label>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant="outline"
-                                            className="w-full justify-start text-left"
-                                        >
-                                            {dob
-                                                ? format(dob, "MM/dd/yyyy")
-                                                : "Pick a date"}
-                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0">
-                                        <Calendar
-                                            mode="single"
-                                            selected={dob}
-                                            onSelect={setDob}
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-                            </div>
+                            <CardFooter className="mt-6">
+                                <Button type="submit" disabled={isSubmitting}>
+                                    {isSubmitting ? "Submitting..." : "Submit"}
+                                </Button>
+                            </CardFooter>
+                        </form>
+                    </CardContent>
+                    <div className="col-span-full mt-4 text-center text-sm">
+                        Already have an account?{" "}
+                        <Link to="/" className="underline underline-offset-4">
+                            Login
+                        </Link>
+                    </div>
+                </Card>
+            }
 
-                            <div>
-                                <Label>Guardian Name</Label>
-                                <Input
-                                    name="guardian_name"
-                                    placeholder="Guardian's Full Name"
-                                    value={formData.guardian_name}
-                                    onChange={handleInputChange}
-                                    required
-                                />
-                            </div>
+            {
+                showCoursesForm &&
+                <Card className="shadow-none">
+                    <CardHeader>
+                        <CardTitle>Select courses with class timing</CardTitle>
+                        <CardDescription>
+                            Fill in the information below to request admin approval.
+                        </CardDescription>
+                    </CardHeader>
 
-                            <div>
-                                <Label>Contact Number</Label>
-                                <Input
-                                    name="contact_number"
-                                    placeholder="Phone number"
-                                    value={formData.contact_number}
-                                    onChange={handleInputChange}
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <Label>Alternate Contact Number</Label>
-                                <Input
-                                    name="alternate_contact_number"
-                                    placeholder="Optional"
-                                    value={formData.alternate_contact_number}
-                                    onChange={handleInputChange}
-                                />
-                            </div>
-
-                            <div>
-                                <Label>Languages Spoken</Label>
-                                <Select
-                                    onValueChange={handleLanguageChange}
-                                    value={formData.preferred_language}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select language" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="urdu">Urdu</SelectItem>
-                                        <SelectItem value="english">English</SelectItem>
-                                        <SelectItem value="arabic">Arabic</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div>
-                                <Label>Signature</Label>
-                                <Input
-                                    name="signature"
-                                    placeholder="Type signature"
-                                    value={formData.signature}
-                                    onChange={handleInputChange}
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <Label>Registration Date</Label>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant="outline"
-                                            className="w-full justify-start text-left"
-                                        >
-                                            {registrationDate
-                                                ? format(registrationDate, "MM/dd/yyyy")
-                                                : "Pick a date"}
-                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0">
-                                        <Calendar
-                                            mode="single"
-                                            selected={registrationDate}
-                                            onSelect={setRegistrationDate}
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-                            </div>
-                        </div>
+                    <CardContent className="space-y-6">
+                        {error && <div className="text-red-500">{error}</div>}
+                        {successMessage && (
+                            <div className="text-green-500">{successMessage}</div>
+                        )}
 
                         <div className="space-y-6 mt-6">
                             {formData.courses.map((course, courseIndex) => (
@@ -592,21 +627,31 @@ const CreateStudentAccountForm = () => {
                                 <Plus className="w-4 h-4 mr-2" /> Add Another Course
                             </Button>
                         </div>
-
                         <CardFooter className="mt-6">
-                            <Button type="submit" disabled={isSubmitting}>
+                            <Button
+                                onClick={handleSubmit}
+                                type="submit" disabled={isSubmitting}>
                                 {isSubmitting ? "Submitting..." : "Submit"}
                             </Button>
+                            <Button variant='destructive' className="ml-2" type="button"
+                                onClick={() => {
+                                    setShowCoursesForm(!showCoursesForm)
+                                }}
+                            >
+                                Cancel
+                            </Button>
                         </CardFooter>
-                    </form>
-                </CardContent>
-                <div className="col-span-full mt-4 text-center text-sm">
-                    Already have an account?{" "}
-                    <Link to="/" className="underline underline-offset-4">
-                        Login
-                    </Link>
-                </div>
-            </Card>
+                    </CardContent>
+                    <div className="col-span-full mt-4 text-center text-sm">
+                        Already have an account?{" "}
+                        <Link to="/" className="underline underline-offset-4">
+                            Login
+                        </Link>
+                    </div>
+                </Card>
+            }
+
+
         </div>
     );
 };

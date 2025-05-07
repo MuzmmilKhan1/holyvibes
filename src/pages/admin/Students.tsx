@@ -20,6 +20,14 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import usePostAndPut from "@/hooks/usePostAndPut";
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+import { Slash } from "lucide-react";
 
 interface Student {
     std_id: number;
@@ -65,6 +73,7 @@ const Students = () => {
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const [showBillingDetails, setShowBillingDetails] = useState<boolean>(false);
     const [showStdClassTimings, setShowStdClassTimings] = useState<boolean>(false);
+    const [showAssignId, setShowAssignId] = useState<boolean>(false);
     const [formData, setFormData] = useState<FormData>({
         id: 0,
         studentID: 0,
@@ -92,6 +101,7 @@ const Students = () => {
             });
             setShowBillingDetails(false);
             setShowStdClassTimings(false);
+            setShowAssignId(false);
         }
     }, [selectedStudent]);
 
@@ -106,7 +116,6 @@ const Students = () => {
     const handleSaveDetails = async () => {
         await postLoginCredentials.callApi('student/assign_login_credentials', formData, true, false, true);
         getStudents();
-
     };
 
     const handleDelete = async () => {
@@ -121,24 +130,57 @@ const Students = () => {
         }
     };
 
-
     const getBillingDetails = async () => {
         if (selectedStudent?.id) {
             const response = await getBilling.callApi(`student/get/billing-details/${selectedStudent?.id}`, true, false);
             console.log(response);
             if (response?.data?.length > 0) {
-                setShowBillingDetails(!showBillingDetails);
+                setShowBillingDetails(true);
+                setShowStdClassTimings(false);
+                setShowAssignId(false);
             }
         }
     };
 
+    // Breadcrumb click handlers
+    const handleStudentDetailsClick = () => {
+        if (selectedStudent) {
+            setShowBillingDetails(false);
+            setShowStdClassTimings(false);
+            setShowAssignId(false);
+        }
+    };
+
+    const handleClassTimingsClick = () => {
+        if (selectedStudent) {
+            setShowStdClassTimings(true);
+            setShowBillingDetails(false);
+            setShowAssignId(false);
+        }
+    };
+
+    const handleBillingClick = () => {
+        if (selectedStudent) {
+            getBillingDetails();
+            setShowStdClassTimings(false);
+            setShowAssignId(false);
+        }
+    };
+
+    const handleAssignIdClick = () => {
+        if (selectedStudent) {
+            setShowAssignId(true);
+            setShowBillingDetails(false);
+            setShowStdClassTimings(false);
+        }
+    };
 
     return (
-        <div className="p-6">
+        <div className="p-5">
             {getStd.loading ? (
                 <SpinnerLoader color="black" />
             ) : (
-                !selectedStudent && !showBillingDetails && (
+                !selectedStudent && (
                     <Card className="shadow-none">
                         <CardHeader>
                             <CardTitle className="text-xl font-bold underline ">
@@ -186,62 +228,89 @@ const Students = () => {
                 )
             )}
 
-            {selectedStudent && !showBillingDetails && (
+            {selectedStudent && (
                 <div>
-                    <Card className="shadow-none">
-                        <CardHeader>
-                            <CardTitle className="text-xl font-bold underline ">Student Details</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex flex-wrap w-full space-y-4 lg:space-y-0 lg:flex-row">
-                                <div className="w-full lg:w-1/4 space-y-2">
-                                    <p className="underline"><strong>Contact Info</strong></p>
-                                    <p><strong>Name:</strong> {selectedStudent?.name}</p>
-                                    <p><strong>Email:</strong> {selectedStudent?.email}</p>
-                                    <p><strong>Contact:</strong> {selectedStudent?.contact_number}</p>
-                                    <p><strong>Alternate Contact:</strong> {selectedStudent?.alternate_contact_number}</p>
-                                </div>
-                                <div className="w-full lg:w-1/4 space-y-2">
-                                    <p className="underline"><strong>Personal Details</strong></p>
-                                    <p><strong>Date of Birth:</strong> {selectedStudent?.date_of_birth}</p>
-                                    <p><strong>Preferred Language:</strong> {selectedStudent?.preferred_language}</p>
-                                    <p><strong>Guardian:</strong> {selectedStudent?.guardian_name}</p>
-                                    <p><strong>Signature:</strong> {selectedStudent?.signature}</p>
-                                    <p><strong>Registered On:</strong> {selectedStudent?.registration_date}</p>
-                                </div>
-                                <div className="w-full lg:w-1/4 space-y-2 flex flex-col items-start">
-                                    <p className="underline"><strong>Action</strong></p>
-                                    <div className="flex flex-col flex-wrap gap-3">
-                                        <div className="flex gap-2">
-                                            <Button onClick={getBillingDetails}>Billing Details</Button>
-                                            <Button onClick={() => setShowStdClassTimings(!showStdClassTimings)}>
-                                                {
-                                                    showStdClassTimings ?
-                                                        "Cancel" :
-                                                        "Class time"
-                                                }
-                                            </Button>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <Button variant="outline" onClick={() => setSelectedStudent(null)}>
-                                                Close
-                                            </Button>
-                                            <Button variant="destructive" onClick={handleDelete}>
-                                                Delete
-                                            </Button>
+                    <div className="p-3 border w-full mb-2 rounded-xl">
+                        <Breadcrumb>
+                            <BreadcrumbList>
+                                <BreadcrumbItem>
+                                    <BreadcrumbLink onClick={handleStudentDetailsClick} className="cursor-pointer">
+                                        Student Details
+                                    </BreadcrumbLink>
+                                </BreadcrumbItem>
+                                <BreadcrumbSeparator>
+                                    <Slash />
+                                </BreadcrumbSeparator>
+                                <BreadcrumbItem>
+                                    <BreadcrumbLink onClick={handleClassTimingsClick} className="cursor-pointer">
+                                        Class Timings
+                                    </BreadcrumbLink>
+                                </BreadcrumbItem>
+                                <BreadcrumbSeparator>
+                                    <Slash />
+                                </BreadcrumbSeparator>
+                                <BreadcrumbItem>
+                                    <BreadcrumbLink onClick={handleBillingClick} className="cursor-pointer">
+                                        Billing
+                                    </BreadcrumbLink>
+                                </BreadcrumbItem>
+                                <BreadcrumbSeparator>
+                                    <Slash />
+                                </BreadcrumbSeparator>
+                                <BreadcrumbItem>
+                                    <BreadcrumbLink onClick={handleAssignIdClick} className="cursor-pointer">
+                                        Assign ID
+                                    </BreadcrumbLink>
+                                </BreadcrumbItem>
+                            </BreadcrumbList>
+                        </Breadcrumb>
+                    </div>
+
+                    {!showBillingDetails && !showStdClassTimings && !showAssignId && (
+                        <Card className="shadow-none">
+                            <CardHeader>
+                                <CardTitle className="text-xl font-bold underline">Student Details</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex flex-wrap w-full space-y-4 lg:space-y-0 lg:flex-row">
+                                    <div className="w-full lg:w-1/4 space-y-2">
+                                        <p className="underline"><strong>Contact Info</strong></p>
+                                        <p><strong>Name:</strong> {selectedStudent?.name}</p>
+                                        <p><strong>Email:</strong> {selectedStudent?.email}</p>
+                                        <p><strong>Contact:</strong> {selectedStudent?.contact_number}</p>
+                                        <p><strong>Alternate Contact:</strong> {selectedStudent?.alternate_contact_number}</p>
+                                    </div>
+                                    <div className="w-full lg:w-1/4 space-y-2">
+                                        <p className="underline"><strong>Personal Details</strong></p>
+                                        <p><strong>Date of Birth:</strong> {selectedStudent?.date_of_birth}</p>
+                                        <p><strong>Preferred Language:</strong> {selectedStudent?.preferred_language}</p>
+                                        <p><strong>Guardian:</strong> {selectedStudent?.guardian_name}</p>
+                                        <p><strong>Signature:</strong> {selectedStudent?.signature}</p>
+                                        <p><strong>Registered On:</strong> {selectedStudent?.registration_date}</p>
+                                    </div>
+                                    <div className="w-full lg:w-1/4 space-y-2 flex flex-col items-start">
+                                        <p className="underline"><strong>Action</strong></p>
+                                        <div className="flex flex-col flex-wrap gap-3">
+                                            <div className="flex gap-2">
+                                                <Button variant="outline" onClick={() => setSelectedStudent(null)}>
+                                                    Close
+                                                </Button>
+                                                <Button variant="destructive" onClick={handleDelete}>
+                                                    Delete
+                                                </Button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    {(
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {showAssignId && (
                         <Card className="shadow-none mt-6">
                             <CardHeader>
                                 <CardTitle className="text-xl font-bold underline">
-                                    {
-                                        "Assign and Edit ID"
-                                    }
+                                    Assign and Edit ID
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -258,9 +327,7 @@ const Students = () => {
                                     </div>
                                     <div className="mt-4">
                                         <Button onClick={handleSaveDetails}>
-                                            {
-                                                "Submit"
-                                            }
+                                            Submit
                                         </Button>
                                     </div>
                                 </div>
@@ -271,7 +338,7 @@ const Students = () => {
                     {showStdClassTimings && JSON.parse(selectedStudent?.class_course_data)?.length > 0 ? (
                         <Card className="shadow-none mt-6">
                             <CardHeader>
-                                <CardTitle className="text-xl font-bold underline ">
+                                <CardTitle className="text-xl font-bold underline">
                                     Class Time
                                 </CardTitle>
                             </CardHeader>
@@ -303,36 +370,33 @@ const Students = () => {
                             No classtime and course details found.
                         </div>
                     )}
-                </div>
-            )}
 
-            {showBillingDetails && getBilling.response?.data && getBilling.response?.data?.length > 0 && (
-                <div>
-                    <div className="underline text-xl font-bold mb-5">
-                        Billing details
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-5">
-                        {getBilling.response?.data.map((billing: BillingDetail, index: number) => (
-                            <Card key={index} className="shadow-none">
-                                <CardContent>
-                                    <div className="space-y-2">
-                                        <div className="w-full flex items-center justify-center">
-                                            <img src={billing.receipt} className="border p-2 rounded-xl" alt="Receipt" />
-                                        </div>
-                                        <p className="mt-5"><strong>Payment Method:</strong> {billing.paymentMethod}</p>
-                                        <p><strong>Payment Status:</strong> {billing.paymentStatus}</p>
-                                        <p><strong>Course:</strong> {billing.course?.name}</p>
-                                        <p><strong>Duration:</strong> {billing.course?.course_duration}</p>
-                                    </div>
-                                    <Button className="mt-4 w-full" onClick={() => {
-                                        setShowBillingDetails(false);
-                                    }}>
-                                        Close
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
+                    {showBillingDetails && getBilling.response?.data && getBilling.response?.data?.length > 0 && (
+                        <div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-5">
+                                {getBilling.response?.data.map((billing: BillingDetail, index: number) => (
+                                    <Card key={index} className="shadow-none">
+                                        <CardContent>
+                                            <div className="space-y-2">
+                                                <div className="w-full flex items-center justify-center">
+                                                    <img src={billing.receipt} className="border p-2 rounded-xl" alt="Receipt" />
+                                                </div>
+                                                <p className="mt-5"><strong>Payment Method:</strong> {billing.paymentMethod}</p>
+                                                <p><strong>Payment Status:</strong> {billing.paymentStatus}</p>
+                                                <p><strong>Course:</strong> {billing.course?.name}</p>
+                                                <p><strong>Duration:</strong> {billing.course?.course_duration}</p>
+                                            </div>
+                                            <Button className="mt-4 w-full" onClick={() => {
+                                                setShowBillingDetails(false);
+                                            }}>
+                                                Close
+                                            </Button>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

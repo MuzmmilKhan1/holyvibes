@@ -53,9 +53,9 @@ const ClassForm = () => {
     const [attendenceID, setAttendenceID] = useState<number>(0);
 
     const getCourse = useGetAndDelete(axios.get);
+    const getClass = useGetAndDelete(axios.get);
     const postClass = usePostAndPut(axios.post);
     const putClass = usePostAndPut(axios.put);
-    const getClass = useGetAndDelete(axios.get);
     const getStudents = useGetAndDelete(axios.get);
     const postAttendence = usePostAndPut(axios.post);
     const getAttendence = useGetAndDelete(axios.get);
@@ -154,7 +154,7 @@ const ClassForm = () => {
     }, []);
 
     return (
-        <div className="p-6">
+        <div className="p-5">
             {!showAttendenceForm && (
                 <div className="space-y-10">
                     <Card className="shadow-none">

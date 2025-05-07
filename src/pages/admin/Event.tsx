@@ -77,7 +77,6 @@ const Event = () => {
     const getStd = useGetAndDelete(axios.get);
     const addStd = usePostAndPut(axios.post);
 
-
     const [formData, setFormData] = useState<Omit<EventType, 'id'>>({
         title: '',
         description: '',
@@ -90,6 +89,7 @@ const Event = () => {
     const [showMemberBilling, setShowMemberBilling] = useState<boolean>(false);
     const [studentOptions, setStudentOptions] = useState([]);
     const [selectedStudents, setSelectedStudents] = useState<OptionType[]>([]);
+    const [showForm, setShowForm] = useState(false);
 
     const [data, setData] = useState(
         {
@@ -210,91 +210,107 @@ const Event = () => {
     }
 
     return (
-        <div className="w-full mx-auto p-6">
+        <div className="w-full mx-auto p-5">
             {!showMembers && !showMemberBilling && (
-                <div className="space-y-6 mx-auto">
+                <div className="space-y-4 mx-auto">
                     <Card className="shadow-none">
                         <CardHeader>
-                            <CardTitle className="text-xl font-bold underline">
-                                {eventId === 0 ? 'Create Event' : 'Edit Event'}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                <Input
-                                    type="text"
-                                    placeholder="Event Title"
-                                    value={formData.title}
-                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                    required
-                                />
-                                <Textarea
-                                    placeholder="Event Description"
-                                    value={formData.description}
-                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                    required
-                                />
-                                <Input
-                                    type="number"
-                                    placeholder="Price (leave blank for free)"
-                                    value={formData.price ?? ''}
-                                    onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            price: e.target.value ? parseFloat(e.target.value) : null,
-                                        })
+                            <div className='flex items-center justify-between' >
+                                <CardTitle className="text-xl font-bold underline">
+                                    {eventId === 0 ? showForm ? 'Create Event' : "Events" : 'Edit Event'}
+                                </CardTitle>
+                                <Button
+                                    onClick={
+                                        () => {
+                                            setShowForm(!showForm)
+                                        }
                                     }
-                                />
-                                <Input
-                                    type="datetime-local"
-                                    value={formData.time}
-                                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                                    required
-                                />
-                                <Input
-                                    type="text"
-                                    placeholder="Event Link (optional)"
-                                    value={formData.link ?? ''}
-                                    onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-                                />
-                                {postEvent?.loading ? (
-                                    <Button type="submit" disabled>
-                                        {eventId === 0 ? 'Creating...' : 'Updating...'}
-                                    </Button>
-                                ) : (
-                                    <Button type="submit">
-                                        {eventId === 0 ? 'Create Event' : 'Update Event'}
-                                    </Button>
-                                )}
-                                {eventId !== 0 && (
-                                    <Button
-                                        variant="outline"
-                                        className="ml-2"
-                                        onClick={() => {
-                                            setEventId(0);
+                                    size='sm' >
+                                    {
+                                        !showForm ?
+                                            "Create" :
+                                            "Cancel"
+                                    }
+
+                                </Button>
+                            </div>
+                        </CardHeader>
+                        {
+                            showForm &&
+                            <CardContent>
+                                <form onSubmit={handleSubmit} className="space-y-4">
+                                    <Input
+                                        type="text"
+                                        placeholder="Event Title"
+                                        value={formData.title}
+                                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                        required
+                                    />
+                                    <Textarea
+                                        placeholder="Event Description"
+                                        value={formData.description}
+                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                        required
+                                    />
+                                    <Input
+                                        type="number"
+                                        placeholder="Price (leave blank for free)"
+                                        value={formData.price ?? ''}
+                                        onChange={(e) =>
                                             setFormData({
-                                                title: '',
-                                                description: '',
-                                                price: null,
-                                                time: '',
-                                                link: '',
-                                            });
-                                        }}
-                                    >
-                                        Cancel Edit
-                                    </Button>
-                                )}
-                            </form>
-                        </CardContent>
+                                                ...formData,
+                                                price: e.target.value ? parseFloat(e.target.value) : null,
+                                            })
+                                        }
+                                    />
+                                    <Input
+                                        type="datetime-local"
+                                        value={formData.time}
+                                        onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                                        required
+                                    />
+                                    <Input
+                                        type="text"
+                                        placeholder="Event Link (optional)"
+                                        value={formData.link ?? ''}
+                                        onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+                                    />
+                                    {postEvent?.loading ? (
+                                        <Button type="submit" disabled>
+                                            {eventId === 0 ? 'Creating...' : 'Updating...'}
+                                        </Button>
+                                    ) : (
+                                        <Button type="submit">
+                                            {eventId === 0 ? 'Create Event' : 'Update Event'}
+                                        </Button>
+                                    )}
+                                    {eventId !== 0 && (
+                                        <Button
+                                            variant="outline"
+                                            className="ml-2"
+                                            onClick={() => {
+                                                setEventId(0);
+                                                setFormData({
+                                                    title: '',
+                                                    description: '',
+                                                    price: null,
+                                                    time: '',
+                                                    link: '',
+                                                });
+                                            }}
+                                        >
+                                            Cancel Edit
+                                        </Button>
+                                    )}
+                                </form>
+                            </CardContent>
+                        }
                     </Card>
 
                     {getEvent?.loading ? (
                         <SpinnerLoader color="black" />
                     ) : (
                         <Card className="shadow-none">
-                            <CardHeader>
-                                <CardTitle className="text-xl font-bold underline">All Events</CardTitle>
-                            </CardHeader>
                             <CardContent>
                                 <Table>
                                     <TableCaption>List of all created events.</TableCaption>

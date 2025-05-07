@@ -8,7 +8,6 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "./ui/button";
 import React from "react";
 
 type ClassTiming = {
@@ -23,7 +22,7 @@ type TeacherClassTimingsProps = {
     setShowClassManagement: (value: boolean) => void;
 };
 
-const TeacherClassTimings: React.FC<TeacherClassTimingsProps> = ({ classTimings, setShowClassManagement }) => {
+const TeacherClassTimings: React.FC<TeacherClassTimingsProps> = ({ classTimings, }) => {
     return (
         <Card className="shadow-none">
             <CardHeader>
@@ -49,14 +48,6 @@ const TeacherClassTimings: React.FC<TeacherClassTimingsProps> = ({ classTimings,
                         ))}
                     </TableBody>
                 </Table>
-                <div className="mt-4">
-                    <Button
-                        variant="secondary"
-                        onClick={() => setShowClassManagement(false)}
-                    >
-                        Close
-                    </Button>
-                </div>
             </CardContent>
         </Card>
     );

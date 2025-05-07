@@ -1,9 +1,10 @@
 
 const SpinnerLoader = ({ color }: { color: string }) => {
+    console.log(color)
     return (
         <div className="flex items-center justify-center">
             <svg
-                className={`animate-spin h-10 w-10 text-${color}`}
+                className={`animate-spin h-10 w-10 text-[#183e7a]`}
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"

@@ -26,6 +26,8 @@ import StudentPerformanceReport from './pages/admin/StudentPerformanceReport';
 import AddStudent from './pages/teacher/AddStudent';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
+import DashBoard from './pages/teacher/DashBoard';
+import AdminDashboard from './pages/admin/AdminDashboard';
 
 function App() {
   const navigate = useNavigate();
@@ -49,7 +51,6 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password/:token/:email" element={<ResetPassword />} />
 
-      
       <Route path="/admin" element={
         <RouteProtector isAuthenticate={true}>
           <Layout userType="admin" />
@@ -63,6 +64,8 @@ function App() {
         <Route path="allot-teacher" element={<AllotTeacher />} />
         <Route path="students" element={<Students />} />
         <Route path="student-Performance-report" element={<StudentPerformanceReport />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
+
       </Route>
 
       <Route path="/student" element={
@@ -70,7 +73,7 @@ function App() {
           <Layout userType="student" />
         </RouteProtector>
       }>
-        <Route path="enrolled-courses" element={<EnrolledCourses />} />
+        <Route path="enrolled-courses" element={<EnrolledCourses />} />za
         <Route path="policy" element={<Policy />} />
         <Route path="event" element={<UpcommmingEvents />} />
         <Route path="courses" element={<Courses />} />
@@ -87,7 +90,8 @@ function App() {
         <Route path="alloted-students" element={<TeacherAllotment />} />
         <Route path="student-performance" element={<StudentPerformance />} />
         <Route path="add-student" element={<AddStudent />} />
-        
+        <Route path="dashboard" element={<DashBoard />} />
+
       </Route>
     </Routes>
   );

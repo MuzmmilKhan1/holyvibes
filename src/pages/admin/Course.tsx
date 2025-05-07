@@ -46,6 +46,8 @@ const Course: React.FC = () => {
 
     const [courseData, setCourseData] = useState(defaultCourseData);
     const [showOutlines, setShowOutlines] = useState(false);
+    const [showCourseForm, setShowCourseForm] = useState(false);
+    const [showOutlineForm, setShowOutlineForm] = useState(false);
     const [courseID, setCourseID] = useState<number | null>(null);
     const [outlineID, setOutlineID] = useState<number>(0);
     const [outline, setOutline] = useState({
@@ -131,79 +133,98 @@ const Course: React.FC = () => {
             {!showOutlines && (
                 <div>
                     <div className="mx-auto p-6 border rounded-xl">
-                        <h1 className="text-xl font-bold underline mb-5">
-                            {isEditing ? "Edit Course" : "Add New Course"}
-                        </h1>
-                        <form onSubmit={handleSubmit}>
-                            <div className="mb-4">
-                                <Label htmlFor="name">Course Name</Label>
-                                <Input
-                                    id="name"
-                                    type="text"
-                                    placeholder="Enter course name"
-                                    value={courseData.name}
-                                    onChange={handleChange}
-                                />
-                            </div>
-                            <div className="mb-4">
-                                <Label htmlFor="description">Description</Label>
-                                <Textarea
-                                    id="description"
-                                    placeholder="Enter course description"
-                                    value={courseData.description}
-                                    onChange={handleChange}
-                                />
-                            </div>
-                            <div className="mb-4">
-                                <Label htmlFor="price">Price</Label>
-                                <Input
-                                    id="price"
-                                    type="number"
-                                    placeholder="Enter course price"
-                                    value={courseData.price}
-                                    onChange={handleChange}
-                                />
-                            </div>
-                            <div className="mb-4">
-                                <Label htmlFor="courseDuration">Course Duration</Label>
-                                <Input
-                                    id="courseDuration"
-                                    type="text"
-                                    placeholder="Enter course duration"
-                                    value={courseData.courseDuration}
-                                    onChange={handleChange}
-                                />
-                            </div>
-                            <div className="mb-4">
-                                <Label htmlFor="image">Course Image</Label>
-                                <Input
-                                    id="image"
-                                    type="file"
-                                    onChange={handleFileChange}
-                                />
-                            </div>
-                            <div className="flex items-start space-x-2">
-                                {postCourse.loading || putCourse.loading ? (
-                                    <div className="bg-black w-auto text-white py-1.5 px-3 rounded-md text-center">
-                                        loading...
-                                    </div>
-                                ) : (
-                                    <>
-                                        <Button type="submit">
-                                            {isEditing ? "Update" : "Submit"}
-                                        </Button>
-                                        {isEditing && (
-                                            <Button type="button" variant="outline" onClick={resetForm}>
-                                                Cancel
+                        <div className={`${showCourseForm && 'mb-4'} flex items-center justify-between`} >
+                            <h1 className={`text-xl font-bold underline `}>
+                                {isEditing ? "Edit Course" : showCourseForm ? "Add Courses" : "Courses"}
+                            </h1>
+                            <Button
+                                onClick={
+                                    () => {
+                                        setShowCourseForm(!showCourseForm)
+                                    }
+                                }
+                                size='sm' >
+                                {
+                                    !showCourseForm ?
+                                        "Create" :
+                                        "Cancel"
+                                }
+
+                            </Button>
+                        </div>
+                        {
+                            showCourseForm &&
+                            <form onSubmit={handleSubmit}>
+                                <div className="mb-4">
+                                    <Label htmlFor="name">Course Name</Label>
+                                    <Input
+                                        id="name"
+                                        type="text"
+                                        placeholder="Enter course name"
+                                        value={courseData.name}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <Label htmlFor="description">Description</Label>
+                                    <Textarea
+                                        id="description"
+                                        placeholder="Enter course description"
+                                        value={courseData.description}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <Label htmlFor="price">Price</Label>
+                                    <Input
+                                        id="price"
+                                        type="number"
+                                        placeholder="Enter course price"
+                                        value={courseData.price}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <Label htmlFor="courseDuration">Course Duration</Label>
+                                    <Input
+                                        id="courseDuration"
+                                        type="text"
+                                        placeholder="Enter course duration"
+                                        value={courseData.courseDuration}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <Label htmlFor="image">Course Image</Label>
+                                    <Input
+                                        id="image"
+                                        type="file"
+                                        onChange={handleFileChange}
+                                    />
+                                </div>
+                                <div className="flex items-start space-x-2">
+                                    {postCourse.loading || putCourse.loading ? (
+                                        <div className="bg-black w-auto text-white py-1.5 px-3 rounded-md text-center">
+                                            loading...
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <Button type="submit">
+                                                {isEditing ? "Update" : "Submit"}
                                             </Button>
-                                        )}
-                                    </>
-                                )}
-                            </div>
-                        </form>
+                                            {isEditing && (
+                                                <Button type="button" variant="outline" onClick={resetForm}>
+                                                    Cancel
+                                                </Button>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            </form>
+                        }
                     </div>
 
-                    <div className="mt-8 w-full">
+                    <div className="mt-4 w-full">
                         {getCourse.loading ? (
                             <SpinnerLoader color="black" />
                         ) : (
@@ -233,7 +254,7 @@ const Course: React.FC = () => {
                                                     <Button
                                                         onClick={
                                                             async () => {
-                                                                await deleteCourse.callApi(`course/delete/${course.id}`,true,false)
+                                                                await deleteCourse.callApi(`course/delete/${course.id}`, true, false)
                                                                 await getCourses();
                                                             }
                                                         }
@@ -266,42 +287,60 @@ const Course: React.FC = () => {
                 <div className="space-y-6">
                     <Card className="shadow-none">
                         <CardHeader>
-                            <CardTitle className="text-xl font-bold underline">Add Outline</CardTitle>
+                            <div className='flex items-center justify-between' >
+                                <CardTitle className="text-xl font-bold underline">
+                                    {showOutlineForm ? 'Create Event' : 'Outlines'}
+                                </CardTitle>
+                                <Button
+                                    onClick={
+                                        () => {
+                                            setShowOutlineForm(!showOutlineForm)
+                                        }
+                                    }
+                                    size='sm' >
+                                    {
+                                        !showOutlineForm ?
+                                            "Create" :
+                                            "Cancel"
+                                    }
+
+                                </Button>
+                            </div>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div>
-                                <Label htmlFor="outlineTitle">Title</Label>
-                                <Input
-                                    value={outline.title}
-                                    onChange={(e) => setOutline({ ...outline, title: e.target.value })}
-                                    id="outlineTitle"
-                                    placeholder="Enter outline title"
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="outlineDescription">Description</Label>
-                                <Textarea
-                                    value={outline.description}
-                                    onChange={(e) => setOutline({ ...outline, description: e.target.value })}
-                                    id="outlineDescription"
-                                    placeholder="Enter outline description"
-                                />
-                            </div>
-                            <Button onClick={addOutline}>Add Outline</Button>
-                            <Button
-                                variant="outline"
-                                className="ml-2"
-                                onClick={() => setShowOutlines(!showOutlines)}
-                            >
-                                Close
-                            </Button>
-                        </CardContent>
+                        {
+                            showOutlineForm &&
+                            <CardContent className="space-y-4">
+                                <div>
+                                    <Label htmlFor="outlineTitle">Title</Label>
+                                    <Input
+                                        value={outline.title}
+                                        onChange={(e) => setOutline({ ...outline, title: e.target.value })}
+                                        id="outlineTitle"
+                                        placeholder="Enter outline title"
+                                    />
+                                </div>
+                                <div>
+                                    <Label htmlFor="outlineDescription">Description</Label>
+                                    <Textarea
+                                        value={outline.description}
+                                        onChange={(e) => setOutline({ ...outline, description: e.target.value })}
+                                        id="outlineDescription"
+                                        placeholder="Enter outline description"
+                                    />
+                                </div>
+                                <Button onClick={addOutline}>Add Outline</Button>
+                                <Button
+                                    variant="outline"
+                                    className="ml-2"
+                                    onClick={() => setShowOutlines(!showOutlines)}
+                                >
+                                    Close
+                                </Button>
+                            </CardContent>
+                        }
                     </Card>
 
                     <Card className="shadow-none">
-                        <CardHeader>
-                            <CardTitle className="text-xl font-bold underline">Course Outlines</CardTitle>
-                        </CardHeader>
                         <CardContent>
                             <Table>
                                 <TableHeader>

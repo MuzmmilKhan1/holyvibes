@@ -32,6 +32,7 @@ const StudentPolicy = () => {
         title: '',
         description: ''
     });
+    const [showForm, setShowForm] = useState(false);
 
     const fetchPolicies = async () => {
         await getPolicy.callApi('student-policy/get', true, false);
@@ -68,48 +69,64 @@ const StudentPolicy = () => {
     }
 
     return (
-        <div className="max-w-full mx-auto p-6 space-y-6">
+        <div className="max-w-full mx-auto p-5 space-y-4">
             <Card className='shadow-none' >
                 <CardHeader>
-                    <CardTitle className='underline' >{formData.id === 0 ? 'Create New Policy' : 'Edit Policy'}</CardTitle>
+                    <div className='flex items-center justify-between' >
+                        <CardTitle className='text-xl font-bold underline' >{formData.id === 0 ? showForm ? "Add Policy" : 'Policies' : 'Edit Policy'}</CardTitle>
+                        <Button
+                            onClick={
+                                () => {
+                                    setShowForm(!showForm)
+                                }
+                            }
+                            size='sm' >
+                            {
+                                !showForm ?
+                                    "Create" :
+                                    "Cancel"
+                            }
+
+                        </Button>
+                    </div>
                 </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <Input
-                            type="text"
-                            placeholder="Policy Title"
-                            value={formData.title}
-                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                            required
-                        />
-                        <Textarea
-                            placeholder="Policy Description"
-                            value={formData.description}
-                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            required
-                        />
-                        {
-                            postPolicy?.loading ?
-                                <div className='flex'  >
-                                    <div className='px-4 py-1.5 bg-black text-white rounded-lg' >
-                                        {formData.id === 0 ? 'Creating...' : 'Updating...'}
-                                    </div>
-                                </div> :
-                                <Button type="submit">
-                                    {formData.id === 0 ? 'Create Policy' : 'Update Policy'}
-                                </Button>
-                        }
-                    </form>
-                </CardContent>
+                {
+                    showForm &&
+                    <CardContent>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <Input
+                                type="text"
+                                placeholder="Policy Title"
+                                value={formData.title}
+                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                required
+                            />
+                            <Textarea
+                                placeholder="Policy Description"
+                                value={formData.description}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                required
+                            />
+                            {
+                                postPolicy?.loading ?
+                                    <div className='flex'  >
+                                        <Button type='button' >
+                                            {formData.id === 0 ? 'Creating...' : 'Updating...'}
+                                        </Button>
+                                    </div> :
+                                    <Button type="submit">
+                                        {formData.id === 0 ? 'Create Policy' : 'Update Policy'}
+                                    </Button>
+                            }
+                        </form>
+                    </CardContent>
+                }
             </Card>
 
             {
                 getPolicy?.loading ?
                     <SpinnerLoader color='black' /> :
                     <Card className='shadow-none' >
-                        <CardHeader>
-                            <CardTitle className="text-xl font-bold underline ">Policies</CardTitle>
-                        </CardHeader>
                         <CardContent>
                             <Table>
                                 <TableHeader>

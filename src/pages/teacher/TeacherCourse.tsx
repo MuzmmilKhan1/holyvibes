@@ -39,7 +39,7 @@ const TeacherCourse = () => {
     }, []);
 
     return (
-        <div className="p-6">
+        <div className="p-5">
             {
                 !showOutlines &&
                 <div className=" w-full">
@@ -47,34 +47,42 @@ const TeacherCourse = () => {
                         <SpinnerLoader color="black" />
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
-
-                            {getCourses?.response?.course?.map((course: Course) => (
-                                <div
-                                    key={course.course.id}
-                                    className="bg-white rounded-2xl border overflow-hidden"
-                                >
-                                    <img
-                                        src={course.course.image}
-                                        alt={course.course.name}
-                                        className="w-full h-48 object-none"
-                                    />
-                                    <div className="p-4">
-                                        <h2 className="text-lg font-bold text-gray-800">{course.course.name}</h2>
-                                        <p className="text-gray-600 mt-1 text-sm">{course.course.description}</p>
-                                        <div className="mt-3 flex flex-col justify-between items-start">
-                                            <div className="flex flex-row items-center justify-between px-1 w-full">
-                                                <span className="text-gray-600 font-semibold">${course.course.price}</span>
-                                                <span className="text-sm text-gray-500">{course.course.course_duration}</span>
-                                            </div>
-                                            <div className="flex mt-2 items-center justify-between w-full">
-                                                <Button
-                                                    onClick={() => fetchCourseOutlines(course.course.id)}
-                                                    size="sm">See outlines</Button>
+                            {
+                                getCourses?.response?.course?.length > 0 ?
+                                    getCourses?.response?.course?.map((course: Course) => (
+                                        <div
+                                            key={course.course.id}
+                                            className="bg-white rounded-2xl border overflow-hidden"
+                                        >
+                                            <img
+                                                src={course.course.image}
+                                                alt={course.course.name}
+                                                className="w-full h-48 object-none"
+                                            />
+                                            <div className="p-4">
+                                                <h2 className="text-lg font-bold text-gray-800">{course.course.name}</h2>
+                                                <p className="text-gray-600 mt-1 text-sm">{course.course.description}</p>
+                                                <div className="mt-3 flex flex-col justify-between items-start">
+                                                    <div className="flex flex-row items-center justify-between px-1 w-full">
+                                                        <span className="text-gray-600 font-semibold">${course.course.price}</span>
+                                                        <span className="text-sm text-gray-500">{course.course.course_duration}</span>
+                                                    </div>
+                                                    <div className="flex mt-2 items-center justify-between w-full">
+                                                        <Button
+                                                            onClick={() => fetchCourseOutlines(course.course.id)}
+                                                            size="sm">See outlines</Button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
+                                    )
+                                    )
+                                    :
+                                    <div>
+                                        No courses assigned
                                     </div>
-                                </div>
-                            ))}
+
+                            }
                         </div>
                     )}
                 </div>

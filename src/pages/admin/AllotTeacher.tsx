@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import { Trash, Pencil } from "lucide-react";
 import usePostAndPut from "@/hooks/usePostAndPut";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import SpinnerLoader from "@/components/SpinLoader";
 
 interface OptionType {
     value: string;
@@ -36,7 +37,7 @@ interface Course {
 }
 
 interface TimeSlot {
-    id?: string; // Added to store the class timing ID
+    id?: string;
     from: string;
     to: string;
 }
@@ -61,6 +62,8 @@ const AllotTeacher = () => {
     const [classTimes, setClassTimes] = useState<TimeSlot[]>([{ from: "", to: "" }]);
     const [allotments, setAllotments] = useState<any[]>([]);
     const [editingId, setEditingId] = useState<string | null>(null);
+    const [showForm, setShowForm] = useState<boolean>(false);
+
 
     const getStudentsData = async () => {
         const response = await getStudents.callApi("student/get", true, false);
@@ -187,116 +190,144 @@ const AllotTeacher = () => {
     }, []);
 
     return (
-        <div className="p-6 space-y-10">
+        <div className="p-5 space-y-4">
             <Card className="w-full shadow-none">
-                <CardHeader>
-                    <CardTitle className="text-xl font-bold underline ">
-                        {editingId ? "Edit Allotment" : "Allot Teacher to Student"}
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div>
-                        <label className="block mb-1 text-sm font-medium">Select Student</label>
-                        <Select options={stdOptions} value={selectedStudent} onChange={setSelectedStudent} placeholder="Search student..." isSearchable />
-                    </div>
-                    <div>
-                        <label className="block mb-1 text-sm font-medium">Select Course</label>
-                        <Select options={courseOptions} value={selectedCourse} onChange={setSelectedCourse} placeholder="Search course..." isSearchable />
-                    </div>
-                    <div>
-                        <label className="block mb-1 text-sm font-medium">Select Teacher</label>
-                        <Select options={teacherOptions} value={selectedTeacher} onChange={setSelectedTeacher} placeholder="Search teacher..." isSearchable />
-                    </div>
-                    <div>
-                        <label className="block mb-2 text-sm font-medium">Class Times</label>
-                        {classTimes.map((slot, index) => (
-                            <div key={index} className="flex flex-wrap gap-2 items-center mb-2">
-                                <Input
-                                    type="time"
-                                    value={slot.from}
-                                    onChange={(e) => handleTimeChange(index, "from", e.target.value)}
-                                    className="w-[45%]"
-                                />
-                                <span className="text-gray-500">to</span>
-                                <Input
-                                    type="time"
-                                    value={slot.to}
-                                    onChange={(e) => handleTimeChange(index, "to", e.target.value)}
-                                    className="w-[45%]"
-                                />
-                                {classTimes.length > 1 && (
-                                    <Button
-                                        variant="destructive"
-                                        size="icon"
-                                        onClick={() => handleRemoveTimeSlot(index, slot.id)}
-                                    >
-                                        <Trash size={16} />
-                                    </Button>
-                                )}
-                            </div>
-                        ))}
-                        {!editingId && (
-                            <Button variant="outline" onClick={handleAddTimeSlot}>
-                                Add Time Slot
+                <CardHeader >
+                    <div className="flex items-center justify-between">
+                        <CardTitle className="text-xl font-bold underline  ">
+                            {editingId ? "Edit Allotment" : showForm ? "Allot Teacher to Student" : 'Alloted Teachers'}
+                        </CardTitle>
+                        {
+                            !showForm &&
+                            <Button
+                                onClick={
+                                    () => {
+                                        setShowForm(true)
+                                    }
+                                }
+                            >
+                                Allot
                             </Button>
-                        )}
+                        }
                     </div>
-
-                    <div className="w-full flex justify-start gap-4">
-                        <Button onClick={handleAllot}>
-                            {editingId ? "Update Allotment" : "Allot"}
-                        </Button>
-                        {editingId && (
-                            <Button variant="secondary" onClick={resetForm}>
-                                Cancel Edit
-                            </Button>
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card className="w-full shadow-none">
-                <CardHeader>
-                    <CardTitle className="text-xl font-bold underline ">Allotted Teachers</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Course</TableHead>
-                                <TableHead>Student</TableHead>
-                                <TableHead>Teacher</TableHead>
-                                <TableHead>Class Timings</TableHead>
-                                <TableHead>Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {allotments?.length > 0 && allotments.map((allotment, index) => (
-                                <TableRow key={index}>
-                                    <TableCell>{allotment.course.name}</TableCell>
-                                    <TableCell>{allotment.student.name}</TableCell>
-                                    <TableCell>{allotment.teacher.name}</TableCell>
-                                    <TableCell>
-                                        {allotment.student_class_timings.map((time: any, i: number) => (
-                                            <div key={i} className="text-sm">
-                                                From: {time.preferred_time_from} - To: {time.preferred_time_to}
-                                            </div>
-                                        ))}
-                                    </TableCell>
-                                    <TableCell className="space-x-2">
-                                        <Button size="icon" variant="outline" onClick={() => handleEdit(allotment)}>
-                                            <Pencil size={16} />
-                                        </Button>
-                                        <Button size="icon" variant="destructive" onClick={() => handleDelete(allotment.id)}>
+                {
+                    showForm &&
+                    <CardContent className="space-y-4">
+                        <div>
+                            <label className="block mb-1 text-sm font-medium">Select Student</label>
+                            <Select options={stdOptions} value={selectedStudent} onChange={setSelectedStudent} placeholder="Search student..." isSearchable />
+                        </div>
+                        <div>
+                            <label className="block mb-1 text-sm font-medium">Select Course</label>
+                            <Select options={courseOptions} value={selectedCourse} onChange={setSelectedCourse} placeholder="Search course..." isSearchable />
+                        </div>
+                        <div>
+                            <label className="block mb-1 text-sm font-medium">Select Teacher</label>
+                            <Select options={teacherOptions} value={selectedTeacher} onChange={setSelectedTeacher} placeholder="Search teacher..." isSearchable />
+                        </div>
+                        <div>
+                            <label className="block mb-2 text-sm font-medium">Class Times</label>
+                            {classTimes.map((slot, index) => (
+                                <div key={index} className="flex flex-wrap gap-2 items-center mb-2">
+                                    <Input
+                                        type="time"
+                                        value={slot.from}
+                                        onChange={(e) => handleTimeChange(index, "from", e.target.value)}
+                                        className="w-[45%]"
+                                    />
+                                    <span className="text-gray-500">to</span>
+                                    <Input
+                                        type="time"
+                                        value={slot.to}
+                                        onChange={(e) => handleTimeChange(index, "to", e.target.value)}
+                                        className="w-[45%]"
+                                    />
+                                    {classTimes.length > 1 && (
+                                        <Button
+                                            variant="destructive"
+                                            size="icon"
+                                            onClick={() => handleRemoveTimeSlot(index, slot.id)}
+                                        >
                                             <Trash size={16} />
                                         </Button>
-                                    </TableCell>
-                                </TableRow>
+                                    )}
+                                </div>
                             ))}
-                        </TableBody>
-                    </Table>
-                </CardContent>
+                            {!editingId && (
+                                <Button variant="outline" onClick={handleAddTimeSlot}>
+                                    Add Time Slot
+                                </Button>
+                            )}
+                        </div>
+
+                        <div className="w-full flex justify-start gap-4">
+                            <Button onClick={handleAllot}>
+                                {editingId ? "Update Allotment" : "Allot"}
+                            </Button>
+                            {editingId && (
+                                <Button variant="secondary" onClick={resetForm}>
+                                    Cancel Edit
+                                </Button>
+                            )}
+                            <Button
+                                variant='destructive'
+                                onClick={
+                                    () => {
+                                        setShowForm(false)
+                                    }
+                                }
+                            >
+                                Cancel
+                            </Button>
+                        </div>
+                    </CardContent>
+                }
             </Card>
+            {
+                getStdAllotment.loading ?
+                    <SpinnerLoader color="black" /> :
+                    <Card className="w-full shadow-none">
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Course</TableHead>
+                                        <TableHead>Student</TableHead>
+                                        <TableHead>Teacher</TableHead>
+                                        <TableHead>Class Timings</TableHead>
+                                        <TableHead>Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {allotments?.length > 0 && allotments.map((allotment, index) => (
+                                        <TableRow key={index}>
+                                            <TableCell>{allotment.course.name}</TableCell>
+                                            <TableCell>{allotment.student.name}</TableCell>
+                                            <TableCell>{allotment.teacher.name}</TableCell>
+                                            <TableCell>
+                                                {allotment.student_class_timings.map((time: any, i: number) => (
+                                                    <div key={i} className="text-sm">
+                                                        From: {time.preferred_time_from} - To: {time.preferred_time_to}
+                                                    </div>
+                                                ))}
+                                            </TableCell>
+                                            <TableCell className="space-x-2">
+                                                <Button size="icon" variant="outline" onClick={() => handleEdit(allotment)}>
+                                                    <Pencil size={16} />
+                                                </Button>
+                                                <Button size="icon" variant="destructive" onClick={() => handleDelete(allotment.id)}>
+                                                    <Trash size={16} />
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+            }
+
         </div>
     );
 };

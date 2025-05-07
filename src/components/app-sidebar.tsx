@@ -1,16 +1,17 @@
 import * as React from "react"
 import {
   Notebook,
-  School,
+  Plus,
   // School,
   // Settings2,
   User,
+  User2Icon,
 } from "lucide-react"
 import { PiStudentFill } from "react-icons/pi";
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
 import { SiCoursera } from "react-icons/si";
-import { MdUpcoming } from "react-icons/md";
+import { MdDashboard, MdUpcoming } from "react-icons/md";
 import { MdPolicy } from "react-icons/md";
 import {
   Sidebar,
@@ -32,6 +33,15 @@ let data = {
   // admin routers
   adminRoutes: [
     {
+      title: "Dashboard",
+      url: "/admin/dashboard",
+      icon: MdDashboard,
+      isActive: true,
+      items: [
+
+      ],
+    },
+    {
       title: "Courses",
       url: "/admin/course",
       icon: SiCoursera,
@@ -42,28 +52,31 @@ let data = {
     },
     {
       title: "Teacher",
-      url: "/admin/teacher",
+      url: "#",
       icon: User,
       isActive: true,
       items: [
         {
           title: "Classes",
           url: "/admin/classes",
-          icon: School,
-          isActive: true,
-          items: [
-    
-          ],
+        },
+        {
+          title: "Teachers",
+          url: "/admin/teacher",
         },
       ],
     },
-    
+
     {
       title: "Student",
-      url: "/admin/students",
+      url: "#",
       icon: PiStudentFill,
       isActive: true,
       items: [
+        {
+          title: "Students",
+          url: "/admin/students",
+        },
         {
           title: "Allot teachers",
           url: "/admin/allot-teacher",
@@ -88,14 +101,6 @@ let data = {
       items: [
       ],
     },
-    // {
-    //   title: "Settings",
-    //   url: "#",
-    //   icon: Settings2,
-    //   items: [
-
-    //   ],
-    // },
   ],
 
 
@@ -134,32 +139,56 @@ let data = {
   // teacher routers
   teacherRoutes: [
     {
+      title: "Dashboard",
+      url: "/teacher/dashboard",
+      icon: MdDashboard,
+      isActive: true,
+      items: [
+        
+      ],
+    },
+    {
       title: "Class",
       url: "/teacher/classes",
       icon: Notebook,
-      isActive: false,
+      isActive: true,
       items: [
-        {
-          title: "Add Students",
-          url: "/teacher/add-student",
-        },
       ],
     },
+    {
+      title: "Add Students",
+      url: "/teacher/add-student",
+      icon: Plus,
+      isActive: false,
+      items: [
 
+      ],
+    },
     {
       title: "Course",
       url: "/teacher/course",
       icon: SiCoursera,
+      isActive: true,
+      items: [
+        
+      ],
+    },
+    {
+      title: "Students",
+      url: "/teacher/alloted-students",
+      icon: User2Icon,
       isActive: false,
       items: [
-        {
-          title: "Students",
-          url: "/teacher/alloted-students",
-        },
-        {
-          title: "Performance Report",
-          url: "/teacher/student-performance",
-        },
+
+      ],
+    },
+    {
+      title: "Performance Report",
+      url: "/teacher/student-performance",
+      icon: Notebook,
+      isActive: false,
+      items: [
+
       ],
     },
 
@@ -186,7 +215,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<any>) {
 
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarContent>
+      <SidebarContent  >
         {
           props.userType?.startsWith("admin") &&
           <NavMain items={data.adminRoutes} />

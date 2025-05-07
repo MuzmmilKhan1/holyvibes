@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 import { Trash } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import SpinnerLoader from "@/components/SpinLoader";
 
 interface OptionType {
     value: string;
@@ -204,7 +205,7 @@ const AddStudent = () => {
     }, []);
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="p-5 space-y-6">
             <Card className="w-full shadow-none">
                 <CardHeader>
                     <CardTitle className="text-xl font-bold underline">
@@ -294,45 +295,50 @@ const AddStudent = () => {
             </Card>
 
 
-            <Card className="w-full shadow-none ">
-                <CardHeader>
-                    <CardTitle className="text-xl font-bold underline">
-                        Students
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Student ID</TableHead>
-                                <TableHead>Class</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {getStdWithClass?.response?.students?.length > 0 &&
-                                getStdWithClass.response.students.map((items: any) => (
-                                    <TableRow key={items.id}>
-                                        <TableCell>{items?.student?.std_id}</TableCell>
-                                        <TableCell>{items?.class.title}</TableCell>
-                                        <TableCell>
-                                            <Button
-                                                variant='destructive'
-                                                onClick={
-                                                    async () => {
-                                                        await deleteStdClass.callApi(`class/remove-std/${items.classID}/${items.student.id}/${items.id}`, true, false)
-                                                        await getStudents();
-                                                    }
-                                                }
-                                            >
-                                                Remove
-                                            </Button>
-                                        </TableCell>
+            {
+                getStdWithClass.loading ?
+                    <SpinnerLoader color="black" /> :
+                    <Card className="w-full shadow-none ">
+                        <CardHeader>
+                            <CardTitle className="text-xl font-bold underline">
+                                Students
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Student ID</TableHead>
+                                        <TableHead>Class</TableHead>
                                     </TableRow>
-                                ))}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+                                </TableHeader>
+                                <TableBody>
+                                    {getStdWithClass?.response?.students?.length > 0 &&
+                                        getStdWithClass.response.students.map((items: any) => (
+                                            <TableRow key={items.id}>
+                                                <TableCell>{items?.student?.std_id}</TableCell>
+                                                <TableCell>{items?.class.title}</TableCell>
+                                                <TableCell>
+                                                    <Button
+                                                        variant='destructive'
+                                                        onClick={
+                                                            async () => {
+                                                                await deleteStdClass.callApi(`class/remove-std/${items.classID}/${items.student.id}/${items.id}`, true, false)
+                                                                await getStudents();
+                                                            }
+                                                        }
+                                                    >
+                                                        Remove
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+            }
+
         </div>
     );
 };
