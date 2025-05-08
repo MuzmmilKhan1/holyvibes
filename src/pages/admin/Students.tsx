@@ -80,7 +80,7 @@ const Students = () => {
 
     useEffect(() => {
         if (selectedStudent) {
-            console.log(selectedStudent?.class_course_data);
+
             setFormData({
                 id: selectedStudent?.id,
                 studentID: selectedStudent.std_id ? selectedStudent.std_id : 0,
@@ -117,14 +117,14 @@ const Students = () => {
                 getStudents();
             }
         } catch (error) {
-            console.error("Error deleting student:", error);
+            throw new Error("Error deleting student");
         }
     };
 
     const getBillingDetails = async () => {
         if (selectedStudent?.id) {
             const response = await getBilling.callApi(`student/get/billing-details/${selectedStudent?.id}`, true, false);
-            console.log(response);
+
             return response?.data?.length > 0;
         }
         return false;
@@ -197,9 +197,9 @@ const Students = () => {
 
             {selectedStudent && (
                 <div>
-                    <div className="p-3 border w-full  rounded-xl mb-4">
-                        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-                            <TabsList className="grid w-full grid-cols-4">
+                    <div className="p-3 border   rounded-xl mb-4">
+                        <Tabs value={activeTab} onValueChange={handleTabChange} className="overflow-auto">
+                        <TabsList className="lg:grid lg:w-full grid-cols-4 ">
                                 <TabsTrigger value="student-details">Student Details</TabsTrigger>
                                 <TabsTrigger value="class-timings">Class Timings</TabsTrigger>
                                 <TabsTrigger value="billing">Billing</TabsTrigger>
@@ -208,9 +208,9 @@ const Students = () => {
                         </Tabs>
                     </div>
 
-                    <Tabs  value={activeTab} onValueChange={handleTabChange} className="w-full">
+                    <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                         <TabsContent value="student-details">
-                            <Card  className="shadow-none ">
+                            <Card className="shadow-none ">
                                 <CardHeader>
                                     <CardTitle className="text-xl font-bold underline">Student Details</CardTitle>
                                 </CardHeader>
@@ -302,9 +302,9 @@ const Students = () => {
                                                     <p><strong>Course:</strong> {billing.course?.name}</p>
                                                     <p><strong>Duration:</strong> {billing.course?.course_duration}</p>
                                                 </div>
-                                                <Button className="mt-4 w-full" onClick={() => setActiveTab("student-details")}>
+                                                {/* <Button className="mt-4 w-full" onClick={() => setActiveTab("student-details")}>
                                                     Close
-                                                </Button>
+                                                </Button> */}
                                             </CardContent>
                                         </Card>
                                     ))}
@@ -336,9 +336,9 @@ const Students = () => {
                                             />
                                         </div>
                                         <div className="flex gap-4 mt-4">
-                                            <Button variant="outline" onClick={() => setActiveTab("student-details")}>
+                                            {/* <Button variant="outline" onClick={() => setActiveTab("student-details")}>
                                                 Cancel
-                                            </Button>
+                                            </Button> */}
                                             <Button onClick={handleSaveDetails}>
                                                 Submit
                                             </Button>

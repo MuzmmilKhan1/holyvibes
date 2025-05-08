@@ -152,8 +152,8 @@ const Teacher = () => {
 
     const renderTabs = () => (
         <div className="p-3 border w-full  rounded-xl mb-4">
-            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-                <TabsList className="grid w-full grid-cols-4 ">
+            <Tabs value={activeTab} onValueChange={handleTabChange} className=" overflow-auto">
+                <TabsList className="lg:grid lg:w-full grid-cols-4 ">
                     <TabsTrigger value="teacher-details">Teacher Details</TabsTrigger>
                     <TabsTrigger value="class-timings">Class Timings</TabsTrigger>
                     <TabsTrigger value="assign-course">Assign Course</TabsTrigger>
