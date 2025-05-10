@@ -1,0 +1,29 @@
+/* Default styles for the A4 report */
+.a4-report {
+  box-sizing: border-box;
+}
+
+
+@media print {
+    body * {
+      visibility: hidden;
+    }
+    .a4-report,
+    .a4-report * {
+      visibility: visible;
+    }
+    .a4-report {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 210mm;
+      height: 297mm;
+      min-height: 297mm;
+      margin: 0;
+      padding: 5mm;
+      box-shadow: none;
+    }
+    button {
+      display: none;
+    }
+  }

@@ -21,6 +21,13 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import usePostAndPut from "@/hooks/usePostAndPut";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import {
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 
 interface Student {
     std_id: number;
@@ -62,6 +69,8 @@ const Students = () => {
     const getBilling = useGetAndDelete(axios.get);
     const postLoginCredentials = usePostAndPut(axios.post);
     const deleteStd = useGetAndDelete(axios.delete);
+    const getCourses = useGetAndDelete(axios.get);
+    const getFilteredStds = useGetAndDelete(axios.get);
 
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const [activeTab, setActiveTab] = useState("student-details");
@@ -69,12 +78,27 @@ const Students = () => {
         id: 0,
         studentID: 0,
     });
+    const [courseID, setCourseID] = useState<Number | null>(null);
+    const [students, setStudents] = useState([]);
+
 
     const getStudents = async () => {
-        await getStd.callApi("student/get", true, false);
+        const response = await getStd.callApi("student/get", true, false);
+        console.log(response);
+        setStudents(response?.students);
     };
 
+    const fetchCourses = async () => {
+        try {
+            await getCourses.callApi("course/get", false, false);
+        } catch (error) {
+            console.error("Error fetching courses:", error);
+        }
+    };
+
+
     useEffect(() => {
+        fetchCourses();
         getStudents();
     }, []);
 
@@ -144,54 +168,118 @@ const Students = () => {
 
     return (
         <div className="p-5">
-            {getStd.loading ? (
+            {getStd.loading || getFilteredStds.loading ? (
                 <SpinnerLoader color="black" />
             ) : (
                 !selectedStudent && (
-                    <Card className="shadow-none">
-                        <CardHeader>
-                            <CardTitle className="text-xl font-bold underline">
-                                Registered Students
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Student ID</TableHead>
-                                        <TableHead>Name</TableHead>
-                                        <TableHead>Email</TableHead>
-                                        <TableHead>Contact</TableHead>
-                                        <TableHead>DOB</TableHead>
-                                        <TableHead>Language</TableHead>
-                                        <TableHead>Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {getStd.response?.students?.map((student: Student) => (
-                                        <TableRow key={student.id}>
-                                            <TableCell>{student.std_id || 'N/A'}</TableCell>
-                                            <TableCell>{student.name}</TableCell>
-                                            <TableCell>{student.email}</TableCell>
-                                            <TableCell>{student.contact_number}</TableCell>
-                                            <TableCell>{student.date_of_birth}</TableCell>
-                                            <TableCell>{student.preferred_language}</TableCell>
-                                            <TableCell>
-                                                <Button
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        setSelectedStudent(student);
-                                                    }}
+                    <>
+
+
+
+                        <div className="mb-3 p-3 rounded-xl border" >
+                            <div className="mb-1 font-semibold" >
+                                Filters
+                            </div>
+                            <div className="space-x-2 flex items-center " >
+
+
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="outline" >
+                                            {courseID
+                                                ? getCourses?.response?.course?.find((c: { id: Number; }) => c.id === courseID)?.name
+                                                : "Courses"}
+                                        </Button>
+                                    </DropdownMenuTrigger>
+
+                                    <DropdownMenuContent className="w-56">
+                                        {getCourses?.response?.course?.map(
+                                            (course: { id: number; name: string }) => (
+                                                <DropdownMenuCheckboxItem
+                                                    key={course.id}
+                                                    checked={courseID === course.id}
+                                                    onCheckedChange={checked =>
+                                                        setCourseID(checked ? course.id : null)
+                                                    }
                                                 >
-                                                    See more
-                                                </Button>
-                                            </TableCell>
+                                                    {course.name}
+                                                </DropdownMenuCheckboxItem>
+                                            )
+                                        )}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+
+
+                                <Button
+                                    onClick={
+                                        async () => {
+                                            const response = await getFilteredStds.callApi(`student/get-filtered-stds/${courseID}`, true, false)
+                                            console.log(response.students)
+                                            setStudents(response.students)
+                                        }
+                                    }
+                                >
+                                    Apply
+                                </Button>
+                                <Button
+                                    onClick={
+                                        () => {
+                                            getStudents()
+                                        }
+                                    }
+                                >
+                                    Refresh
+                                </Button>
+                            </div>
+                        </div>
+
+
+
+                        <Card className="shadow-none">
+                            <CardHeader>
+                                <CardTitle className="text-xl font-bold underline">
+                                    Students
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Student ID</TableHead>
+                                            <TableHead>Name</TableHead>
+                                            <TableHead>Email</TableHead>
+                                            <TableHead>Contact</TableHead>
+                                            <TableHead>DOB</TableHead>
+                                            <TableHead>Language</TableHead>
+                                            <TableHead>Actions</TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {students?.map((student: Student) => (
+                                            <TableRow key={student.id}>
+                                                <TableCell>{student.std_id || 'N/A'}</TableCell>
+                                                <TableCell>{student.name}</TableCell>
+                                                <TableCell>{student.email}</TableCell>
+                                                <TableCell>{student.contact_number}</TableCell>
+                                                <TableCell>{student.date_of_birth}</TableCell>
+                                                <TableCell>{student.preferred_language}</TableCell>
+                                                <TableCell>
+                                                    <Button
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            setSelectedStudent(student);
+                                                        }}
+                                                    >
+                                                        See more
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                    </>
                 )
             )}
 
@@ -199,7 +287,7 @@ const Students = () => {
                 <div>
                     <div className="p-3 border   rounded-xl mb-4">
                         <Tabs value={activeTab} onValueChange={handleTabChange} className="overflow-auto">
-                        <TabsList className="lg:grid lg:w-full grid-cols-4 ">
+                            <TabsList className="lg:grid lg:w-full grid-cols-4 ">
                                 <TabsTrigger value="student-details">Student Details</TabsTrigger>
                                 <TabsTrigger value="class-timings">Class Timings</TabsTrigger>
                                 <TabsTrigger value="billing">Billing</TabsTrigger>

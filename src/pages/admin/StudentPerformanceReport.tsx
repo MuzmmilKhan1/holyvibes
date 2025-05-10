@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Select from "react-select";
 import toast from "react-hot-toast";
+import SpinnerLoader from "@/components/SpinLoader";
 
 interface OptionType {
     value: string;
@@ -355,64 +356,79 @@ const StudentPerformanceReport = () => {
                     </CardContent>
                 </Card>
             ) : (
-                <Card className="mx-auto shadow-none">
-                    <CardHeader className="text-xl font-bold underline">
-                        <CardTitle>
-                            Student Performance Report
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Student ID</TableHead>
-                                    <TableHead>Teacher ID</TableHead>
-                                    <TableHead>Course</TableHead>
-                                    <TableHead>Class</TableHead>
-                                    <TableHead>Attendance</TableHead>
-                                    <TableHead>Oral/Written Test Remarks</TableHead>
-                                    <TableHead>Participation</TableHead>
-                                    <TableHead>Suggestions</TableHead>
-                                    <TableHead>Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {getStdPerformance?.response?.data?.length > 0 ? (
-                                    getStdPerformance.response?.data.map((items: any) => (
-                                        <TableRow key={items.id}>
-                                            <TableCell>{items.student.std_id}</TableCell>
-                                            <TableCell>{items.teacher.teach_id}</TableCell>
-                                            <TableCell className="text-wrap">{items.course.name}</TableCell>
-                                            <TableCell className="text-wrap">{items?.class?.title || 'N/A'}</TableCell>
-                                            <TableCell>{items.attendance}</TableCell>
-                                            <TableCell className="text-wrap">{items.test_remarks || 'N/A'}</TableCell>
-                                            <TableCell className="text-wrap">{items.participation || 'N/A'}</TableCell>
-                                            <TableCell className="text-wrap">{items.suggestions || 'N/A'}</TableCell>
-                                            <TableCell>
-                                                <Button onClick={() => handleEdit(items)}>
-                                                    Edit
-                                                </Button>
-                                                <Button
-                                                    className='ml-2'
-                                                    variant='destructive'
-                                                    onClick={() => handleDelete(items.id)}
-                                                >
-                                                    Delete
-                                                </Button>
+
+                getStdPerformance.loading ?
+                    <SpinnerLoader color="black" /> :
+                    <Card className="mx-auto shadow-none">
+                        <CardHeader className="text-xl font-bold underline">
+                            <CardTitle>
+                                Student Performance Report
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="min-w-[100px]" >Student ID</TableHead>
+                                        <TableHead className="min-w-[100px]">Teacher ID</TableHead>
+                                        <TableHead className="min-w-[100px]" >Course</TableHead>
+                                        <TableHead className="min-w-[100px]">Class</TableHead>
+                                        <TableHead className="min-w-[100px]">Attendance</TableHead>
+                                        <TableHead className="min-w-[200px]">Oral/Written Test Remarks</TableHead>
+                                        <TableHead className="min-w-[200px]">Participation</TableHead>
+                                        <TableHead className="min-w-[200px]">Suggestions</TableHead>
+                                        <TableHead className="min-w-[200px]">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {getStdPerformance?.response?.data?.length > 0 ? (
+                                        getStdPerformance.response?.data.map((items: any) => (
+                                            <TableRow key={items.id}>
+                                                <TableCell>{items.student.std_id}</TableCell>
+                                                <TableCell>{items.teacher.teach_id}</TableCell>
+                                                <TableCell className="text-wrap">{items.course.name}</TableCell>
+                                                <TableCell className="text-wrap">{items?.class?.title || 'N/A'}</TableCell>
+                                                <TableCell>{items.attendance}</TableCell>
+                                                <TableCell className="whitespace-normal break-words">{items.test_remarks || 'N/A'}</TableCell>
+                                                <TableCell className="whitespace-normal break-words">{items.participation || 'N/A'}</TableCell>
+                                                <TableCell className="whitespace-normal break-words">{items.suggestions || 'N/A'}</TableCell>
+                                                <TableCell>
+                                                    <Button onClick={() => handleEdit(items)}>
+                                                        Edit
+                                                    </Button>
+                                                    {
+                                                        deletePerformance.loading ?
+                                                            <Button
+                                                                className='ml-2'
+                                                                variant='destructive'
+                                                                disabled
+                                                            >
+                                                                Delete
+                                                            </Button> :
+                                                            <Button
+                                                                className='ml-2'
+                                                                variant='destructive'
+                                                                onClick={() => handleDelete(items.id)}
+                                                            >
+                                                                Delete
+                                                            </Button>
+                                                    }
+
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={9} className="text-center">
+                                                No performance records found.
                                             </TableCell>
                                         </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={9} className="text-center">
-                                            No performance records found.
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+
             )}
         </div>
     );

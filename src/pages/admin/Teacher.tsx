@@ -18,6 +18,25 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import SpinnerLoader from "@/components/SpinLoader";
+import {
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+type Teacher = {
+    id: number;
+    teach_id?: string;
+    name: string;
+    application_date: string;
+    contact_number: string;
+    current_address: string;
+    date_of_birth: string;
+    email: string;
+    experience_Quran: string;
+};
+
 
 const Teacher = () => {
     const getTeacher = useGetAndDelete(axios.get);
@@ -27,6 +46,8 @@ const Teacher = () => {
     const postCourse = usePostAndPut(axios.post);
     const getTeacCourse = useGetAndDelete(axios.get);
     const removeCourse = useGetAndDelete(axios.delete);
+    const getFilteredTeacher = useGetAndDelete(axios.get);
+
 
     const [showTeacherDetails, setShowTeacherDetails] = useState(false);
     const [selectedTeacher, setSelectedTeacher] = useState<any>(null);
@@ -35,13 +56,20 @@ const Teacher = () => {
     const [teacherPassword, setTeacherPassword] = useState<string>("");
     const [teacherID, setTeacherID] = useState<string>("");
     const [activeTab, setActiveTab] = useState("teacher-details");
+    const [courseID, setCourseID] = useState<Number | null>(null);
+    const [studentID, setStudentID] = useState<Number | null>(null);
+    const [teachers, setTeachers] = useState<Teacher[]>([]);
+
+    
+    const getStd = useGetAndDelete(axios.get);
+
     const [assignCourse, setAssignCourse] = useState({
         courseId: "",
     });
 
     const getRequestedTeacher = async () => {
         const response = await getTeacher.callApi("teacher/get", false, false);
-        console.log(response.teachers);
+        setTeachers(response.teachers);
     };
 
     const fetchCourses = async () => {
@@ -51,6 +79,11 @@ const Teacher = () => {
             console.error("Error fetching courses:", error);
         }
     };
+
+    const getStudents = async () => {
+        await getStd.callApi("student/get", true, false);
+    };
+
 
     const handleTeacherDetails = (teacher: any) => {
         setTeacherID(teacher.teach_id);
@@ -148,6 +181,7 @@ const Teacher = () => {
     useEffect(() => {
         fetchCourses();
         getRequestedTeacher();
+        getStudents()
     }, []);
 
     const renderTabs = () => (
@@ -169,13 +203,95 @@ const Teacher = () => {
         <div className="p-5">
             {!showTeacherDetails && (
                 <div>
-                    {getTeacher.loading ? (
+                    {getTeacher.loading || getFilteredTeacher.loading ? (
                         <SpinnerLoader color="black" />
                     ) : (
-                        <TeacherTable
-                            teachers={getTeacher?.response?.teachers}
-                            handleTeacherDetails={handleTeacherDetails}
-                        />
+                        <>
+                            <div className="mb-3 p-3 rounded-xl border" >
+                                <div className="mb-1 font-semibold" >
+                                    Filters
+                                </div>
+                                <div className="space-x-2 flex items-center " >
+
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="outline" >
+                                                {courseID
+                                                    ? getCourses?.response?.course?.find((c: { id: Number; }) => c.id === courseID)?.name
+                                                    : "Courses"}
+                                            </Button>
+                                        </DropdownMenuTrigger>
+
+                                        <DropdownMenuContent className="w-56">
+                                            {getCourses?.response?.course?.map(
+                                                (course: { id: number; name: string }) => (
+                                                    <DropdownMenuCheckboxItem
+                                                        key={course.id}
+                                                        checked={courseID === course.id}
+                                                        onCheckedChange={checked =>
+                                                            setCourseID(checked ? course.id : null)
+                                                        }
+                                                    >
+                                                        {course.name}
+                                                    </DropdownMenuCheckboxItem>
+                                                )
+                                            )}
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="outline" >
+                                                {studentID
+                                                    ? getStd?.response?.students?.find((s: { id: Number; }) => s.id === studentID)?.name
+                                                    : "Students"}
+                                            </Button>
+                                        </DropdownMenuTrigger>
+
+                                        <DropdownMenuContent className="w-56">
+                                            {getStd?.response?.students?.map(
+                                                (student: { id: number; name: string; std_id: string }) => (
+                                                    <DropdownMenuCheckboxItem
+                                                        key={student.id}
+                                                        checked={studentID === student.id}
+                                                        onCheckedChange={checked => {
+                                                            setStudentID(checked ? student.id : null)
+                                                        }
+                                                        }
+                                                    >
+                                                        {`${student.name} - ${student.std_id}`}
+                                                    </DropdownMenuCheckboxItem>
+                                                )
+                                            )}
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+
+                                    <Button
+                                        onClick={
+                                            async () => {
+                                                const response = await getFilteredTeacher.callApi(`teacher/get-filtered-teacher/${studentID}/${courseID}`, true, false)
+                                                setTeachers(response.teachers)
+                                            }
+                                        }
+                                    >
+                                        Apply
+                                    </Button>
+                                    <Button
+                                        onClick={
+                                            () => {
+                                                getRequestedTeacher()
+                                            }
+                                        }
+                                    >
+                                        Refresh
+                                    </Button>
+                                </div>
+                            </div>
+                            <TeacherTable
+                                teachers={teachers}
+                                handleTeacherDetails={handleTeacherDetails}
+                            />
+                        </>
                     )}
                 </div>
             )}

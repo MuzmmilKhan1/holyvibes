@@ -56,6 +56,9 @@ const StudentPolicy = () => {
     };
 
     const handleEdit = (policy: Policy) => {
+        if(!showForm){
+            setShowForm(true)
+        }
         setFormData({
             id: policy.id,
             title: policy.title,

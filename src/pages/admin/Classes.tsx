@@ -11,11 +11,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import usePostAndPut from "@/hooks/usePostAndPut";
 import toast from "react-hot-toast";
+import {
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 
 const Classes = () => {
     const getClass = useGetAndDelete(axios.get);
     const putClass = usePostAndPut(axios.put);
     const deleteClass = useGetAndDelete(axios.delete);
+    const getCourses = useGetAndDelete(axios.get);
+    const getTeacher = useGetAndDelete(axios.get);
+    const getFilteredClasses = useGetAndDelete(axios.get);
 
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
@@ -28,18 +38,37 @@ const Classes = () => {
             to: ""
         }
     });
+    const [courseID, setCourseID] = useState<Number | null>(null);
+    const [teacherID, setTeacherID] = useState<Number | null>(null);
+    const [classes, setClasses] = useState([]);
+
 
     const getAllClasses = async () => {
         try {
             const response = await getClass.callApi("class/get-all", true, false);
             if (!response?.data) {
                 toast.error("Failed to load classes");
+                return;
             }
+            setClasses(response.data);
         } catch (error) {
             console.error("Error fetching classes", error);
             toast.error("Error fetching classes");
         }
     };
+
+    const fetchCourses = async () => {
+        try {
+            await getCourses.callApi("course/get", false, false);
+        } catch (error) {
+            console.error("Error fetching courses:", error);
+        }
+    };
+
+    const getRequestedTeacher = async () => {
+        await getTeacher.callApi("teacher/get", false, false);
+    };
+
 
     const handleEditClick = (classData: any) => {
         setIsEditing(true);
@@ -134,72 +163,165 @@ const Classes = () => {
     };
 
     useEffect(() => {
+        fetchCourses();
         getAllClasses();
+        getRequestedTeacher()
     }, []);
 
     return (
         <div className="p-5">
             {
-                getClass.loading ? (
+                getClass.loading || getFilteredClasses.loading ? (
                     <SpinnerLoader color="black" />
                 ) : !isEditing ? (
                     getClass?.response?.data?.length > 0 ? (
-                        <Card className="shadow-none">
-                            <CardHeader>
-                                <CardTitle className="text-xl font-bold underline">Classes</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <Table>
-                                    <TableCaption>List of all classes</TableCaption>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>TeacherID</TableHead>
-                                            <TableHead>Title</TableHead>
-                                            <TableHead>Class Link</TableHead>
-                                            <TableHead>Class Time</TableHead>
-                                            <TableHead>Action</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {getClass?.response?.data?.map((c: any) => (
-                                            <TableRow key={c?.id}>
-                                                <TableCell>{c?.teacherID || "N/A"}</TableCell>
-                                                <TableCell>{c?.title}</TableCell>
-                                                <TableCell>{c?.classLink || 'N/A'}</TableCell>
-                                                <TableCell>
-                                                    {c.teacher_class_timings?.length > 0 ? (
-                                                        c.teacher_class_timings.map((ct: any, idx: number) => (
-                                                            <div key={idx}>
-                                                                {ct.preferred_time_from} - {ct.preferred_time_to}
-                                                            </div>
-                                                        ))
-                                                    ) : (
-                                                        "No timings"
-                                                    )}
-                                                </TableCell>
-                                                <TableCell className="space-x-2">
-                                                    <Button
-                                                        onClick={() => handleEditClick(c)}
-                                                        variant='outline'
-                                                    >
-                                                        Edit
-                                                    </Button>
-                                                    <Button
-                                                        onClick={async () => {
-                                                            await deleteClass.callApi(`class/delete/${c.id}`, true, false)
-                                                            getAllClasses();
-                                                        }}
 
-                                                        variant='destructive'>
-                                                        Delete
-                                                    </Button>
-                                                </TableCell>
+
+                        <>
+                            <div className="mb-3 p-3 rounded-xl border" >
+                                <div className="mb-1 font-semibold" >
+                                    Filters
+                                </div>
+                                <div className="space-x-2 flex items-center " >
+
+
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="outline" >
+                                                {courseID
+                                                    ? getCourses?.response?.course?.find((c: { id: Number; }) => c.id === courseID)?.name
+                                                    : "Courses"}
+                                            </Button>
+                                        </DropdownMenuTrigger>
+
+                                        <DropdownMenuContent className="w-56">
+                                            {getCourses?.response?.course?.map(
+                                                (course: { id: number; name: string }) => (
+                                                    <DropdownMenuCheckboxItem
+                                                        key={course.id}
+                                                        checked={courseID === course.id}
+                                                        onCheckedChange={checked =>
+                                                            setCourseID(checked ? course.id : null)
+                                                        }
+                                                    >
+                                                        {course.name}
+                                                    </DropdownMenuCheckboxItem>
+                                                )
+                                            )}
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="outline" >
+                                                {teacherID
+                                                    ? getTeacher?.response?.teachers?.find((s: { id: Number; }) => s.id == teacherID)?.name
+                                                    : "Teachers"}
+                                            </Button>
+                                        </DropdownMenuTrigger>
+
+                                        <DropdownMenuContent className="w-56">
+                                            {getTeacher?.response?.teachers?.map(
+                                                (teacher: { id: number; name: string; teach_id: string }) => (
+                                                    <DropdownMenuCheckboxItem
+                                                        key={teacher.id}
+                                                        checked={teacherID === teacher.id}
+                                                        onCheckedChange={checked => {
+                                                            setTeacherID(checked ? teacher.id : null)
+                                                        }
+                                                        }
+                                                    >
+                                                        {`${teacher.name} - ${teacher.teach_id}`}
+                                                    </DropdownMenuCheckboxItem>
+                                                )
+                                            )}
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+
+
+                                    <Button
+                                        onClick={
+                                            async () => {
+                                                const response = await getFilteredClasses.callApi(`class/get-filtered-classes/${teacherID}/${courseID}`, true, false)
+                                                console.log(response)
+                                                setClasses(response.data)
+                                            }
+                                        }
+                                    >
+                                        Apply
+                                    </Button>
+                                    <Button
+                                        onClick={
+                                            () => {
+                                                getAllClasses()
+                                            }
+                                        }
+                                    >
+                                        Refresh
+                                    </Button>
+                                </div>
+                            </div>
+
+
+
+                            <Card className="shadow-none">
+                                <CardHeader>
+                                    <CardTitle className="text-xl font-bold underline">Classes</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <Table>
+                                        <TableCaption>List of all classes</TableCaption>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>TeacherID</TableHead>
+                                                <TableHead>Title</TableHead>
+                                                <TableHead>Class Link</TableHead>
+                                                <TableHead>Class Time</TableHead>
+                                                <TableHead>Action</TableHead>
                                             </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {classes?.map((c: any) => (
+                                                <TableRow key={c?.id}>
+                                                    <TableCell>{c?.teacherID || "N/A"}</TableCell>
+                                                    <TableCell>{c?.title}</TableCell>
+                                                    <TableCell>{c?.classLink || 'N/A'}</TableCell>
+                                                    <TableCell>
+                                                        {c.teacher_class_timings?.length > 0 ? (
+                                                            c.teacher_class_timings.map((ct: any, idx: number) => (
+                                                                <div key={idx}>
+                                                                    {ct.preferred_time_from} - {ct.preferred_time_to}
+                                                                </div>
+                                                            ))
+                                                        ) : (
+                                                            "No timings"
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell className="space-x-2">
+                                                        <Button
+                                                            onClick={() => handleEditClick(c)}
+                                                            variant='outline'
+                                                        >
+                                                            Edit
+                                                        </Button>
+                                                        <Button
+                                                            onClick={async () => {
+                                                                await deleteClass.callApi(`class/delete/${c.id}`, true, false)
+                                                                getAllClasses();
+                                                            }}
+
+                                                            variant='destructive'>
+                                                            Delete
+                                                        </Button>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </CardContent>
+                            </Card>
+                        </>
+
                     ) : (
                         <p>No classes found.</p>
                     )

@@ -1,6 +1,9 @@
+import { useEffect } from "react";
 
 const SpinnerLoader = ({ color }: { color: string }) => {
-    console.log(color)
+    useEffect(()=>{
+        console.log(color)
+    },[])
     return (
         <div className="flex items-center justify-center">
             <svg

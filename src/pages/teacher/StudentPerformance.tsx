@@ -62,6 +62,7 @@ const StudentPerformance = () => {
     const [studentOptions, setStudentOptions] = useState<Option[]>([])
     const [courseOptions, setCourseOptions] = useState<Option[]>([])
     const [classOptions, setClassOptions] = useState<Option[]>([])
+    const [showForm, setShowForm] = useState<boolean>(false);
 
     const getAllottedStudents = useGetAndDelete(axios.get)
     const getCourses = useGetAndDelete(axios.get)
@@ -162,7 +163,10 @@ const StudentPerformance = () => {
     }
 
     const handleEdit = (performance: any) => {
-        setIsEditing(true)
+        if (!showForm) {
+            setShowForm(true)
+        }
+        setIsEditing(true);
         setFormData({
             id: performance.id,
             classId: performance.class?.id || '',
@@ -213,159 +217,220 @@ const StudentPerformance = () => {
         <div className="p-5 space-y-5">
             <Card className="mx-auto shadow-none">
                 <CardHeader className="text-xl font-bold underline">
-                    <CardTitle>
-                        Student Performance Report
-                    </CardTitle>
+
+
+                    <div className="flex items-center justify-between" >
+                        <CardTitle className="text-xl font-bold underline">
+                            {showForm ? "Create Student Performance Report" : "Student Performance Report"}
+                        </CardTitle>
+                        <Button
+                            onClick={
+                                () => {
+                                    setShowForm(!showForm)
+                                }
+                            }
+                        >
+                            {
+                                showForm ?
+                                    "Cancel" :
+                                    "Create"
+                            }
+
+                        </Button>
+                    </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div>
-                            <Label htmlFor="courseId">Course</Label>
-                            <Select
-                                id="courseId"
-                                options={courseOptions}
-                                onChange={handleCourseChange}
-                                value={courseOptions.find(option => option.value === formData.courseId)}
-                                placeholder="Select course"
-                            />
-                        </div>
+                {
+                    showForm &&
+                    <CardContent className="space-y-4">
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <Label htmlFor="courseId">Course</Label>
+                                <Select
+                                    id="courseId"
+                                    options={courseOptions}
+                                    onChange={handleCourseChange}
+                                    value={courseOptions.find(option => option.value === formData.courseId)}
+                                    placeholder="Select course"
+                                />
+                            </div>
 
-                        <div>
-                            <Label htmlFor="studentId">Student</Label>
-                            <Select
-                                id="studentId"
-                                options={studentOptions}
-                                onChange={handleStudentChange}
-                                value={studentOptions.find(option => option.value === formData.studentId)}
-                                placeholder="Select student ID"
-                            />
-                        </div>
+                            <div>
+                                <Label htmlFor="studentId">Student</Label>
+                                <Select
+                                    id="studentId"
+                                    options={studentOptions}
+                                    onChange={handleStudentChange}
+                                    value={studentOptions.find(option => option.value === formData.studentId)}
+                                    placeholder="Select student ID"
+                                />
+                            </div>
 
-                        <div>
-                            <Label htmlFor="classId">Class</Label>
-                            <Select
-                                id="classId"
-                                options={classOptions}
-                                onChange={handleClassChange}
-                                value={classOptions.find(option => option.value === formData.classId)}
-                                placeholder="Select class"
-                            />
-                        </div>
+                            <div>
+                                <Label htmlFor="classId">Class</Label>
+                                <Select
+                                    id="classId"
+                                    options={classOptions}
+                                    onChange={handleClassChange}
+                                    value={classOptions.find(option => option.value === formData.classId)}
+                                    placeholder="Select class"
+                                />
+                            </div>
 
-                        <div>
-                            <Label htmlFor="attendance">Attendance</Label>
-                            <Input
-                                id="attendance"
-                                name="attendance"
-                                value={formData.attendance}
-                                onChange={handleChange}
-                                placeholder="e.g. 85%"
-                                required
-                            />
-                        </div>
+                            <div>
+                                <Label htmlFor="attendance">Attendance</Label>
+                                <Input
+                                    id="attendance"
+                                    name="attendance"
+                                    value={formData.attendance}
+                                    onChange={handleChange}
+                                    placeholder="e.g. 85%"
+                                    required
+                                />
+                            </div>
 
-                        <div>
-                            <Label htmlFor="testRemarks">Oral/Written Test Remarks</Label>
-                            <Textarea
-                                id="testRemarks"
-                                name="testRemarks"
-                                value={formData.testRemarks}
-                                onChange={handleChange}
-                                placeholder="Remarks on test performance"
-                                required
-                            />
-                        </div>
+                            <div>
+                                <Label htmlFor="testRemarks">Oral/Written Test Remarks</Label>
+                                <Textarea
+                                    id="testRemarks"
+                                    name="testRemarks"
+                                    value={formData.testRemarks}
+                                    onChange={handleChange}
+                                    placeholder="Remarks on test performance"
+                                    required
+                                />
+                            </div>
 
-                        <div>
-                            <Label htmlFor="classParticipation">Class Participation</Label>
-                            <Textarea
-                                id="classParticipation"
-                                name="classParticipation"
-                                value={formData.classParticipation}
-                                onChange={handleChange}
-                                placeholder="Comment on engagement in class"
-                                required
-                            />
-                        </div>
+                            <div>
+                                <Label htmlFor="classParticipation">Class Participation</Label>
+                                <Textarea
+                                    id="classParticipation"
+                                    name="classParticipation"
+                                    value={formData.classParticipation}
+                                    onChange={handleChange}
+                                    placeholder="Comment on engagement in class"
+                                    required
+                                />
+                            </div>
 
-                        <div>
-                            <Label htmlFor="suggestions">Suggestions for Improvement</Label>
-                            <Textarea
-                                id="suggestions"
-                                name="suggestions"
-                                value={formData.suggestions}
-                                onChange={handleChange}
-                                placeholder="Areas where the student can improve"
-                            />
-                        </div>
+                            <div>
+                                <Label htmlFor="suggestions">Suggestions for Improvement</Label>
+                                <Textarea
+                                    id="suggestions"
+                                    name="suggestions"
+                                    value={formData.suggestions}
+                                    onChange={handleChange}
+                                    placeholder="Areas where the student can improve"
+                                />
+                            </div>
 
-                        <div className="flex w-full items-start space-x-2">
-                            <Button type="submit">
-                                {isEditing ? 'Update Report' : 'Submit Report'}
-                            </Button>
-                            {isEditing && (
-                                <Button type="button" variant="outline" onClick={resetForm}>
-                                    Cancel
+                            <div className="flex w-full items-start space-x-2">
+                                <Button type="submit">
+                                    {isEditing ? 'Update Report' : 'Submit Report'}
                                 </Button>
-                            )}
-                        </div>
-                    </form>
-                </CardContent>
+                                {isEditing && (
+                                    <Button type="button" variant="outline" onClick={resetForm}>
+                                        Cancel
+                                    </Button>
+                                )}
+                            </div>
+                        </form>
+                    </CardContent>
+                }
             </Card>
 
-            {
-                getStdPerformance.loading ?
-                    <SpinnerLoader color='black' /> :
-                    <Card className="mx-auto shadow-none">
-                        <CardHeader className="text-xl font-bold underline">
-                            <CardTitle>
-                                Student Performance Table
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
+            {getStdPerformance.loading ? (
+                <div className="flex justify-center items-center h-64">
+                    <SpinnerLoader color="black" />
+                </div>
+            ) : (
+                <Card className=" shadow-none">
+                    <CardContent >
+                        <div className="overflow-x-auto">
                             <Table>
                                 <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Student ID</TableHead>
-                                        <TableHead>Course</TableHead>
-                                        <TableHead>Attendance</TableHead>
-                                        <TableHead>Class</TableHead>
-                                        <TableHead>Oral/Written Test Remarks</TableHead>
-                                        <TableHead>Participation</TableHead>
-                                        <TableHead>Suggestions</TableHead>
-                                        <TableHead>Actions</TableHead>
+                                    <TableRow >
+                                        <TableHead className="font-bold">Student ID</TableHead>
+                                        <TableHead className="font-bold">Course</TableHead>
+                                        <TableHead className="font-bold">Attendance</TableHead>
+                                        <TableHead className="font-bold">Class</TableHead>
+                                        <TableHead className="font-bold min-w-[200px]">
+                                            Oral/Written Test Remarks
+                                        </TableHead>
+                                        <TableHead className="font-bold min-w-[200px]">
+                                            Participation
+                                        </TableHead>
+                                        <TableHead className="font-bold min-w-[200px]">
+                                            Suggestions
+                                        </TableHead>
+                                        <TableHead className="font-bold">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {getStdPerformance?.response?.data?.length > 0 &&
-                                        getStdPerformance.response?.data.map((items: any) => (
-                                            <TableRow key={items.id}>
+                                    {getStdPerformance?.response?.data?.length > 0 ? (
+                                        getStdPerformance.response.data.map((items: any) => (
+                                            <TableRow key={items.id} className="hover:bg-gray-50">
                                                 <TableCell>{items.student.std_id}</TableCell>
                                                 <TableCell>{items.course.name}</TableCell>
-                                                <TableCell>{items.attendance}</TableCell>
-                                                <TableCell className="text-wrap">{items?.class?.title || 'N/A'}</TableCell>
-                                                <TableCell>{items.test_remarks || 'N/A'}</TableCell>
-                                                <TableCell>{items.participation || 'N/A'}</TableCell>
-                                                <TableCell>{items.suggestions || 'N/A'}</TableCell>
+                                                <TableCell>{items.attendance}%</TableCell>
+                                                <TableCell>{items.class?.title || "N/A"}</TableCell>
+                                                <TableCell className="whitespace-normal break-words">
+                                                    {items.test_remarks || "N/A"}
+                                                </TableCell>
+                                                <TableCell className="whitespace-normal break-words">
+                                                    {items.participation || "N/A"}
+                                                </TableCell>
+                                                <TableCell className="whitespace-normal break-words">
+                                                    {items.suggestions || "N/A"}
+                                                </TableCell>
                                                 <TableCell>
-                                                    <Button onClick={() => handleEdit(items)}>
-                                                        Edit
-                                                    </Button>
-                                                    <Button
-                                                        className='ml-2'
-                                                        variant='destructive'
-                                                        onClick={() => handleDelete(items.id)}
-                                                    >
-                                                        Delete
-                                                    </Button>
+                                                    {
+                                                        postPerformance.loading ?
+                                                            <Button
+                                                                disabled
+                                                                className="mr-2"
+                                                            >
+                                                                Edit
+                                                            </Button>
+                                                            :
+                                                            <Button
+                                                                onClick={() => handleEdit(items)}
+                                                                className="mr-2"
+                                                            >
+                                                                Edit
+                                                            </Button>
+                                                    }
+                                                    {
+                                                        deletePerformance.loading ?
+                                                            <Button
+                                                                variant="destructive"
+                                                                disabled
+                                                            >
+                                                                Delete
+                                                            </Button>
+                                                            :
+                                                            <Button
+                                                                variant="destructive"
+                                                                onClick={() => handleDelete(items.id)}
+                                                            >
+                                                                Delete
+                                                            </Button>
+                                                    }
                                                 </TableCell>
                                             </TableRow>
-                                        ))}
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={8} className="text-center py-4">
+                                                No student performance data available.
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
                                 </TableBody>
                             </Table>
-                        </CardContent>
-                    </Card>
-            }
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
         </div>
     )

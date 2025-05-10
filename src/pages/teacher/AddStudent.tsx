@@ -46,6 +46,8 @@ const AddStudent = () => {
     const [studentOptions, setStudentOptions] = useState<OptionType[]>([]);
     const [classOptions, setClassOptions] = useState<OptionType[]>([]);
     const [allotments, setAllotments] = useState<any[]>([]);
+    const [showForm, setShowForm] = useState<boolean>(false);
+
     const [formData, setFormData] = useState<FormData>({
         selectedClass: null,
         students: [{ selectedStudent: null, timings: [], selectedTimings: [] }],
@@ -184,6 +186,7 @@ const AddStudent = () => {
                     selectedClass: null,
                     students: [{ selectedStudent: null, timings: [], selectedTimings: [] }],
                 });
+                getStudents();
             }
         } catch (error) {
             console.error("Error assigning students", error);
@@ -205,93 +208,116 @@ const AddStudent = () => {
     }, []);
 
     return (
-        <div className="p-5 space-y-6">
+        <div className="p-5 space-y-4">
             <Card className="w-full shadow-none">
                 <CardHeader>
-                    <CardTitle className="text-xl font-bold underline">
-                        Assign Students to Class
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    {formData.students.map((studentData, index) => (
-                        <div key={index} className="space-y-4 border p-5 rounded-xl relative">
-                            <div>
-                                <label className="block mb-1 text-sm font-medium">Select Student {index + 1}</label>
-                                <Select
-                                    options={studentOptions}
-                                    value={studentData.selectedStudent}
-                                    onChange={(selected) => handleStudentChange(index, selected as OptionType | null)}
-                                    placeholder="Select student..."
-                                    isSearchable
-                                    className="basic-single-select"
-                                    classNamePrefix="select"
-                                />
-                            </div>
+                    <div className="flex items-center justify-between" >
+                        <CardTitle className="text-xl font-bold underline">
+                            {
+                                showForm ?
+                                    "Assign Students to Class" :
+                                    "Assigned Students to Classes"
+                            }
+                        </CardTitle>
+                        <Button
+                            onClick={
+                                () => {
+                                    setShowForm(!showForm)
+                                }
+                            }
+                        >
+                            {
+                                showForm ?
+                                    "Cancel" :
+                                    "Assign"
+                            }
 
-                            {studentData.selectedStudent && studentData.timings.length > 0 && (
+                        </Button>
+                    </div>
+                </CardHeader>
+                {
+                    showForm &&
+                    <CardContent className="space-y-6">
+                        {formData.students.map((studentData, index) => (
+                            <div key={index} className="space-y-4 border p-5 rounded-xl relative">
                                 <div>
-                                    <label className="block mb-1 text-sm font-medium">Select Timings to Assign</label>
+                                    <label className="block mb-1 text-sm font-medium">Select Student {index + 1}</label>
                                     <Select
-                                        options={studentData.timings.map(timing => ({
-                                            value: timing.id,
-                                            label: `${timing.preferred_time_from} - ${timing.preferred_time_to}`,
-                                        }))}
-                                        value={studentData.selectedTimings}
-                                        onChange={(selected) => handleTimingSelection(index, selected as OptionType[])}
-                                        placeholder="Select timings..."
-                                        isMulti
+                                        options={studentOptions}
+                                        value={studentData.selectedStudent}
+                                        onChange={(selected) => handleStudentChange(index, selected as OptionType | null)}
+                                        placeholder="Select student..."
                                         isSearchable
-                                        className="basic-multi-select"
+                                        className="basic-single-select"
                                         classNamePrefix="select"
                                     />
                                 </div>
-                            )}
 
-                            {studentData.selectedStudent && studentData.timings.length === 0 && (
-                                <p className="text-sm text-gray-500">No class timings available for this student.</p>
-                            )}
+                                {studentData.selectedStudent && studentData.timings.length > 0 && (
+                                    <div>
+                                        <label className="block mb-1 text-sm font-medium">Select Timings to Assign</label>
+                                        <Select
+                                            options={studentData.timings.map(timing => ({
+                                                value: timing.id,
+                                                label: `${timing.preferred_time_from} - ${timing.preferred_time_to}`,
+                                            }))}
+                                            value={studentData.selectedTimings}
+                                            onChange={(selected) => handleTimingSelection(index, selected as OptionType[])}
+                                            placeholder="Select timings..."
+                                            isMulti
+                                            isSearchable
+                                            className="basic-multi-select"
+                                            classNamePrefix="select"
+                                        />
+                                    </div>
+                                )}
 
-                            {formData.students.length > 1 && (
-                                <Button
-                                    variant="destructive"
-                                    size="icon"
-                                    onClick={() => handleRemoveStudent(index)}
-                                >
-                                    <Trash size={16} />
-                                </Button>
-                            )}
-                        </div>
-                    ))}
+                                {studentData.selectedStudent && studentData.timings.length === 0 && (
+                                    <p className="text-sm text-gray-500">No class timings available for this student.</p>
+                                )}
 
-                    <Button variant="outline" onClick={handleAddMore}>
-                        Add More
-                    </Button>
+                                {formData.students.length > 1 && (
+                                    <Button
+                                        variant="destructive"
+                                        size="icon"
+                                        onClick={() => handleRemoveStudent(index)}
+                                    >
+                                        <Trash size={16} />
+                                    </Button>
+                                )}
+                            </div>
+                        ))}
 
-                    <div>
-                        <label className="block mb-1 text-sm font-medium">Select Class</label>
-                        <Select
-                            options={classOptions}
-                            value={formData.selectedClass}
-                            onChange={(selected) => {
-                                setFormData(prev => ({ ...prev, selectedClass: selected as OptionType | null }));
-                                console.log(selected);
-                            }}
-                            placeholder="Select class..."
-                            isSearchable
-                            className="basic-single-select"
-                            classNamePrefix="select"
-                        />
-                    </div>
-
-                    <div className="w-full flex justify-start">
-                        <Button
-                            onClick={handleAssignStudents}
-                            disabled={assignStudents.loading}
-                        >
-                            {assignStudents.loading ? "Assigning..." : "Assign Students"}
+                        <Button variant="outline" onClick={handleAddMore}>
+                            Add More
                         </Button>
-                    </div>
-                </CardContent>
+
+                        <div>
+                            <label className="block mb-1 text-sm font-medium">Select Class</label>
+                            <Select
+                                options={classOptions}
+                                value={formData.selectedClass}
+                                onChange={(selected) => {
+                                    setFormData(prev => ({ ...prev, selectedClass: selected as OptionType | null }));
+                                    console.log(selected);
+                                }}
+                                placeholder="Select class..."
+                                isSearchable
+                                className="basic-single-select"
+                                classNamePrefix="select"
+                            />
+                        </div>
+
+                        <div className="w-full flex justify-start">
+                            <Button
+                                onClick={handleAssignStudents}
+                                disabled={assignStudents.loading}
+                            >
+                                {assignStudents.loading ? "Assigning..." : "Assign Students"}
+                            </Button>
+                        </div>
+                    </CardContent>
+                }
             </Card>
 
 
@@ -300,9 +326,6 @@ const AddStudent = () => {
                     <SpinnerLoader color="black" /> :
                     <Card className="w-full shadow-none ">
                         <CardHeader>
-                            <CardTitle className="text-xl font-bold underline">
-                                Students
-                            </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <Table>
@@ -319,17 +342,26 @@ const AddStudent = () => {
                                                 <TableCell>{items?.student?.std_id}</TableCell>
                                                 <TableCell>{items?.class.title}</TableCell>
                                                 <TableCell>
-                                                    <Button
-                                                        variant='destructive'
-                                                        onClick={
-                                                            async () => {
-                                                                await deleteStdClass.callApi(`class/remove-std/${items.classID}/${items.student.id}/${items.id}`, true, false)
-                                                                await getStudents();
-                                                            }
-                                                        }
-                                                    >
-                                                        Remove
-                                                    </Button>
+                                                    {
+                                                        deleteStdClass.loading ?
+                                                            <Button
+                                                                variant='destructive'
+                                                                disabled={true}
+                                                            >
+                                                                Remove
+                                                            </Button> :
+                                                            <Button
+                                                                variant='destructive'
+                                                                onClick={
+                                                                    async () => {
+                                                                        await deleteStdClass.callApi(`class/remove-std/${items.classID}/${items.student.id}/${items.id}`, true, false)
+                                                                        await getStudents();
+                                                                    }
+                                                                }
+                                                            >
+                                                                Remove
+                                                            </Button>
+                                                    }
                                                 </TableCell>
                                             </TableRow>
                                         ))}

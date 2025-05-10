@@ -51,6 +51,8 @@ const ClassForm = () => {
     const [isEdit, setIsEdit] = useState<boolean>(false);
     const [editClassId, setEditClassId] = useState<number | null>(null); // Track class ID for editing
     const [attendenceID, setAttendenceID] = useState<number>(0);
+    const [showForm, setShowForm] = useState<boolean>(false);
+
 
     const getCourse = useGetAndDelete(axios.get);
     const getClass = useGetAndDelete(axios.get);
@@ -92,10 +94,11 @@ const ClassForm = () => {
     };
 
     const handleEditClass = (classItem: ClassItem) => {
-        // Populate form with class data
+        if (!showForm) {
+            setShowForm(true)
+        }
         setTitle(classItem.title);
         setLink(classItem.classLink);
-        // Assuming only one timing per class for simplicity; adjust if multiple timings
         if (classItem.timings && classItem.timings.length > 0) {
             setTimeFrom(classItem.timings[0].from);
             setTimeTo(classItem.timings[0].to);
@@ -156,102 +159,120 @@ const ClassForm = () => {
     return (
         <div className="p-5">
             {!showAttendenceForm && (
-                <div className="space-y-10">
+                <div className="space-y-4">
                     <Card className="shadow-none">
                         <CardHeader>
-                            <CardTitle className="text-xl font-bold underline">
-                                {isEdit ? "Edit Class" : "Create Class"}
-                            </CardTitle>
+                            <div className="flex items-center justify-between" >
+                                <CardTitle className="text-xl font-bold underline">
+                                    {isEdit ? "Edit Class" : showForm ? "Create Class" : "Classes"}
+                                </CardTitle>
+                                <Button
+                                    onClick={
+                                        () => {
+                                            setShowForm(!showForm)
+                                        }
+                                    }
+                                >
+                                    {
+                                        showForm ?
+                                            "Cancel" :
+                                            "Create"
+                                    }
+
+                                </Button>
+                            </div>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            {!isEdit && (
+                        {
+                            showForm &&
+                            <CardContent className="space-y-4">
+                                {!isEdit && (
+                                    <div>
+                                        <Label htmlFor="courses">Select Courses</Label>
+                                        <ReactSelect
+                                            isMulti
+                                            options={courseOptions}
+                                            value={selectedCourseIds}
+                                            onChange={(selected) => setSelectedCourseIds(selected as OptionType[])}
+                                            placeholder="Select courses..."
+                                            className="basic-multi-select"
+                                            classNamePrefix="select"
+                                            isDisabled={isEdit} // Disable course selection in edit mode
+                                        />
+                                    </div>
+                                )}
                                 <div>
-                                    <Label htmlFor="courses">Select Courses</Label>
-                                    <ReactSelect
-                                        isMulti
-                                        options={courseOptions}
-                                        value={selectedCourseIds}
-                                        onChange={(selected) => setSelectedCourseIds(selected as OptionType[])}
-                                        placeholder="Select courses..."
-                                        className="basic-multi-select"
-                                        classNamePrefix="select"
-                                        isDisabled={isEdit} // Disable course selection in edit mode
+                                    <Label htmlFor="title">Title</Label>
+                                    <Input
+                                        id="title"
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
+                                        placeholder="Enter class title"
                                     />
                                 </div>
-                            )}
-                            <div>
-                                <Label htmlFor="title">Title</Label>
-                                <Input
-                                    id="title"
-                                    value={title}
-                                    onChange={(e) => setTitle(e.target.value)}
-                                    placeholder="Enter class title"
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="link">Link</Label>
-                                <Input
-                                    id="link"
-                                    value={link}
-                                    onChange={(e) => setLink(e.target.value)}
-                                    placeholder="Enter class link"
-                                />
-                            </div>
-                            <div>
-                                <Label>Class Time</Label>
-                                <div className="flex items-center space-x-4">
-                                    <div className="flex-1">
-                                        <Label htmlFor="timeFrom" className="text-sm">From</Label>
-                                        <Input
-                                            id="timeFrom"
-                                            type="time"
-                                            value={timeFrom}
-                                            onChange={(e) => setTimeFrom(e.target.value)}
-                                        />
-                                    </div>
-                                    <div className="flex-1">
-                                        <Label htmlFor="timeTo" className="text-sm">To</Label>
-                                        <Input
-                                            id="timeTo"
-                                            type="time"
-                                            value={timeTo}
-                                            onChange={(e) => setTimeTo(e.target.value)}
-                                        />
+                                <div>
+                                    <Label htmlFor="link">Link</Label>
+                                    <Input
+                                        id="link"
+                                        value={link}
+                                        onChange={(e) => setLink(e.target.value)}
+                                        placeholder="Enter class link"
+                                    />
+                                </div>
+                                <div>
+                                    <Label>Class Time</Label>
+                                    <div className="flex items-center space-x-4">
+                                        <div className="flex-1">
+                                            <Label htmlFor="timeFrom" className="text-sm">From</Label>
+                                            <Input
+                                                id="timeFrom"
+                                                type="time"
+                                                value={timeFrom}
+                                                onChange={(e) => setTimeFrom(e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="flex-1">
+                                            <Label htmlFor="timeTo" className="text-sm">To</Label>
+                                            <Input
+                                                id="timeTo"
+                                                type="time"
+                                                value={timeTo}
+                                                onChange={(e) => setTimeTo(e.target.value)}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="w-full flex items-start gap-2">
-                                {postClass.loading ? (
-                                    <Button disabled>Please wait...</Button>
-                                ) : (
-                                    <Button onClick={handleSubmit}>{isEdit ? "Update" : "Submit"}</Button>
-                                )}
-                                {isEdit && (
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => {
-                                            setTitle("");
-                                            setLink("");
-                                            setTimeFrom("");
-                                            setTimeTo("");
-                                            setTimingId(null);
-                                            setIsEdit(false);
-                                            setEditClassId(null);
-                                        }}
-                                    >
-                                        Cancel Edit
-                                    </Button>
-                                )}
-                            </div>
-                        </CardContent>
+                                <div className="w-full flex items-start gap-2">
+                                    {postClass.loading ? (
+                                        <Button disabled>Please wait...</Button>
+                                    ) : (
+                                        putClass.loading || postClass.loading ?
+                                            <Button disabled >{isEdit ? "Update" : "Submit"}</Button> :
+                                            <Button onClick={handleSubmit}>{isEdit ? "Update" : "Submit"}</Button>
+                                    )}
+                                    {isEdit && (
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => {
+                                                setTitle("");
+                                                setLink("");
+                                                setTimeFrom("");
+                                                setTimeTo("");
+                                                setTimingId(null);
+                                                setIsEdit(false);
+                                                setEditClassId(null);
+                                            }}
+                                        >
+                                            Cancel Edit
+                                        </Button>
+                                    )}
+                                </div>
+                            </CardContent>
+                        }
                     </Card>
                     {getClass.loading ? (
                         <SpinnerLoader color="black" />
                     ) : (
                         <Card className="shadow-none">
-                            <CardHeader>
-                                <CardTitle className="text-xl font-bold underline">All Classes</CardTitle>
-                            </CardHeader>
                             <CardContent>
                                 {getClass.response?.data?.length > 0 ? (
                                     <div className="overflow-x-auto">
@@ -273,13 +294,13 @@ const ClassForm = () => {
                                                             <a
                                                                 href={
                                                                     classItem.classLink ?
-                                                                    (
-                                                                        classItem.classLink.startsWith('http://') ||
-                                                                            classItem.classLink.startsWith('https://')
-                                                                            ? classItem.classLink
-                                                                            : `https://${classItem.classLink}`
-                                                                    ):
-                                                                    'N/A'
+                                                                        (
+                                                                            classItem.classLink.startsWith('http://') ||
+                                                                                classItem.classLink.startsWith('https://')
+                                                                                ? classItem.classLink
+                                                                                : `https://${classItem.classLink}`
+                                                                        ) :
+                                                                        'N/A'
                                                                 }
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
@@ -305,21 +326,37 @@ const ClassForm = () => {
                                                             )}
                                                         </TableCell>
                                                         <TableCell className="flex gap-2">
-                                                            <Button
-                                                                onClick={() => handleEditClass(classItem)}
-                                                            >
-                                                                Edit
-                                                            </Button>
-                                                            <Button
-                                                                onClick={async () => {
-                                                                    console.log("Delete Class:", classItem.id);
-                                                                    await deleteClass.callApi(`class/delete/${classItem.id}`, true, false)
-                                                                    getClassData();
-                                                                }}
-                                                                variant="destructive"
-                                                            >
-                                                                Delete
-                                                            </Button>
+                                                            {
+                                                                putClass.loading ?
+                                                                    <Button
+                                                                        disabled={true}
+                                                                    >
+                                                                        Edit
+                                                                    </Button> :
+                                                                    <Button
+                                                                        onClick={() => handleEditClass(classItem)}
+                                                                    >
+                                                                        Edit
+                                                                    </Button>
+                                                            }
+                                                            {
+                                                                deleteClass.loading ?
+                                                                    <Button
+                                                                        variant="destructive"
+                                                                        disabled={true}
+                                                                    >
+                                                                        Delete
+                                                                    </Button> :
+                                                                    <Button
+                                                                        onClick={async () => {
+                                                                            await deleteClass.callApi(`class/delete/${classItem.id}`, true, false)
+                                                                            getClassData();
+                                                                        }}
+                                                                        variant="destructive"
+                                                                    >
+                                                                        Delete
+                                                                    </Button>
+                                                            }
                                                             <Button
                                                                 variant="outline"
                                                                 onClick={async () => {

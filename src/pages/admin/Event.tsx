@@ -156,6 +156,9 @@ const Event = () => {
     };
 
     const handleEdit = (event: EventType) => {
+        if(!showForm){
+            setShowForm(true)
+        }
         setEventId(event.id);
         setFormData({
             title: event.title,
@@ -369,9 +372,9 @@ const Event = () => {
                                                             </DialogTrigger>
                                                             <DialogContent className="sm:max-w-[425px]">
                                                                 <DialogHeader>
-                                                                    <DialogTitle>Edit profile</DialogTitle>
+                                                                    <DialogTitle>Add students in event</DialogTitle>
                                                                     <DialogDescription>
-                                                                        Make changes to your profile here. Click save when you're done.
+                                                                        Click submit when all the students are selected.
                                                                     </DialogDescription>
                                                                 </DialogHeader>
                                                                 <div className="grid gap-4 py-4">

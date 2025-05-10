@@ -36,7 +36,13 @@ const TeacherTable: React.FC<TeacherTableProps> = ({ teachers, handleTeacherDeta
             </CardHeader>
             <CardContent>
                 <Table>
-                    <TableCaption>List of all teachers</TableCaption>
+                    <TableCaption>
+                        {
+                            teachers?.length > 0 ?
+                                "List of all teachers" :
+                                "Teacher not found"
+                        }
+                    </TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Teacher ID</TableHead>
@@ -51,23 +57,26 @@ const TeacherTable: React.FC<TeacherTableProps> = ({ teachers, handleTeacherDeta
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {teachers?.map((teacher) => (
-                            <TableRow key={teacher.id}>
-                                <TableCell>{teacher.teach_id || "N/A"}</TableCell>
-                                <TableCell>{teacher.name}</TableCell>
-                                <TableCell>{teacher.application_date}</TableCell>
-                                <TableCell>{teacher.contact_number}</TableCell>
-                                <TableCell>{teacher.current_address}</TableCell>
-                                <TableCell>{teacher.date_of_birth}</TableCell>
-                                <TableCell>{teacher.email}</TableCell>
-                                <TableCell>{teacher.experience_Quran}</TableCell>
-                                <TableCell>
-                                    <Button onClick={() => handleTeacherDetails(teacher)}>
-                                        See more
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
-                        ))}
+                        {
+                            teachers?.length > 0 &&
+                            teachers?.map((teacher) => (
+                                <TableRow key={teacher.id}>
+                                    <TableCell>{teacher.teach_id || "N/A"}</TableCell>
+                                    <TableCell>{teacher.name}</TableCell>
+                                    <TableCell>{teacher.application_date}</TableCell>
+                                    <TableCell>{teacher.contact_number}</TableCell>
+                                    <TableCell>{teacher.current_address}</TableCell>
+                                    <TableCell>{teacher.date_of_birth}</TableCell>
+                                    <TableCell>{teacher.email}</TableCell>
+                                    <TableCell>{teacher.experience_Quran}</TableCell>
+                                    <TableCell>
+                                        <Button onClick={() => handleTeacherDetails(teacher)}>
+                                            See more
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        }
                     </TableBody>
                 </Table>
             </CardContent>

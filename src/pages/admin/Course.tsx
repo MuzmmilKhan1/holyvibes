@@ -42,7 +42,7 @@ const Course: React.FC = () => {
     const postOutlines = usePostAndPut(axios.post);
     const deleteOutline = useGetAndDelete(axios.delete);
     const deleteCourse = useGetAndDelete(axios.delete);
-
+  
 
     const [courseData, setCourseData] = useState(defaultCourseData);
     const [showOutlines, setShowOutlines] = useState(false);
@@ -83,6 +83,9 @@ const Course: React.FC = () => {
     };
 
     const handleEditCourse = (course: Course) => {
+        if(!showCourseForm){
+            setShowCourseForm(true)
+        }
         setIsEditing(true);
         setCourseData({
             id: course.id as number,
@@ -98,6 +101,8 @@ const Course: React.FC = () => {
         setCourseData(defaultCourseData);
         setIsEditing(false);
     };
+
+
 
     const getCourses = async () => {
         await getCourse.callApi("course/get", false, false);
@@ -364,6 +369,9 @@ const Course: React.FC = () => {
                                                             title: outline.title,
                                                             description: outline.description,
                                                         });
+                                                        if(!showOutlineForm){
+                                                            setShowOutlineForm(true)
+                                                        }
                                                     }}
                                                 >
                                                     Edit
