@@ -324,8 +324,15 @@ const StudentPerformance = () => {
                             </div>
 
                             <div className="flex w-full items-start space-x-2">
-                                <Button type="submit">
-                                    {isEditing ? 'Update Report' : 'Submit Report'}
+                                <Button disabled={postPerformance.loading} type="submit">
+                                    {isEditing ?
+                                        postPerformance.loading ?
+                                            'Updating...' :
+                                            'Update Report' :
+                                        postPerformance.loading ?
+                                            'Submitting...' :
+                                            'Submit Report'
+                                    }
                                 </Button>
                                 {isEditing && (
                                     <Button type="button" variant="outline" onClick={resetForm}>

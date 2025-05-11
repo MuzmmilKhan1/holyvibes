@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom"
 import usePostAndPut from "@/hooks/usePostAndPut"
 import { useState } from "react"
 import axios from "axios"
-import CryptoJS from 'crypto-js';
+import * as CryptoJS from 'crypto-js';
 import Helpers from "@/config/Helpers"
 
 
@@ -69,7 +69,7 @@ export function LoginForm({
       }
 
       if (res.data.user.role == "student" && res.data.status === "allowed") {
-        navigate(res.data.user.role + "/courses")
+        navigate(res.data.user.role + "/dashboard")
       }
       else if (res.data.user.role === "student" && res.data.status === "blocked") {
         navigate('/restriction-message')

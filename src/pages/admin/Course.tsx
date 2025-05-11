@@ -42,7 +42,7 @@ const Course: React.FC = () => {
     const postOutlines = usePostAndPut(axios.post);
     const deleteOutline = useGetAndDelete(axios.delete);
     const deleteCourse = useGetAndDelete(axios.delete);
-  
+
 
     const [courseData, setCourseData] = useState(defaultCourseData);
     const [showOutlines, setShowOutlines] = useState(false);
@@ -83,7 +83,7 @@ const Course: React.FC = () => {
     };
 
     const handleEditCourse = (course: Course) => {
-        if(!showCourseForm){
+        if (!showCourseForm) {
             setShowCourseForm(true)
         }
         setIsEditing(true);
@@ -263,6 +263,7 @@ const Course: React.FC = () => {
                                                                 await getCourses();
                                                             }
                                                         }
+                                                        disabled={deleteCourse.loading}
                                                         size="sm" variant="destructive">
                                                         Delete
                                                     </Button>
@@ -369,7 +370,7 @@ const Course: React.FC = () => {
                                                             title: outline.title,
                                                             description: outline.description,
                                                         });
-                                                        if(!showOutlineForm){
+                                                        if (!showOutlineForm) {
                                                             setShowOutlineForm(true)
                                                         }
                                                     }}

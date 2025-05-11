@@ -156,7 +156,7 @@ const Event = () => {
     };
 
     const handleEdit = (event: EventType) => {
-        if(!showForm){
+        if (!showForm) {
             setShowForm(true)
         }
         setEventId(event.id);
@@ -283,8 +283,10 @@ const Event = () => {
                                             {eventId === 0 ? 'Creating...' : 'Updating...'}
                                         </Button>
                                     ) : (
-                                        <Button type="submit">
-                                            {eventId === 0 ? 'Create Event' : 'Update Event'}
+                                        <Button type="submit"
+                                            disabled={postEvent.loading}
+                                        >
+                                            {eventId === 0 ? postEvent.loading ? "Creating..." : 'Create Event' : postEvent.loading ? "Updating..." : 'Update Event'}
                                         </Button>
                                     )}
                                     {eventId !== 0 && (
@@ -347,6 +349,7 @@ const Event = () => {
                                                             className="ml-2"
                                                             size="sm"
                                                             onClick={() => handleDelete(event.id)}
+                                                            disabled={deleteEvent.loading}
                                                         >
                                                             Delete
                                                         </Button>
@@ -511,7 +514,7 @@ const Event = () => {
                                 <div className="space-y-2">
                                     <label className="font-medium">Payment Status</label>
                                     <Select
-                                        onValueChange={(value) => {
+                                        onValueChange={(value: any) => {
                                             setData({ ...data, paymentStatus: value });
                                         }}
                                     >
@@ -527,8 +530,14 @@ const Event = () => {
                                 </div>
 
                                 <div className="flex gap-2">
-                                    <Button onClick={saveBillingChanges} >
-                                        Save Changes
+                                    <Button
+                                        disabled={putEvent.loading}
+                                        onClick={saveBillingChanges} >
+                                        {
+                                            putEvent.loading ?
+                                                "Saving..." :
+                                                "Save Changes"
+                                        }
                                     </Button>
                                     <Button
                                         onClick={() => {

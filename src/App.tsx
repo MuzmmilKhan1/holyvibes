@@ -28,6 +28,8 @@ import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import DashBoard from './pages/teacher/DashBoard';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import Biling from './pages/student/Biling';
+import StudentDashboard from './pages/student/StudentDashboard';
 
 function App() {
   const navigate = useNavigate();
@@ -77,6 +79,9 @@ function App() {
         <Route path="policy" element={<Policy />} />
         <Route path="event" element={<UpcommmingEvents />} />
         <Route path="courses" element={<Courses />} />
+        <Route path="billing" element={<Biling />} />
+        <Route path="dashboard" element={<StudentDashboard />} />
+
 
       </Route>
 

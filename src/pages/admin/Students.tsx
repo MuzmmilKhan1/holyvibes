@@ -198,7 +198,7 @@ const Students = () => {
                                                 <DropdownMenuCheckboxItem
                                                     key={course.id}
                                                     checked={courseID === course.id}
-                                                    onCheckedChange={checked =>
+                                                    onCheckedChange={(checked:boolean) =>
                                                         setCourseID(checked ? course.id : null)
                                                     }
                                                 >
@@ -326,8 +326,14 @@ const Students = () => {
                                                     <Button variant="outline" onClick={() => setSelectedStudent(null)}>
                                                         Close
                                                     </Button>
-                                                    <Button variant="destructive" onClick={handleDelete}>
-                                                        Delete
+                                                    <Button
+                                                        disabled={deleteStd.loading}
+                                                        variant="destructive" onClick={handleDelete}>
+                                                        {
+                                                            deleteStd.loading ?
+                                                                "Deleting..." :
+                                                                "Delete"
+                                                        }
                                                     </Button>
                                                 </div>
                                             </div>
@@ -427,8 +433,12 @@ const Students = () => {
                                             {/* <Button variant="outline" onClick={() => setActiveTab("student-details")}>
                                                 Cancel
                                             </Button> */}
-                                            <Button onClick={handleSaveDetails}>
-                                                Submit
+                                            <Button onClick={handleSaveDetails} disabled={postLoginCredentials.loading}  >
+                                                {
+                                                    postLoginCredentials.loading ?
+                                                        "Submitting..." :
+                                                        "Submit"
+                                                }
                                             </Button>
                                         </div>
                                     </div>

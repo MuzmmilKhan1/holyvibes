@@ -1,5 +1,6 @@
 import * as React from "react"
 import {
+  Calendar,
   Notebook,
   Plus,
   // School,
@@ -107,11 +108,22 @@ let data = {
   // student routers
   stdRoutes: [
     {
-      title: "Courses",
-      url: "/student/courses",
+      title: "Dashboard",
+      url: "/student/dashboard",
+      icon: MdDashboard,
+      items: [
+      ],
+    },
+    {
+      title: "Course",
+      url: "#",
       icon: Notebook,
       isActive: true,
       items: [
+        {
+          title: "Courses",
+          url: "/student/courses",
+        },
         {
           title: "Enrolled Courses",
           url: "/student/enrolled-courses",
@@ -129,6 +141,15 @@ let data = {
       title: "Policy",
       url: "/student/policy",
       icon: MdPolicy,
+      isActive: false,
+      items: [
+
+      ],
+    },
+     {
+      title: "Billing",
+      url: "/student/billing",
+      icon: Calendar,
       isActive: false,
       items: [
 

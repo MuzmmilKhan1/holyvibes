@@ -146,7 +146,7 @@ const CreateTeacherAccountForm = ({
 
                             <div className="grid gap-3">
                                 <Label htmlFor="gender">Gender</Label>
-                                <Select onValueChange={(val) => handleSelectChange("gender", val)} value={formData.gender}>
+                                <Select onValueChange={(val:any) => handleSelectChange("gender", val)} value={formData.gender}>
                                     <SelectTrigger id="gender">
                                         <SelectValue placeholder="Select gender" />
                                     </SelectTrigger>
@@ -175,7 +175,7 @@ const CreateTeacherAccountForm = ({
 
                             <div className="grid gap-3">
                                 <Label htmlFor="languages_spoken">Languages Spoken</Label>
-                                <Select onValueChange={(val) => handleSelectChange("languages_spoken", val)} value={formData.languages_spoken}>
+                                <Select onValueChange={(val:any) => handleSelectChange("languages_spoken", val)} value={formData.languages_spoken}>
                                     <SelectTrigger id="languages_spoken">
                                         <SelectValue placeholder="Select language" />
                                     </SelectTrigger>
@@ -189,7 +189,7 @@ const CreateTeacherAccountForm = ({
 
                             <div className="grid gap-3">
                                 <Label htmlFor="age_group">Age Group</Label>
-                                <Select onValueChange={(val) => handleSelectChange("age_group", val)} value={formData.age_group}>
+                                <Select onValueChange={(val:any) => handleSelectChange("age_group", val)} value={formData.age_group}>
                                     <SelectTrigger id="age_group">
                                         <SelectValue placeholder="Select age group" />
                                     </SelectTrigger>
@@ -207,7 +207,7 @@ const CreateTeacherAccountForm = ({
                                         <div>
                                             <Label>Course {courseIndex + 1}</Label>
                                             <Select
-                                                onValueChange={(val) => handleCourseChange(courseIndex, val)}
+                                                onValueChange={(val:any) => handleCourseChange(courseIndex, val)}
                                                 value={courseObj.id}
                                             >
                                                 <SelectTrigger>
@@ -261,7 +261,7 @@ const CreateTeacherAccountForm = ({
                                                                 className="-mb-3 ml-2"
                                                                 onClick={() => removeTimeSlot(courseIndex, timeIndex)}
                                                             >
-                                                                <Trash/>
+                                                                <Trash />
                                                             </Button>
                                                         )}
                                                     </div>
@@ -325,9 +325,16 @@ const CreateTeacherAccountForm = ({
                             </div>
 
                             <div className="col-span-full">
-                                <Button type="submit" className="w-full mt-6">
-                                    Submit Application
-                                </Button>
+                                {
+                                    <Button type="submit" disabled={postTeacherApplication.loading} className="w-full mt-6">
+                                        {
+                                            postTeacherApplication.loading ?
+                                                "Submitting..." :
+                                                "Submit Application"
+                                        }
+                                    </Button>
+                                }
+
                             </div>
 
                             <div className="col-span-full mt-4 text-center text-sm">

@@ -119,6 +119,7 @@ const Courses = () => {
                                                             }));
                                                             setShowForm(true);
                                                         }}
+                                                        disabled={postBilling.loading}
                                                     >
                                                         Purchase
                                                     </Button>
@@ -328,7 +329,7 @@ const Courses = () => {
                     )}
                 </div>
             }
-
+            
             {
                 showOutlines &&
                 <CourseOutlineScreen

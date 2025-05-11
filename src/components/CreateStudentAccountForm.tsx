@@ -72,12 +72,7 @@ const CreateStudentAccountForm = () => {
         preferred_language: "",
         signature: "",
         courses: [
-            {
-                course_id: "",
-                course_name: "",
-                timings: [{ from: "", to: "" }],
-                billing: { receipt_image: null, payment_method: "" },
-            },
+           
         ],
     });
 
@@ -482,7 +477,7 @@ const CreateStudentAccountForm = () => {
                                     <div>
                                         <Label>Course</Label>
                                         <Select
-                                            onValueChange={(value) =>
+                                            onValueChange={(value:any) =>
                                                 handleCourseChange(courseIndex, value)
                                             }
                                             value={course.course_id}
@@ -595,7 +590,7 @@ const CreateStudentAccountForm = () => {
                                     <div>
                                         <Label>Payment Method</Label>
                                         <Select
-                                            onValueChange={(value) =>
+                                            onValueChange={(value:any) =>
                                                 handlePaymentMethodChange(value, courseIndex)
                                             }
                                             value={course.billing.payment_method}

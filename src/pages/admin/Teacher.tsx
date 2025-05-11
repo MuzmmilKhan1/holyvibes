@@ -60,7 +60,7 @@ const Teacher = () => {
     const [studentID, setStudentID] = useState<Number | null>(null);
     const [teachers, setTeachers] = useState<Teacher[]>([]);
 
-    
+
     const getStd = useGetAndDelete(axios.get);
 
     const [assignCourse, setAssignCourse] = useState({
@@ -69,6 +69,9 @@ const Teacher = () => {
 
     const getRequestedTeacher = async () => {
         const response = await getTeacher.callApi("teacher/get", false, false);
+        
+        console.log(response);
+
         setTeachers(response.teachers);
     };
 
@@ -228,7 +231,7 @@ const Teacher = () => {
                                                     <DropdownMenuCheckboxItem
                                                         key={course.id}
                                                         checked={courseID === course.id}
-                                                        onCheckedChange={checked =>
+                                                        onCheckedChange={(checked: boolean) =>
                                                             setCourseID(checked ? course.id : null)
                                                         }
                                                     >
@@ -254,7 +257,7 @@ const Teacher = () => {
                                                     <DropdownMenuCheckboxItem
                                                         key={student.id}
                                                         checked={studentID === student.id}
-                                                        onCheckedChange={checked => {
+                                                        onCheckedChange={(checked: boolean) => {
                                                             setStudentID(checked ? student.id : null)
                                                         }
                                                         }
@@ -333,7 +336,7 @@ const Teacher = () => {
                                             <div className="flex flex-row gap-2">
                                                 <div className="flex gap-2 flex-wrap">
                                                     <Button variant="secondary" onClick={() => setShowTeacherDetails(false)}>Close</Button>
-                                                    <Button variant="destructive" onClick={deleteUser}>Delete</Button>
+                                                    <Button variant="destructive" disabled={postTeacherData.loading} onClick={deleteUser}>Delete</Button>
                                                 </div>
                                                 {selectedTeacher.status !== "pending" && (
                                                     <div className="flex gap-2">
@@ -374,7 +377,7 @@ const Teacher = () => {
                                                 <Label htmlFor="course">Course</Label>
                                                 <Select
                                                     value={assignCourse.courseId}
-                                                    onValueChange={(value) => setAssignCourse(prev => ({ ...prev, courseId: value }))}
+                                                    onValueChange={(value: any) => setAssignCourse(prev => ({ ...prev, courseId: value }))}
                                                 >
                                                     <SelectTrigger id="course">
                                                         <SelectValue placeholder="Choose a course" />
@@ -411,8 +414,14 @@ const Teacher = () => {
                                                                     variant='destructive'
                                                                     size='sm'
                                                                     className="ml-2"
+                                                                    disabled={removeCourse.loading}
                                                                 >
-                                                                    Delete
+                                                                    {
+                                                                        removeCourse.loading ?
+                                                                            "Deleting..." :
+                                                                            "Delete"
+                                                                    }
+
                                                                 </Button>
                                                             </TableCell>
                                                         </TableRow>
@@ -427,7 +436,13 @@ const Teacher = () => {
                                             >
                                                 Cancel
                                             </Button>
-                                            <Button onClick={handleAssignCourse}>Assign</Button>
+                                            <Button disabled={postCourse.loading} onClick={handleAssignCourse}>
+                                                {
+                                                    postCourse.loading ?
+                                                        "Assigning..." :
+                                                        "Assign"
+                                                }
+                                            </Button>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -489,8 +504,8 @@ const Teacher = () => {
                                             >
                                                 Cancel
                                             </Button>
-                                            <Button onClick={() => handleSaveDetails(selectedTeacher?.status !== "pending")}>
-                                                {selectedTeacher?.status === "pending" ? "Assign" : "Update"}
+                                            <Button onClick={() => handleSaveDetails(selectedTeacher?.status !== "pending")} disabled={postTeacherData.loading} >
+                                                {selectedTeacher?.status === "pending" ? postTeacherData.loading ? "Assigning..." : "Assign" : postTeacherData.loading ? "Updating..." : "Update"}
                                             </Button>
                                         </div>
                                     </div>

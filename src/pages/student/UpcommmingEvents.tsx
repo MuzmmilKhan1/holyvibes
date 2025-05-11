@@ -107,6 +107,7 @@ const UpcommmingEvents: React.FC = () => {
                       }));
                       setShowPayment(true);
                     }}
+
                   >
                     Purchase
                   </Button>
@@ -117,7 +118,7 @@ const UpcommmingEvents: React.FC = () => {
                     <>
                       {
                         updateMembership.loading ?
-                          <Button variant="destructive" disabled>Cancel Membership</Button> :
+                          <Button variant="destructive" disabled>Leave</Button> :
                           <Button variant="destructive"
                             onClick={() => cancelMembershipOrJoin(event.event?.id, event?.studentID)}
                           >Leave</Button>
@@ -143,7 +144,7 @@ const UpcommmingEvents: React.FC = () => {
           </div>
         ))
       ) : (
-        !showPayment && <p className="text-center text-gray-500">No upcoming events found.</p>
+        !showPayment && <p >No upcoming events found.</p>
       )}
 
       {showPayment && (
@@ -167,7 +168,7 @@ const UpcommmingEvents: React.FC = () => {
                   <div className="space-y-2">
                     <Label htmlFor="payment-method">Payment Method</Label>
                     <Select
-                      onValueChange={(value) => setFormData({ ...formData, method: value })}
+                      onValueChange={(value: any) => setFormData({ ...formData, method: value })}
                     >
                       <SelectTrigger id="payment-method">
                         <SelectValue placeholder="Select a payment method" />
@@ -178,7 +179,9 @@ const UpcommmingEvents: React.FC = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button type="submit" className="w-full">
+                  <Button
+                    disabled={postEventPayment.loading}
+                    type="submit" className="w-full">
                     Submit Payment
                   </Button>
                 </form>

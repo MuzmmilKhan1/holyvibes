@@ -200,7 +200,7 @@ const Classes = () => {
                                                     <DropdownMenuCheckboxItem
                                                         key={course.id}
                                                         checked={courseID === course.id}
-                                                        onCheckedChange={checked =>
+                                                        onCheckedChange={(checked:boolean) =>
                                                             setCourseID(checked ? course.id : null)
                                                         }
                                                     >
@@ -226,7 +226,7 @@ const Classes = () => {
                                                     <DropdownMenuCheckboxItem
                                                         key={teacher.id}
                                                         checked={teacherID === teacher.id}
-                                                        onCheckedChange={checked => {
+                                                        onCheckedChange={(checked:boolean) => {
                                                             setTeacherID(checked ? teacher.id : null)
                                                         }
                                                         }
@@ -309,7 +309,7 @@ const Classes = () => {
                                                                 await deleteClass.callApi(`class/delete/${c.id}`, true, false)
                                                                 getAllClasses();
                                                             }}
-
+                                                            disabled={deleteClass.loading}
                                                             variant='destructive'>
                                                             Delete
                                                         </Button>

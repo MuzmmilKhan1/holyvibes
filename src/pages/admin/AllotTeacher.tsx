@@ -262,8 +262,8 @@ const AllotTeacher = () => {
                         </div>
 
                         <div className="w-full flex justify-start gap-4">
-                            <Button onClick={handleAllot}>
-                                {editingId ? "Update Allotment" : "Allot"}
+                            <Button onClick={handleAllot} disabled={updateAllotment.loading || postAllotment.loading} >
+                                {editingId ? updateAllotment.loading ? "Updating..." : "Update Allotment" : postAllotment.loading ? "Alotting..." : "Allot"}
                             </Button>
                             {editingId && (
                                 <Button variant="secondary" onClick={resetForm}>
@@ -316,7 +316,7 @@ const AllotTeacher = () => {
                                                 <Button size="icon" variant="outline" onClick={() => handleEdit(allotment)}>
                                                     <Pencil size={16} />
                                                 </Button>
-                                                <Button size="icon" variant="destructive" onClick={() => handleDelete(allotment.id)}>
+                                                <Button disabled={deleteAllotment.loading} size="icon" variant="destructive" onClick={() => handleDelete(allotment.id)}>
                                                     <Trash size={16} />
                                                 </Button>
                                             </TableCell>

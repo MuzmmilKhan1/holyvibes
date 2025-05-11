@@ -22,7 +22,7 @@ type TeacherClassTimingsProps = {
     setShowClassManagement: (value: boolean) => void;
 };
 
-const TeacherClassTimings: React.FC<TeacherClassTimingsProps> = ({ classTimings, }) => {
+const TeacherClassTimings: React.FC<TeacherClassTimingsProps> = ({ classTimings, }:any) => {
     return (
         <Card className="shadow-none">
             <CardHeader>
@@ -39,7 +39,7 @@ const TeacherClassTimings: React.FC<TeacherClassTimingsProps> = ({ classTimings,
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {classTimings.map((ct) => (
+                        {classTimings.map((ct:any) => (
                             <TableRow key={ct.id}>
                                 <TableCell>{ct.course_name}</TableCell>
                                 <TableCell>{ct.from}</TableCell>
