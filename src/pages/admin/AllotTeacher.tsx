@@ -119,22 +119,18 @@ const AllotTeacher = () => {
     };
 
     const handleAllot = async () => {
-        if (!selectedStudent || !selectedTeacher || !selectedCourse || classTimes.some(t => !t.from || !t.to)) {
-            toast.error("Please fill in all the fields.");
-            return;
-        }
-
         const payload = {
-            studentId: selectedStudent.value,
-            teacherId: selectedTeacher.value,
-            courseId: selectedCourse.value,
+            studentId: selectedStudent?.value,
+            teacherId: selectedTeacher?.value,
+            courseId: selectedCourse?.value,
             classTimes,
         };
 
         if (editingId) {
             await updateAllotment.callApi(`teacher-allotment/update/${editingId}`, payload, true, false, true);
         } else {
-            await postAllotment.callApi('teacher-allotment/allot', payload, true, false, true);
+            const response = await postAllotment.callApi('teacher-allotment/allot', payload, true, false, true);
+            console.log(response)
         }
 
         // resetForm();
