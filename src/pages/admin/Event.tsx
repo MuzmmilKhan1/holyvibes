@@ -28,10 +28,10 @@ import {
     SelectContent,
     SelectItem,
 } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
-import ReactSelect from "react-select"
+// import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+// import { Label } from '@/components/ui/label';
+// import { toast } from 'sonner';
+// import ReactSelect from "react-select"
 
 interface EventType {
     id: number;
@@ -60,10 +60,10 @@ interface BillingDetails {
     receipt?: string;
 }
 
-interface OptionType {
-    value: string;
-    label: string;
-}
+// interface OptionType {
+//     value: string;
+//     label: string;
+// }
 
 
 const Event = () => {
@@ -74,8 +74,8 @@ const Event = () => {
     const getStdBilling = useGetAndDelete(axios.get);
     const deleteEvent = useGetAndDelete(axios.delete);
     const updateMembership = useGetAndDelete(axios.get);
-    const getStd = useGetAndDelete(axios.get);
-    const addStd = usePostAndPut(axios.post);
+    // const getStd = useGetAndDelete(axios.get);
+    // const addStd = usePostAndPut(axios.post);
 
     const [formData, setFormData] = useState<Omit<EventType, 'id'>>({
         title: '',
@@ -87,8 +87,8 @@ const Event = () => {
     const [eventId, setEventId] = useState<number>(0);
     const [showMembers, setShowMembers] = useState<boolean>(false);
     const [showMemberBilling, setShowMemberBilling] = useState<boolean>(false);
-    const [studentOptions, setStudentOptions] = useState([]);
-    const [selectedStudents, setSelectedStudents] = useState<OptionType[]>([]);
+    // const [studentOptions, setStudentOptions] = useState([]);
+    // const [selectedStudents, setSelectedStudents] = useState<OptionType[]>([]);
     const [showForm, setShowForm] = useState(false);
 
     const [data, setData] = useState(
@@ -108,27 +108,27 @@ const Event = () => {
         }
     };
 
-    const getStudents = async () => {
-        try {
-            const response = await getStd.callApi("student/get", true, false);
-            if (response?.students) {
-                const options = response.students.map((student: any) => ({
-                    value: student.id.toString(),
-                    label: `${student.std_id} - ${student.name}`
-                }));
-                setStudentOptions(options);
-            }
-        } catch (error) {
-            console.error("Error fetching students", error);
-            toast.error("Error fetching students");
-        }
-    };
+    // const getStudents = async () => {
+    //     try {
+    //         const response = await getStd.callApi("student/get", true, false);
+    //         if (response?.students) {
+    //             const options = response.students.map((student: any) => ({
+    //                 value: student.id.toString(),
+    //                 label: `${student.std_id} - ${student.name}`
+    //             }));
+    //             setStudentOptions(options);
+    //         }
+    //     } catch (error) {
+    //         console.error("Error fetching students", error);
+    //         toast.error("Error fetching students");
+    //     }
+    // };
 
 
 
     useEffect(() => {
         fetchEvents();
-        getStudents()
+        // getStudents()
     }, []);
 
     const handleSubmit = async (e: FormEvent) => {
@@ -361,7 +361,7 @@ const Event = () => {
                                                         >
                                                             Members
                                                         </Button>
-                                                        <Dialog>
+                                                        {/* <Dialog>
                                                             <DialogTrigger asChild>
                                                                 <Button
                                                                     variant="secondary"
@@ -413,7 +413,7 @@ const Event = () => {
                                                                         type="submit">Submit</Button>
                                                                 </DialogFooter>
                                                             </DialogContent>
-                                                        </Dialog>
+                                                        </Dialog> */}
                                                     </TableCell>
                                                 </TableRow>
                                             ))
@@ -525,6 +525,7 @@ const Event = () => {
                                             <SelectItem value="pending">Pending</SelectItem>
                                             <SelectItem value="paid">Paid</SelectItem>
                                             <SelectItem value="rejected">Rejected</SelectItem>
+
                                         </SelectContent>
                                     </Select>
                                 </div>
